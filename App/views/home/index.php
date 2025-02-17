@@ -5,7 +5,11 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 $isLoggedIn = isset($_SESSION['user']);
 $isAdmin = isset($_SESSION['user']) && $_SESSION['user']['role'] === 'staff';
+$isStudent = isset($_SESSION['user']) && $_SESSION['user']['role'] === 'student';
 $username = $isLoggedIn ? $_SESSION['user']['first_name'] : 'Guest';
+
+// Kiểm tra nếu HomeController đã truyền tutor data
+$tutor = $tutor ?? null;
 ?>
 
 <!DOCTYPE html>
@@ -18,13 +22,12 @@ $username = $isLoggedIn ? $_SESSION['user']['first_name'] : 'Guest';
     <!-- Bootstrap CSS & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
-    <!-- Link đến file style.css -->
     <link rel="stylesheet" href="/eTutoring/public/Css/style.css">
 </head>
 <body>
-    <div class="wrapper"> <!-- Bọc toàn bộ trang -->
+    <div class="wrapper"> 
         <!-- Navbar -->
-        <nav class="navbar navbar-expand-lg navbar-dark">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
                 <a class="navbar-brand" href="?url=home/index">
                     <i class="bi bi-mortarboard"></i> eTutoring
@@ -47,11 +50,16 @@ $username = $isLoggedIn ? $_SESSION['user']['first_name'] : 'Guest';
                             </li>
                         <?php endif; ?>
                         <?php if ($isAdmin): ?>
-                            <li class="nav-item">
-                                <a class="nav-link btn btn-warning text-dark ms-2 btn-custom" href="?url=user/index">
-                                    <i class="bi bi-people-fill"></i> Manage Users
-                                </a>
-                            </li>
+                          <li class="nav-item">
+                              <a class="nav-link btn btn-warning text-dark ms-2 btn-custom" href="?url=user/index">
+                                  <i class="bi bi-people-fill"></i> Manage Users
+                              </a>
+                          </li>
+                          <li class="nav-item">
+                              <a class="nav-link btn btn-success text-light ms-2 btn-custom" href="?url=tutor/assign">
+                                  <i class="bi bi-person-plus"></i> Assign Tutor
+                              </a>
+                          </li>
                         <?php endif; ?>
                     </ul>
                 </div>
@@ -59,7 +67,7 @@ $username = $isLoggedIn ? $_SESSION['user']['first_name'] : 'Guest';
         </nav>
         <!-- End Navbar -->
 
-        <div class="content"> <!-- Bọc nội dung chính -->
+        <div class="content"> 
             <!-- Hero Section -->
             <section class="hero-section text-center">
                 <div class="container">
@@ -76,39 +84,39 @@ $username = $isLoggedIn ? $_SESSION['user']['first_name'] : 'Guest';
             </section>
             <!-- End Hero Section -->
 
-            <!-- Features Section -->
-            <section class="py-5">
+            <!-- Tutor Info Section (Only for Students) -->
+            <?php if ($isStudent && $tutor): ?>
+            <section class="tutor-section py-5">
                 <div class="container">
-                    <div class="row text-center">
-                        <div class="col-md-4 feature-box">
-                            <i class="bi bi-person-badge-fill feature-icon"></i>
-                            <h3>Personal Tutor</h3>
-                            <p>Each student is assigned a personal tutor for guidance.</p>
+                    <div class="card shadow-lg">
+                        <div class="card-header bg-success text-white text-center">
+                            <h5>Your Personal Tutor</h5>
                         </div>
-                        <div class="col-md-4 feature-box">
-                            <i class="bi bi-chat-dots-fill feature-icon"></i>
-                            <h3>Seamless Communication</h3>
-                            <p>Interact with your tutors and schedule meetings effortlessly.</p>
-                        </div>
-                        <div class="col-md-4 feature-box">
-                            <i class="bi bi-journal-text feature-icon"></i>
-                            <h3>Resource Sharing</h3>
-                            <p>Upload and share learning materials easily.</p>
+                        <div class="card-body text-center">
+                            <p><strong>Name:</strong> <?= $tutor['first_name'] . " " . $tutor['last_name'] ?></p>
+                            <p><strong>Total Students:</strong> <?= $tutor['total_students'] ?? 0 ?></p>
+                            <p><strong>Total Messages:</strong> <?= $tutor['total_messages'] ?? 0 ?></p>
                         </div>
                     </div>
                 </div>
             </section>
-            <!-- End Features Section -->
+            <?php elseif ($isStudent): ?>
+                <div class="container mt-4">
+                    <div class="alert alert-warning text-center">
+                        You do not have a personal tutor assigned yet.
+                    </div>
+                </div>
+            <?php endif; ?>
+            <!-- End Tutor Section -->
         </div>
 
         <!-- Footer -->
-        <footer class="footer">
+        <footer class="footer bg-dark text-white text-center py-3">
             <p>&copy; 2025 eTutoring System | University XYZ</p>
         </footer>
-    </div> <!-- Kết thúc wrapper -->
+    </div> 
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>

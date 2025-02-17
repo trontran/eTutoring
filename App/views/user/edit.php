@@ -14,7 +14,7 @@
             <div class="alert alert-danger"><?= $error ?></div>
         <?php endif; ?>
 
-        <form action="?url=user/update" method="POST" class="w-50 mx-auto mt-4">
+        <form action="?url=user/update&id=<?= $user['user_id'] ?>" method="POST" class="w-50 mx-auto mt-4">
             <input type="hidden" name="user_id" value="<?= $user['user_id'] ?>">
 
             <div class="mb-3">

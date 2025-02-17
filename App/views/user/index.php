@@ -50,9 +50,9 @@ $users = $users ?? [];
                 <span class="badge bg-info text-dark"><?= ucfirst($user['role']) ?></span>
               </td>
               <td>
-                <a href="?url=user/view&id=<?= $user['user_id'] ?>" class="btn btn-info btn-sm">
+                <!-- <a href="?url=user/view&id=<?= $user['user_id'] ?>" class="btn btn-info btn-sm">
                   <i class="bi bi-eye"></i> View
-                </a>
+                </a> -->
                 <a href="?url=user/edit&id=<?= $user['user_id'] ?>" class="btn btn-warning btn-sm">
                   <i class="bi bi-pencil-square"></i> Edit
                 </a>

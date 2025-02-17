@@ -10,18 +10,16 @@ require_once '../app/core/Database.php';
 require_once '../app/controllers/HomeController.php';
 require_once '../app/controllers/UserController.php';
 require_once '../app/controllers/LoginController.php';
+require_once '../app/controllers/TutorController.php';
 require_once '../app/models/User.php';
+require_once '../app/models/PersonalTutor.php';
+
 
 // Lấy URL từ query string, ví dụ: ?url=user/index
 $url = isset($_GET['url']) ? $_GET['url'] : '';
 
 // Nếu không có url (hoặc = 'home/index'), ta gọi HomeController
 if ($url === '' || $url === 'home/index') {
-    $controller = new HomeController();
-    $controller->index();
-// Hiển thị Home (Dashboard)
-} elseif ($url === '' || $url === 'home/index') {
-    require_once '../app/controllers/HomeController.php';
     $controller = new HomeController();
     $controller->index();
 
@@ -73,7 +71,16 @@ if ($url === '' || $url === 'home/index') {
 } elseif ($url === 'user/delete') {
     $controller = new UserController();
     $controller->delete();
+// Route cho Assign Tutor (Chỉ dành cho staff)
+} elseif ($url === 'tutor/assign') {
+    $controller = new TutorController();
+    $controller->assign();
 
+// Xử lý gán tutor (POST)
+} elseif ($url === 'tutor/store') {
+    require_once '../app/controllers/TutorController.php';
+    $controller = new TutorController();
+    $controller->store();
 // Nếu không khớp route nào, báo 404
 } else {
     echo "404 Not Found or Route not handled yet.";

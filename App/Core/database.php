@@ -13,6 +13,7 @@ class Database {
             // Cấu hình kết nối: thay đổi host, dbname, username, password cho phù hợp
             $this->pdo = new PDO('mysql:host=localhost;dbname=eTutoringSystem', 'root', 'root');
             $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             die('Database connection error: ' . $e->getMessage());
         }
@@ -27,5 +28,37 @@ class Database {
 
     public function getConnection() {
         return $this->pdo;
+    }
+
+    // Thực thi lệnh SQL (INSERT, UPDATE, DELETE)
+    public function execute($query, $params = []) {
+        try {
+            $stmt = $this->pdo->prepare($query);
+            return $stmt->execute($params);
+        } catch (PDOException $e) {
+            die('Query execution error: ' . $e->getMessage());
+        }
+    }
+
+    // Lấy một dòng dữ liệu
+    public function fetch($query, $params = []) {
+        try {
+            $stmt = $this->pdo->prepare($query);
+            $stmt->execute($params);
+            return $stmt->fetch();
+        } catch (PDOException $e) {
+            die('Fetch error: ' . $e->getMessage());
+        }
+    }
+
+    // Lấy nhiều dòng dữ liệu
+    public function fetchAll($query, $params = []) {
+        try {
+            $stmt = $this->pdo->prepare($query);
+            $stmt->execute($params);
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            die('FetchAll error: ' . $e->getMessage());
+        }
     }
 }
