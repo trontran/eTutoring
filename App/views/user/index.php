@@ -61,9 +61,9 @@ $users = $users ?? [];
                    onclick="return confirm('Are you sure you want to delete this user?');">
                   <i class="bi bi-trash"></i> Delete
                 </a>
-                <a href="?url=user/reset-password&id=<?= $user['user_id'] ?>" class="btn btn-secondary btn-sm">
+                <!-- <a href="?url=user/reset-password&id=<?= $user['user_id'] ?>" class="btn btn-secondary btn-sm">
                   <i class="bi bi-key"></i> Reset Password
-                </a>
+                </a> -->
               </td>
             </tr>
           <?php endforeach; ?>
