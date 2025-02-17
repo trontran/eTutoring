@@ -11,11 +11,17 @@ class User {
         $this->pdo = Database::getInstance()->getConnection();
     }
 
-    // Lấy tất cả người dùng
+    // // Lấy tất cả người dùng
+    // public function getAllUsers() {
+    //     $stmt = $this->pdo->prepare("SELECT * FROM users");
+    //     $stmt->execute();
+    //     return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // }
+
+    // Lấy danh sách tất cả user
     public function getAllUsers() {
-        $stmt = $this->pdo->prepare("SELECT * FROM users");
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $query = "SELECT * FROM Users ORDER BY created_at DESC";
+        return $this->pdo->query($query)->fetchAll();
     }
 
     // Lấy 1 người dùng theo id
@@ -26,15 +32,19 @@ class User {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // Thêm người dùng mới
     public function createUser($data) {
-        $stmt = $this->pdo->prepare("INSERT INTO users (username, email, password, role) VALUES (:username, :email, :password, :role)");
-        return $stmt->execute([
-            ':username' => $data['username'],
-            ':email' => $data['email'],
-            ':password' => password_hash($data['password'], PASSWORD_DEFAULT),
-            ':role' => $data['role']
-        ]);
+        $query = "INSERT INTO Users (first_name, last_name, email, password_hash, role) 
+                  VALUES (:first_name, :last_name, :email, :password_hash, :role)";
+
+        $stmt = $this->pdo->prepare($query);
+
+        $stmt->bindParam(":first_name", $data['first_name']);
+        $stmt->bindParam(":last_name", $data['last_name']);
+        $stmt->bindParam(":email", $data['email']);
+        $stmt->bindParam(":password_hash", $data['password']);
+        $stmt->bindParam(":role", $data['role']);
+
+        return $stmt->execute();
     }
 
     public function getUserByEmail($email) {

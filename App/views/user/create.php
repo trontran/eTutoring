@@ -1,40 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title><?= $title ?></title>
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Add New User</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-  <div class="container mt-5">
-    <h1><?= $title ?></h1>
-    <form action="/user/store" method="POST">
-      <div class="mb-3">
-        <label for="username" class="form-label">Username</label>
-        <input type="text" name="username" class="form-control" required>
-      </div>
-      <div class="mb-3">
-        <label for="email" class="form-label">Email</label>
-        <input type="email" name="email" class="form-control" required>
-      </div>
-      <div class="mb-3">
-        <label for="password" class="form-label">Password</label>
-        <input type="password" name="password" class="form-control" required>
-      </div>
-      <div class="mb-3">
-        <label for="role" class="form-label">Role</label>
-        <select name="role" class="form-control" required>
-          <option value="student">Student</option>
-          <option value="tutor">Tutor</option>
-          <option value="admin">Admin</option>
-        </select>
-      </div>
-      <button type="submit" class="btn btn-success">Submit</button>
-      <a href="/user/index" class="btn btn-secondary">Cancel</a>
-    </form>
-  </div>
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<body class="bg-light">
+    <div class="container mt-5">
+        <h2 class="text-center">Add New User</h2>
+
+        <?php if (!empty($error)): ?>
+            <div class="alert alert-danger"><?= $error ?></div>
+        <?php endif; ?>
+
+        <form action="?url=user/store" method="POST" class="w-50 mx-auto mt-4">
+            <div class="mb-3">
+                <label class="form-label">First Name</label>
+                <input type="text" class="form-control" name="first_name" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Last Name</label>
+                <input type="text" class="form-control" name="last_name" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" name="email" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input type="password" class="form-control" name="password" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Role</label>
+                <select class="form-control" name="role">
+                    <option value="student">Student</option>
+                    <option value="tutor">Tutor</option>
+                    <option value="staff">Staff</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-success w-100">Create User</button>
+        </form>
+    </div>
 </body>
 </html>
