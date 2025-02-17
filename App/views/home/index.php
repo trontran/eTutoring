@@ -6,6 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
 $isLoggedIn = isset($_SESSION['user']);
 $isAdmin = isset($_SESSION['user']) && $_SESSION['user']['role'] === 'staff';
 $isStudent = isset($_SESSION['user']) && $_SESSION['user']['role'] === 'student';
+$isTutor = isset($_SESSION['user']) && $_SESSION['user']['role'] === 'tutor';
 $username = $isLoggedIn ? $_SESSION['user']['first_name'] : 'Guest';
 
 // Kiểm tra nếu HomeController đã truyền tutor data
@@ -61,6 +62,13 @@ $tutor = $tutor ?? null;
                               </a>
                           </li>
                         <?php endif; ?>
+                        <?php if ($isTutor): ?>
+                          <li class="nav-item">
+                              <a class="nav-link btn btn-primary text-light ms-2 btn-custom" href="?url=tutor/dashboard">
+                                  <i class="bi bi-people"></i> View My Tutees
+                              </a>
+                          </li>
+                        <?php endif; ?>
                     </ul>
                 </div>
             </div>
@@ -77,6 +85,10 @@ $tutor = $tutor ?? null;
                         <?php if (!$isLoggedIn): ?>
                             <a href="?url=login" class="btn btn-primary btn-lg btn-custom">
                                 <i class="bi bi-box-arrow-in-right"></i> Get Started
+                            </a>
+                        <?php elseif ($isTutor): ?>
+                            <a href="?url=tutor/dashboard" class="btn btn-primary btn-lg btn-custom">
+                                <i class="bi bi-people"></i> View My Tutees
                             </a>
                         <?php endif; ?>
                     </div>

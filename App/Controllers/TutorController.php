@@ -62,4 +62,19 @@ class TutorController extends Controller
             exit;
         }
     }
+
+    public function dashboard() {
+        if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'tutor') {
+            header("Location: ?url=login");
+            exit;
+        }
+
+        $tutor_id = $_SESSION['user']['id'];
+        $tutees = $this->userModel->getTuteesByTutor($tutor_id);
+
+        $this->view('tutor/dashboard', [
+            'title' => 'My Tutees - Dashboard',
+            'tutees' => $tutees
+        ]);
+    }
 }

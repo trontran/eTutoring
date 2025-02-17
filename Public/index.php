@@ -81,6 +81,11 @@ if ($url === '' || $url === 'home/index') {
     require_once '../app/controllers/TutorController.php';
     $controller = new TutorController();
     $controller->store();
+// Route cho Tutor Dashboard
+} elseif ($url === 'tutor/dashboard') {
+    require_once '../app/controllers/TutorController.php';
+    $controller = new TutorController();
+    $controller->dashboard();
 // Nếu không khớp route nào, báo 404
 } else {
     echo "404 Not Found or Route not handled yet.";

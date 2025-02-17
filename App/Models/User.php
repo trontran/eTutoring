@@ -105,4 +105,18 @@ class User {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function getTuteesByTutor($tutor_id) {
+        $query = "SELECT u.user_id, u.first_name, u.last_name, u.email
+                  FROM Users u
+                  INNER JOIN PersonalTutors pt ON u.user_id = pt.student_id
+                  WHERE pt.tutor_id = :tutor_id";
+    
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':tutor_id', $tutor_id, PDO::PARAM_INT);
+        $stmt->execute();
+    
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
 }
