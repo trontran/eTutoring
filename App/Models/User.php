@@ -37,36 +37,6 @@ class User {
         ]);
     }
 
-    // Cập nhật thông tin người dùng
-    public function updateUser($id, $data) {
-        $query = "UPDATE users SET username = :username, email = :email, role = :role";
-        // Nếu cập nhật password thì thêm vào truy vấn
-        if (!empty($data['password'])) {
-            $query .= ", password = :password";
-        }
-        $query .= " WHERE id = :id";
-
-        $stmt = $this->pdo->prepare($query);
-        $params = [
-            ':username' => $data['username'],
-            ':email' => $data['email'],
-            ':role' => $data['role'],
-            ':id' => $id
-        ];
-
-        if (!empty($data['password'])) {
-            $params[':password'] = password_hash($data['password'], PASSWORD_DEFAULT);
-        }
-        return $stmt->execute($params);
-    }
-
-    // Xoá người dùng
-    public function deleteUser($id) {
-        $stmt = $this->pdo->prepare("DELETE FROM users WHERE id = :id");
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-        return $stmt->execute();
-    }
-
     public function getUserByEmail($email) {
         $stmt = $this->pdo->prepare("SELECT * FROM users WHERE email = :email LIMIT 1");
         $stmt->bindParam(':email', $email, PDO::PARAM_STR);
