@@ -11,25 +11,10 @@ class User {
         $this->pdo = Database::getInstance()->getConnection();
     }
 
-    // // Lấy tất cả người dùng
-    // public function getAllUsers() {
-    //     $stmt = $this->pdo->prepare("SELECT * FROM users");
-    //     $stmt->execute();
-    //     return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    // }
-
     // Lấy danh sách tất cả user
     public function getAllUsers() {
         $query = "SELECT * FROM Users ORDER BY created_at DESC";
         return $this->pdo->query($query)->fetchAll();
-    }
-
-    // Lấy 1 người dùng theo id
-    public function getUserById($id) {
-        $stmt = $this->pdo->prepare("SELECT * FROM users WHERE id = :id");
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public function createUser($data) {
@@ -44,6 +29,37 @@ class User {
         $stmt->bindParam(":password_hash", $data['password']);
         $stmt->bindParam(":role", $data['role']);
 
+        return $stmt->execute();
+    }
+
+    // Lấy thông tin user theo ID
+    public function getUserById($id) {
+        $query = "SELECT * FROM Users WHERE user_id = :id";
+        $stmt = $this->pdo->prepare($query);
+        $stmt->bindParam(":id", $id);
+        $stmt->execute();
+        return $stmt->fetch();
+    }
+
+    // Cập nhật thông tin user
+    public function updateUser($id, $data) {
+        $query = "UPDATE Users SET first_name = :first_name, last_name = :last_name, 
+                  email = :email, role = :role WHERE user_id = :id";
+
+        $stmt = $this->pdo->prepare($query);
+        $stmt->bindParam(":first_name", $data['first_name']);
+        $stmt->bindParam(":last_name", $data['last_name']);
+        $stmt->bindParam(":email", $data['email']);
+        $stmt->bindParam(":role", $data['role']);
+        $stmt->bindParam(":id", $id);
+
+        return $stmt->execute();
+    }
+
+    public function deleteUser($id) {
+        $query = "DELETE FROM Users WHERE user_id = :id";
+        $stmt = $this->pdo->prepare($query);
+        $stmt->bindParam(":id", $id);
         return $stmt->execute();
     }
 

@@ -19,6 +19,11 @@ $url = isset($_GET['url']) ? $_GET['url'] : '';
 if ($url === '' || $url === 'home/index') {
     $controller = new HomeController();
     $controller->index();
+// Hiển thị Home (Dashboard)
+} elseif ($url === '' || $url === 'home/index') {
+    require_once '../app/controllers/HomeController.php';
+    $controller = new HomeController();
+    $controller->index();
 
 // Route cho Login
 } elseif ($url === 'login') {

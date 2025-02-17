@@ -21,8 +21,8 @@ $users = $users ?? [];
       <a href="?url=user/create" class="btn btn-success">
         <i class="bi bi-person-plus-fill"></i> Add New User
       </a>
-      <a href="?url=dashboard" class="btn btn-secondary">
-        <i class="bi bi-arrow-left"></i> Back to Dashboard
+      <a href="?url=home/index" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Back to Home
       </a>
     </div>
 
