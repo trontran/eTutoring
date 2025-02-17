@@ -45,39 +45,6 @@ class UserController extends Controller {
         }
     }
 
-    // Hiển thị form chỉnh sửa thông tin người dùng
-    // Lấy id từ query string: ví dụ /user/edit?id=1
-    public function edit() {
-        $id = $_GET['id'];
-        $user = $this->userModel->getUserById($id);
-        $data = [
-            'title' => 'Edit User',
-            'user' => $user
-        ];
-        $this->view('user/edit', $data);
-    }
 
-    // Xử lý cập nhật thông tin người dùng (POST)
-    public function update() {
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $id = $_GET['id'];
-            $data = [
-                'username' => $_POST['username'],
-                'email' => $_POST['email'],
-                'password' => $_POST['password'], // Nếu không muốn thay đổi, để trống
-                'role' => $_POST['role']
-            ];
-            $this->userModel->updateUser($id, $data);
-            header("Location: /eTutoring/public/?url=user/index");
 
-        }
-    }
-
-    // Xoá người dùng
-    public function delete() {
-        $id = $_GET['id'];
-        $this->userModel->deleteUser($id);
-        header("Location: /eTutoring/public/?url=user/index");
-
-    }
 }
