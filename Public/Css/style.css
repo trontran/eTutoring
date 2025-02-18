@@ -107,11 +107,12 @@ html, body {
 
 /* Footer sticks at the bottom */
 .footer {
-    background-color: #2C3E50;
+    background: linear-gradient(to right, #6a11cb, #2575fc); /* Match Hero Section */
     color: white;
     text-align: center;
     padding: 15px 0;
     font-size: 1rem;
     width: 100%;
-    margin-top: auto;  /* Push footer to bottom */
+    margin-top: auto; /* Push footer to bottom */
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.2);
 }

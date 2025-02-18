@@ -40,15 +40,16 @@ class PersonalTutor {
 
     // Lấy thông tin gia sư của sinh viên
     public function getTutorDetails($student_id) {
-        $query = "SELECT u.user_id, u.first_name, u.last_name, 
-                         IFNULL((SELECT COUNT(*) FROM PersonalTutors WHERE tutor_id = u.user_id), 0) AS total_students,
-                         IFNULL((SELECT COUNT(*) FROM Messages WHERE sender_id = u.user_id), 0) AS total_messages
-                  FROM Users u 
+        $query = "SELECT u.user_id, u.first_name, u.last_name, u.email,
+                         (SELECT COUNT(*) FROM PersonalTutors WHERE tutor_id = u.user_id) AS total_students,
+                         (SELECT COUNT(*) FROM Messages WHERE sender_id = u.user_id) AS total_messages
+                  FROM Users u
                   JOIN PersonalTutors pt ON u.user_id = pt.tutor_id
                   WHERE pt.student_id = ?";
-        
+
         $stmt = $this->db->prepare($query);
         $stmt->execute([$student_id]);
+
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 }
