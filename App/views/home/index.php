@@ -25,7 +25,7 @@ $tutees = [];
 if ($isTutor && isset($_SESSION['user']['user_id'])) {
     require_once '../app/models/PersonalTutor.php';
     $personalTutorModel = new App\Models\PersonalTutor();
-    $tutees = $personalTutorModel->getTuteesByTutor($_SESSION['user']['user_id']);
+    $tutees = $personalTutorModel->getTutorByStudent($_SESSION['user']['user_id']);
 }
 ?>
 
