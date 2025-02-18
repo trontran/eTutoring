@@ -1,13 +1,15 @@
 /*  Global Styles */
 body {
     font-family: 'Arial', sans-serif;
-    background-color: #f4f4f4;
+    background-color: #f8f9fa;
     color: #333;
+    margin: 0;
+    padding: 0;
 }
 
-/*  Navbar  */
+/* Navbar */
 .navbar {
-    background-color: #2C3E50 !important; /* Navy */
+    background-color: #1E3A5F !important; /* Deep Navy */
     padding: 15px 0;
 }
 .navbar-brand {
@@ -21,58 +23,60 @@ body {
     transition: 0.3s;
 }
 .navbar-nav .nav-link:hover {
-    color: #f39c12 !important; 
+    color: #FFC107 !important; /* Yellow Accent */
 }
 
-/*  Hero Section  */
+/* Hero Section */
 .hero-section {
-    background: url('https://source.unsplash.com/1600x900/?education,students') no-repeat center center/cover;
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+                url('https://source.unsplash.com/1600x900/?education,students') no-repeat center center/cover;
     color: white;
     text-align: center;
-    padding: 100px 0;
+    padding: 120px 0;
 }
 .hero-section h1 {
-    font-size: 2.8rem;
+    font-size: 3rem;
     font-weight: bold;
-    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+    text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.7);
 }
 .hero-section p {
     font-size: 1.2rem;
-    margin-bottom: 20px;
-    text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.5);
+    margin-bottom: 25px;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6);
 }
 .btn-custom {
-    padding: 12px 25px;
+    padding: 12px 30px;
     font-size: 1rem;
-    border-radius: 25px;
+    border-radius: 30px;
     transition: 0.3s;
+    background-color: #3498db;
+    color: white;
+    border: none;
 }
 .btn-custom:hover {
-    opacity: 0.9;
+    background-color: #217dbb;
+    transform: scale(1.05);
 }
 
-/*Features Section*/
+/* Features Section */
 .feature-box {
     text-align: center;
-    padding: 20px;
-    border-radius: 10px;
+    padding: 25px;
+    border-radius: 12px;
     transition: 0.3s;
     background: #ffffff;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-}
-.feature-box:hover {
-    transform: scale(1.05);
-    background-color: #ecf0f1;
-}
-.feature-icon {
-    font-size: 3rem;
-    color: #3498DB; /* Màu xanh dương */
-    margin-bottom: 15px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    height: 250px; /* Ensure all feature boxes have the same height */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
-/* Footer  */
+
+/* Footer */
 .footer {
-    background-color: #2C3E50; /* Navy */
+    background-color: #1E3A5F;
     color: white;
     text-align: center;
     padding: 15px 0;
@@ -82,29 +86,32 @@ body {
     width: 100%;
 }
 
-/* Đảm bảo footer luôn nằm dưới cùng */
+/* Ensure the page takes full height */
 html, body {
     height: 100%;
+    margin: 0;
+    padding: 0;
 }
+
+/* Flexbox for layout */
 .wrapper {
-    min-height: 100%;
     display: flex;
     flex-direction: column;
+    min-height: 100vh;
 }
+
+/* Ensure content takes up all available space */
 .content {
     flex: 1;
 }
 
-
-/* Responsive Design  */
-@media (max-width: 768px) {
-    .hero-section {
-        padding: 60px 20px;
-    }
-    .hero-section h1 {
-        font-size: 2rem;
-    }
-    .hero-section p {
-        font-size: 1rem;
-    }
+/* Footer sticks at the bottom */
+.footer {
+    background-color: #2C3E50;
+    color: white;
+    text-align: center;
+    padding: 15px 0;
+    font-size: 1rem;
+    width: 100%;
+    margin-top: auto;  /* Push footer to bottom */
 }

@@ -31,7 +31,7 @@
             </form>
 
             <div class="mt-3 text-center">
-                <small>Don't have an account? <a href="?url=register">Register</a></small>
+                <small>Don't have an account? Please contact your Univerity</small>
             </div>
         </div>
     </div>
