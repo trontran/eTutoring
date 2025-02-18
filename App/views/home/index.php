@@ -112,9 +112,9 @@ if ($isTutor && isset($_SESSION['user']['user_id'])) {
                     </h1>
                     <?php if ($isStudent): ?>
                         <p class="lead text-white">Ready to learn? Explore your courses and connect with your tutor.</p>
-                        <a href="?url=student/courses" class="btn btn-light btn-lg"><i class="bi bi-book"></i> View My Courses</a>
+                        <!-- <a href="?url=student/courses" class="btn btn-light btn-lg"><i class="bi bi-book"></i> View My Courses</a> -->
                         <?php if ($tutor): ?>
-                            <a href="mailto:<?= htmlspecialchars($tutor['email']) ?>" class="btn btn-outline-light btn-lg"><i class="bi bi-envelope"></i> Contact My Tutor</a>
+                            <!-- <a href="mailto:<?= htmlspecialchars($tutor['email']) ?>" class="btn btn-outline-light btn-lg"><i class="bi bi-envelope"></i> Contact My Tutor</a> -->
                         <?php endif; ?>
 
                     <?php elseif ($isTutor): ?>
