@@ -1,118 +1,254 @@
-/*  Global Styles */
+/* Global Styles */
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f8f9fa;
-    color: #333;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f8fb;
+    color: #434a54;
     margin: 0;
     padding: 0;
+    line-height: 1.6;
 }
 
 /* Navbar */
 .navbar {
-    background-color: #1E3A5F !important; /* Deep Navy */
-    padding: 15px 0;
-}
-.navbar-brand {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #ffffff !important;
-}
-.navbar-nav .nav-link {
-    color: #ffffff !important;
-    font-size: 1rem;
-    transition: 0.3s;
-}
-.navbar-nav .nav-link:hover {
-    color: #FFC107 !important; /* Yellow Accent */
+    background-color: #004080 !important;
+    padding: 10px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.navbar-brand {
+    font-size: 1.7rem;
+    font-weight: 600;
+    color: #ffffff !important;
+    font-family: 'Georgia', serif;
+
+}
+
+.navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-size: 1.1rem;
+    /* Removed: transition: color 0.3s ease;  <- Removed transition */
+    padding: 0.5rem 1rem;
+    margin: 0 0.25rem;
+    border-radius: 0.25rem;
+}
+
+/* REMOVED: Hover and active styles for nav-link */
+/*
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link.active {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.2);
+     text-decoration: none;
+
+}
+*/
+
+
+/* style for dropdown*/
+.navbar-nav .dropdown-menu {
+    background-color: #004080;
+    border: none;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    padding: 0.5rem 0;
+
+}
+
+.navbar-nav .dropdown-item {
+    color: #ffffff;
+    padding: 0.75rem 1.5rem;
+    /* REMOVED: transition: background-color 0.3s ease;  <- Removed transition */
+}
+
+/* REMOVED: Hover styles for dropdown-item */
+/*
+.navbar-nav .dropdown-item:hover {
+    background-color: rgba(255,255,255,0.2);
+    color: #ffffff;
+}
+*/
+.navbar-nav .dropdown-item.active{
+    background-color: rgba(255,255,255,0.2);
+
+}
 /* Hero Section */
 .hero-section {
-    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-                url('https://source.unsplash.com/1600x900/?education,students') no-repeat center center/cover;
+    background: linear-gradient(to right, #0056b3, #007bff);
     color: white;
     text-align: center;
-    padding: 120px 0;
-}
-.hero-section h1 {
-    font-size: 3rem;
-    font-weight: bold;
-    text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.7);
-}
-.hero-section p {
-    font-size: 1.2rem;
-    margin-bottom: 25px;
-    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6);
-}
-.btn-custom {
-    padding: 12px 30px;
-    font-size: 1rem;
-    border-radius: 30px;
-    transition: 0.3s;
-    background-color: #3498db;
-    color: white;
-    border: none;
-}
-.btn-custom:hover {
-    background-color: #217dbb;
-    transform: scale(1.05);
+    padding: 100px 0;
 }
 
-/* Features Section */
-.feature-box {
+.hero-section h1 {
+    font-size: 3.5rem;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    margin-bottom: 0.5rem;
+}
+
+.hero-section p {
+    font-size: 1.4rem;
+    margin-bottom: 30px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+
+
+/* Features Section (and Cards in general) */
+.feature-box, .card {
     text-align: center;
-    padding: 25px;
-    border-radius: 12px;
-    transition: 0.3s;
+    padding: 30px;
+    border-radius: 15px;
+    /* REMOVED: transition: transform 0.3s ease, box-shadow 0.3s ease;  <- Removed transition */
     background: #ffffff;
-    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
-    height: 250px; /* Ensure all feature boxes have the same height */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    margin-bottom: 25px;
+    height: auto;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    border: 1px solid #e1e8ed;
 }
+
+/* REMOVED: Hover styles for feature-box and card */
+/*
+.feature-box:hover, .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+*/
 
 
 /* Footer */
 .footer {
-    background-color: #1E3A5F;
+    background-color: #004080;
     color: white;
     text-align: center;
-    padding: 15px 0;
+    padding: 20px 0;
     font-size: 1rem;
-    position: relative;
-    bottom: 0;
     width: 100%;
+    margin-top: auto;
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Ensure the page takes full height */
+/* Other improvements */
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: #fff;
+    padding: 10px 25px;
+    border-radius: 5px;
+   /* REMOVED: transition: background-color 0.3s ease, border-color 0.3s ease; <- Removed transition */
+    font-size: 1.1rem;
+}
+
+/* REMOVED: Hover style of .btn-primary */
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    /* REMOVED: transition: background-color 0.3s ease, border-color 0.3s ease;  <- Removed transition */
+}
+/* REMOVED: Hover style of .btn-secondary */
+/*
+.btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+    color: #fff;
+    text-decoration: none;
+}
+*/
+
+/* Table Styles */
+.table-responsive {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    margin-bottom: 1rem;
+    color: #434a54;
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    padding: 0.75rem;
+    vertical-align: top;
+    border-top: 1px solid #dee2e6;
+}
+
+.table thead th {
+    vertical-align: bottom;
+    border-bottom: 2px solid #dee2e6;
+    background-color: #e9ecef;
+    font-weight: 600;
+}
+
+/* REMOVED: Hover styles for table-hover */
+/*
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.075);
+}
+*/
+.table-sm th,
+.table-sm td {
+     padding: 0.3rem;
+}
+
+/* Card Header */
+.card-header {
+    background-color: #007bff;
+    color: white;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid rgba(0,0,0,.125);
+    font-weight: 600;
+}
+.card-title {
+    margin-bottom: 0.75rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+
+}
+
+/* General improvements */
+.container {
+    max-width: 1200px;
+}
+.rounded-circle{
+  border: 3px solid #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Fix for sticky footer with flexbox */
 html, body {
     height: 100%;
-    margin: 0;
-    padding: 0;
 }
 
-/* Flexbox for layout */
-.wrapper {
+body {
     display: flex;
     flex-direction: column;
+}
+
+.wrapper {
+    flex: 1 0 auto;
     min-height: 100vh;
 }
 
-/* Ensure content takes up all available space */
-.content {
-    flex: 1;
-}
-
-/* Footer sticks at the bottom */
-.footer {
-    background: linear-gradient(to right, #6a11cb, #2575fc); /* Match Hero Section */
-    color: white;
+.initials-avatar {
+    font-family: 'Arial', sans-serif;
+    font-weight: bold;
     text-align: center;
-    padding: 15px 0;
-    font-size: 1rem;
+}
+/* active style*/
+.navbar-nav .nav-link.active::after {
+    content: '';
+    display: block;
     width: 100%;
-    margin-top: auto; /* Push footer to bottom */
-    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.2);
+    height: 2px;
+    background-color: #ffffff; /* Underline color */
+    margin-top: 2px; /* Adjust as needed */
 }

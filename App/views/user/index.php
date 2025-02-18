@@ -16,7 +16,7 @@ $users = $users ?? [];
   <div class="container mt-5">
     <h1 class="mb-4 text-center">User Management</h1>
     
-    <!-- Nút Thêm Người Dùng -->
+    
     <div class="d-flex justify-content-between mb-3">
       <a href="?url=user/create" class="btn btn-success">
         <i class="bi bi-person-plus-fill"></i> Add New User
