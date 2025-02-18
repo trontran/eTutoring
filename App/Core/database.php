@@ -10,10 +10,8 @@ class Database {
 
     private function __construct() {
         try {
-            // Cấu hình kết nối: thay đổi host, dbname, username, password cho phù hợp
             $this->pdo = new PDO('mysql:host=localhost;dbname=eTutoringSystem', 'root', 'root');
             $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $this->pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             die('Database connection error: ' . $e->getMessage());
         }

@@ -1,11 +1,11 @@
-/* ========== Global Styles ========== */
+/*  Global Styles */
 body {
     font-family: 'Arial', sans-serif;
     background-color: #f4f4f4;
     color: #333;
 }
 
-/* ========== Navbar ========== */
+/*  Navbar  */
 .navbar {
     background-color: #2C3E50 !important; /* Navy */
     padding: 15px 0;
@@ -21,10 +21,10 @@ body {
     transition: 0.3s;
 }
 .navbar-nav .nav-link:hover {
-    color: #f39c12 !important; /* Màu cam nhấn */
+    color: #f39c12 !important; 
 }
 
-/* ========== Hero Section ========== */
+/*  Hero Section  */
 .hero-section {
     background: url('https://source.unsplash.com/1600x900/?education,students') no-repeat center center/cover;
     color: white;
@@ -51,7 +51,7 @@ body {
     opacity: 0.9;
 }
 
-/* ========== Features Section ========== */
+/*Features Section*/
 .feature-box {
     text-align: center;
     padding: 20px;
@@ -70,7 +70,7 @@ body {
     margin-bottom: 15px;
 }
 
-/* ========== Footer ========== */
+/* Footer  */
 .footer {
     background-color: #2C3E50; /* Navy */
     color: white;
@@ -96,7 +96,7 @@ html, body {
 }
 
 
-/* ========== Responsive Design ========== */
+/* Responsive Design  */
 @media (max-width: 768px) {
     .hero-section {
         padding: 60px 20px;

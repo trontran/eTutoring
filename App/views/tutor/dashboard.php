@@ -70,7 +70,9 @@ $tutees = $tutees ?? [];
             <div class="alert alert-warning text-center">You have no assigned tutees.</div>
         <?php endif; ?>
     </div>
-
+    <a href="?url=home/index" class="btn btn-secondary w-100">
+            <i class="bi bi-arrow-left"></i> Back to Home
+        </a>
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 

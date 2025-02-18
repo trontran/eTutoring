@@ -1,8 +1,3 @@
-<?php
-$students = $data['students'] ?? [];
-$tutors = $data['tutors'] ?? [];
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,13 +16,27 @@ $tutors = $data['tutors'] ?? [];
 
     <form action="?url=tutor/store" method="POST">
         <div class="mb-3">
-            <label for="student" class="form-label">Select Student</label>
-            <select class="form-control" name="student_id" id="student" required>
-                <option value="">-- Select Student --</option>
-                <?php foreach ($students as $student): ?>
-                    <option value="<?= $student['user_id'] ?>"><?= $student['first_name'] . " " . $student['last_name'] ?></option>
-                <?php endforeach; ?>
-            </select>
+            <label class="form-label">Select Students</label>
+            <table class="table table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Select</th>
+                        <th>Student ID</th>
+                        <th>Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($students as $student): ?>
+                        <tr>
+                            <td>
+                                <input type="checkbox" name="student_ids[]" value="<?= $student['user_id'] ?>">
+                            </td>
+                            <td><?= $student['user_id'] ?></td>
+                            <td><?= $student['first_name'] . " " . $student['last_name'] ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         </div>
 
         <div class="mb-3">
@@ -40,8 +49,17 @@ $tutors = $data['tutors'] ?? [];
             </select>
         </div>
 
-        <button type="submit" class="btn btn-primary w-100">Assign Tutor</button>
+        <button type="submit" class="btn btn-primary w-100 mb-3">Assign Tutor</button>
+
+        <!-- Nút Back to Home -->
+        <a href="?url=home/index" class="btn btn-secondary w-100">
+            <i class="bi bi-arrow-left"></i> Back to Home
+        </a>
     </form>
 </div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>

@@ -1,5 +1,5 @@
 <?php
-// Kiểm tra session
+// check session
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -9,7 +9,7 @@ $isStudent = isset($_SESSION['user']) && $_SESSION['user']['role'] === 'student'
 $isTutor = isset($_SESSION['user']) && $_SESSION['user']['role'] === 'tutor';
 $username = $isLoggedIn ? $_SESSION['user']['first_name'] : 'Guest';
 
-// Kiểm tra nếu HomeController đã truyền tutor data
+// Ensure $tutor is defined to avoid undefined variable notice
 $tutor = $tutor ?? null;
 ?>
 
@@ -80,7 +80,7 @@ $tutor = $tutor ?? null;
             <section class="hero-section text-center">
                 <div class="container">
                     <h1>Welcome, <?= $username ?>!</h1>
-                    <p>Your digital space for seamless eTutoring experience.</p>
+                    <!-- <p>Your digital space for seamless eTutoring experience.</p> -->
                     <div>
                         <?php if (!$isLoggedIn): ?>
                             <a href="?url=login" class="btn btn-primary btn-lg btn-custom">
