@@ -23,7 +23,7 @@ class UserController extends Controller {
     public function index() {
         // Kiểm tra nếu người dùng không đăng nhập hoặc không phải là staff
     if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'staff') {
-        header("Location: ?url=home/index"); // Chuyển hướng về home
+        header("Location: ?url=home/index"); 
         exit;
     }
 
@@ -42,18 +42,32 @@ class UserController extends Controller {
     
     public function store() {
         $this->requireStaffRole();
+        
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $password = $_POST['password'];
+    
+            // Kiểm tra độ mạnh của mật khẩu
+            if (strlen($password) < 8 || !preg_match('/[A-Z]/', $password)) {
+                $_SESSION['error'] = "Password must be at least 8 characters long and contain at least one uppercase letter.";
+                header("Location: ?url=user/create");
+                exit;
+            }
+    
             $data = [
                 'first_name' => $_POST['first_name'],
                 'last_name' => $_POST['last_name'],
                 'email' => $_POST['email'],
-                'password' => password_hash($_POST['password'], PASSWORD_BCRYPT),
+                'password' => password_hash($password, PASSWORD_BCRYPT),
                 'role' => $_POST['role']
             ];
+    
             $this->userModel->createUser($data);
+            $_SESSION['success'] = "User created successfully!";
             header("Location: ?url=user/index");
+            exit;
         }
     }
+    
 
     public function edit() {
         $this->requireStaffRole();

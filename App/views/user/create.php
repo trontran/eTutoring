@@ -10,11 +10,13 @@
     <div class="container mt-5">
         <h2 class="text-center">Add New User</h2>
 
-        <?php if (!empty($error)): ?>
-            <div class="alert alert-danger"><?= $error ?></div>
+        <!-- Hiển thị lỗi nếu có -->
+        <?php if (!empty($_SESSION['error'])): ?>
+            <div class="alert alert-danger"><?= $_SESSION['error'] ?></div>
+            <?php unset($_SESSION['error']); // Xóa lỗi sau khi hiển thị ?>
         <?php endif; ?>
 
-        <form action="?url=user/store" method="POST" class="w-50 mx-auto mt-4">
+        <form action="?url=user/store" method="POST" class="w-50 mx-auto mt-4" onsubmit="return validatePassword()">
             <div class="mb-3">
                 <label class="form-label">First Name</label>
                 <input type="text" class="form-control" name="first_name" required>
@@ -29,7 +31,8 @@
             </div>
             <div class="mb-3">
                 <label class="form-label">Password</label>
-                <input type="password" class="form-control" name="password" required>
+                <input type="password" class="form-control" name="password" id="password" required>
+                <small class="text-muted">Password must be at least 8 characters long and contain at least one uppercase letter.</small>
             </div>
             <div class="mb-3">
                 <label class="form-label">Role</label>
@@ -42,5 +45,17 @@
             <button type="submit" class="btn btn-success w-100">Create User</button>
         </form>
     </div>
+
+    <script>
+        function validatePassword() {
+            const password = document.getElementById("password").value;
+            const regex = /^(?=.*[A-Z]).{8,}$/;
+            if (!regex.test(password)) {
+                alert("Password must be at least 8 characters long and contain at least one uppercase letter.");
+                return false;
+            }
+            return true;
+        }
+    </script>
 </body>
 </html>

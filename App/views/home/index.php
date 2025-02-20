@@ -23,9 +23,9 @@ if ($isStudent && isset($_SESSION['user']['user_id'])) {
 // Fetch tutees if tutor is logged in
 $tutees = [];
 if ($isTutor && isset($_SESSION['user']['user_id'])) {
-    require_once '../app/models/PersonalTutor.php';
-    $personalTutorModel = new App\Models\PersonalTutor();
-    $tutees = $personalTutorModel->getTutorByStudent($_SESSION['user']['user_id']); // Likely needs to be getTuteesByTutor
+    require_once '../app/models/User.php';
+    $personalTutorModel = new App\Models\User();
+    $tutees = $personalTutorModel->getTuteesByTutor($_SESSION['user']['user_id']);
 }
 ?>
 
@@ -216,7 +216,7 @@ if ($isTutor && isset($_SESSION['user']['user_id'])) {
 
         </main>
         <footer class="footer bg-dark text-white text-center py-3">
-            <p>&copy; <?= date('Y') ?> eTutoring System | University XYZ</p>
+            <p>&copy; <?= date('Y') ?> eTutoring System</p>
         </footer>
         </div>
 

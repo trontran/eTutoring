@@ -22,7 +22,7 @@ class HomeController extends Controller
         }
         $tutor = null;
 
-        // Nếu user là student, lấy thông tin gia sư của họ
+        // If the user is a student, get their tutor information
         if (isset($_SESSION['user']) && $_SESSION['user']['role'] === 'student') {
             $student_id = $_SESSION['user']['id'];
             $tutor = $this->personalTutorModel->getTutorDetails($student_id);
