@@ -86,6 +86,9 @@ if ($url === '' || $url === 'home/index') {
     require_once '../app/controllers/TutorController.php';
     $controller = new TutorController();
     $controller->dashboard();
+} elseif ($url === 'user/detail') {
+    $controller = new UserController();
+    $controller->detail();
 // Nếu không khớp route nào, báo 404
 } else {
     echo "404 Not Found or Route not handled yet.";

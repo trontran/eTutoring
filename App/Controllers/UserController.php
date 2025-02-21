@@ -99,4 +99,25 @@ class UserController extends Controller {
         header("Location: ?url=user/index");
     }
 
+    public function detail() {
+        $this->requireStaffRole(); // Chỉ staff mới xem được
+    
+        if (!isset($_GET['id'])) {
+            header("Location: ?url=user/index");
+            exit;
+        }
+    
+        $id = $_GET['id'];
+        $user = $this->userModel->getUserById($id);
+    
+        if (!$user) {
+            $_SESSION['error'] = "User not found.";
+            header("Location: ?url=user/index");
+            exit;
+        }
+    
+        $data = ['title' => 'User Details', 'user' => $user];
+        $this->view('user/detail', $data);
+    }
+
 }

@@ -82,7 +82,7 @@ if ($isTutor && isset($_SESSION['user']['user_id'])) {
                                  <ul class="dropdown-menu" aria-labelledby="adminDropdown">
                                     <li><a class="dropdown-item" href="?url=user/index"><i class="bi bi-people-fill"></i> Manage Users</a></li>
                                     <li><a class="dropdown-item" href="?url=tutor/assign"><i class="bi bi-person-plus-fill"></i> Assign Tutor</a></li>
-                                    <li><a class="dropdown-item" href="?url=course/index"><i class="bi bi-journals"></i> Manage Courses</a></li>
+                                    <!-- <li><a class="dropdown-item" href="?url=course/index"><i class="bi bi-journals"></i> Manage Courses</a></li> -->
                                 </ul>
                             </li>
 

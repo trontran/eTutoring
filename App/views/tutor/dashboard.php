@@ -1,5 +1,5 @@
 <?php
-// Kiểm tra session
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -86,13 +86,13 @@ $tutees = $tutees ?? [];
                             </td>
                             <td><?= htmlspecialchars($tutee['email']) ?></td>
                             <td>
-                                <!-- <div class="btn-group btn-group-sm" role="group" aria-label="Tutee Actions">
+                                <div class="btn-group btn-group-sm" role="group" aria-label="Tutee Actions">
                                 <a href="mailto:<?= htmlspecialchars($tutee['email']) ?>" class="btn btn-primary"><i class="bi bi-envelope-fill"></i></a>
                                  <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#messageModal" data-student-id="<?= htmlspecialchars($tutee['user_id']) ?>" data-student-name="<?= htmlspecialchars($tutee['first_name'] . ' ' . $tutee['last_name']) ?>">
                                     <i class="bi bi-chat-dots-fill"></i>
                                 </button>
                                 <a href="?url=user/profile&id=<?= htmlspecialchars($tutee['user_id']) ?>" class="btn  btn-info"><i class="bi bi-person-lines-fill"></i></a>
-                                </div> -->
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -144,10 +144,9 @@ $tutees = $tutees ?? [];
     </div>
 
     <footer class="footer bg-dark text-white text-center py-3">
-        <p>&copy; <?= date('Y') ?> eTutoring System | University XYZ</p>
+        <p>&copy; <?= date('Y') ?> eTutoring System </p>
     </footer>
 </div>
-
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     <script>
