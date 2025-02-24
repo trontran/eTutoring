@@ -52,4 +52,19 @@ class PersonalTutor {
 
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    public function updateTutorAssignment($studentId, $newTutorId, $assignedBy) {
+    $query = "UPDATE PersonalTutors 
+              SET tutor_id = :tutor_id, assigned_by = :assigned_by, assigned_at = NOW()
+              WHERE student_id = :student_id";
+
+    $stmt = $this->db->prepare($query);
+    $stmt->bindParam(":tutor_id", $newTutorId, PDO::PARAM_INT);
+    $stmt->bindParam(":assigned_by", $assignedBy, PDO::PARAM_INT);
+    $stmt->bindParam(":student_id", $studentId, PDO::PARAM_INT);
+
+    return $stmt->execute();
+}
+    
+    
 }

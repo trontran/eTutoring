@@ -2,13 +2,18 @@
 
 use App\Core\Controller;
 use App\Models\User;
+use App\Models\PersonalTutor;
 
 class UserController extends Controller {
     private $userModel;
+    private $personalTutor;
 
     public function __construct() {
         $this->userModel = new User();
+        $this->personalTutor = new PersonalTutor();
     }
+
+
 
     private function requireStaffRole() {
         if (session_status() === PHP_SESSION_NONE) {
@@ -20,20 +25,45 @@ class UserController extends Controller {
         }
     }
 
-    public function index() {
-        // Kiểm tra nếu người dùng không đăng nhập hoặc không phải là staff
-    if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'staff') {
-        header("Location: ?url=home/index"); 
-        exit;
-    }
+    // public function index() {
+    // if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'staff') {
+    //     header("Location: ?url=home/index"); 
+    //     exit;
+    // }
 
-            $users = $this->userModel->getAllUsers();
-            $data = [
-                'title' => 'User Management',
-                'users' => $users
-                    ];
-    $this->view('user/index', $data);
+    //         $users = $this->userModel->getAllUsers();
+    //         $data = [
+    //             'title' => 'User Management',
+    //             'users' => $users
+    //                 ];
+    // $this->view('user/index', $data);
+    // }
+
+    public function index() {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+    
+        // Kiểm tra nếu người dùng không đăng nhập hoặc không phải staff
+        if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'staff') {
+            header("Location: ?url=home/index");
+            exit;
+        }
+    
+        $users = $this->userModel->getAllUsers();
+        
+        // Định nghĩa biến $isAdmin và truyền vào view
+        $isAdmin = $_SESSION['user']['role'] === 'staff';
+    
+        $data = [
+            'title' => 'User Management',
+            'users' => $users,
+            'isAdmin' => $isAdmin // Thêm biến này để truyền vào view
+        ];
+    
+        $this->view('user/index', $data);
     }
+    
 
     public function create() {
         $this->requireStaffRole();
@@ -119,5 +149,58 @@ class UserController extends Controller {
         $data = ['title' => 'User Details', 'user' => $user];
         $this->view('user/detail', $data);
     }
+
+    public function reallocate() {
+        $this->requireStaffRole(); // Chỉ staff mới có quyền truy cập
+    
+        $studentId = $_GET['id'] ?? null;
+        if (!$studentId) {
+            header("Location: ?url=user/index&error=missing_student_id");
+            exit;
+        }
+    
+        $student = $this->userModel->getUserById($studentId);
+        $tutors = $this->userModel->getTutors(); // Lấy danh sách tutor
+    
+        if (!$student) {
+            header("Location: ?url=user/index&error=student_not_found");
+            exit;
+        }
+    
+        $data = [
+            'student' => $student,
+            'tutors' => $tutors
+        ];
+        $this->view('user/reallocate', $data);
+    }   
+
+    public function storeReallocation() {
+        $this->requireStaffRole(); // Chỉ staff mới có quyền thực hiện
+    
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            if (!isset($_SESSION['user']['id'])) {
+                die("Error: User ID is not set in session.");
+            }
+    
+            $studentId = $_POST['student_id'] ?? null;
+            $newTutorId = $_POST['new_tutor_id'] ?? null;
+            $assignedBy = $_SESSION['user']['id']; // Lấy ID staff thực hiện
+    
+            if (!$studentId || !$newTutorId) {
+                header("Location: ?url=user/index&error=missing_data");
+                exit;
+            }
+    
+            $this->personalTutor->updateTutorAssignment($studentId, $newTutorId, $assignedBy);
+    
+            header("Location: ?url=user/index&success=reallocated");
+            exit;
+        }
+    }
+    
+    
+    
+    
+    
 
 }

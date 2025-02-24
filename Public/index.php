@@ -89,6 +89,15 @@ if ($url === '' || $url === 'home/index') {
 } elseif ($url === 'user/detail') {
     $controller = new UserController();
     $controller->detail();
+// Hiển thị form reallocate tutor
+} elseif ($url === 'user/reallocate') {
+    $controller = new UserController();
+    $controller->reallocate();
+
+// Xử lý lưu reallocation (POST)
+} elseif ($url === 'user/storeReallocation') {
+    $controller = new UserController();
+    $controller->storeReallocation();
 // Nếu không khớp route nào, báo 404
 } else {
     echo "404 Not Found or Route not handled yet.";

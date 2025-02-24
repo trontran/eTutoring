@@ -118,5 +118,14 @@ class User {
     
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function getTutors() {
+        $query = "SELECT user_id, first_name, last_name, email FROM Users WHERE role = 'tutor'";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    
     
 }

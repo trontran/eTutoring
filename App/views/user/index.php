@@ -1,4 +1,5 @@
 <?php
+
 // Đảm bảo biến `$users` không bị null
 $users = $users ?? [];
 ?>
@@ -61,9 +62,18 @@ $users = $users ?? [];
                    onclick="return confirm('Are you sure you want to delete this user?');">
                   <i class="bi bi-trash"></i> Delete
                 </a>
+                <?php if ($isAdmin && $user['role'] === 'student'): ?>
+                <a href="?url=user/reallocate&id=<?= $user['user_id'] ?>"
+                  class="btn btn-warning btn-sm">
+                    <i class="bi bi-arrow-repeat"></i> Reallocate Tutor
+                </a>
+                <?php endif; ?>
+
                 <!-- <a href="?url=user/reset-password&id=<?= $user['user_id'] ?>" class="btn btn-secondary btn-sm">
                   <i class="bi bi-key"></i> Reset Password
                 </a> -->
+                
+
               </td>
             </tr>
           <?php endforeach; ?>
