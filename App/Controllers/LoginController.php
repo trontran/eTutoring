@@ -1,27 +1,96 @@
 <?php
+
 namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Models\User;
 
-class LoginController extends Controller {
+//class LoginController extends Controller
+//{
+//    private $userModel;
+//
+//    public function __construct()
+//    {
+//        $this->userModel = new User();
+//    }
+//
+//    // display form login
+//    public function index()
+//    {
+//        $this->view('auth/login');
+//    }
+//
+//    // login process
+//    public function process()
+//    {
+//        if (session_status() === PHP_SESSION_NONE) {
+//            session_start();
+//        }
+//
+//        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+//            $email = $_POST['email'];
+//            $password = $_POST['password'];
+//
+//            $user = $this->userModel->getUserByEmail($email);
+//
+//            if ($user && password_verify($password, $user['password_hash'])) {
+//                $_SESSION['user'] = [
+//                    'id' => $user['user_id'],
+//                    'first_name' => $user['first_name'],
+//                    'last_name' => $user['last_name'],
+//                    'email' => $user['email'],
+//                    'role' => $user['role']
+//                ];
+//
+//                // Chuyển hướng đến dashboard hoặc home
+//                header("Location: /eTutoring/public/?url=user/index");
+//                exit;
+//            } else {
+//                $this->view('auth/login', ['error' => 'Invalid email or password']);
+//            }
+//        } else {
+//            header("Location: ?url=login");
+//            exit;
+//        }
+//    }
+//
+//    public function logout()
+//    {
+//        session_start();
+//
+//        // Xóa tất cả dữ liệu trong session
+//        session_unset();
+//
+//        // Hủy bỏ session
+//        session_destroy();
+//
+//        // Chuyển hướng về trang chủ
+//        header("Location: ?url=home/index");
+//        exit;
+//    }
+//}
+
+class LoginController extends Controller
+{
     private $userModel;
 
-    public function __construct() {
-        $this->userModel = new User();
-    }
-
-    // display form login
-    public function index() {
-        $this->view('auth/login');
-    }
-
-    // login process
-    public function process() {
+    public function __construct()
+    {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
+        $this->userModel = new User();
+    }
 
+    // Hiển thị form đăng nhập
+    public function index()
+    {
+        $this->view('auth/login');
+    }
+
+    // Xử lý đăng nhập
+    public function process()
+    {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email = $_POST['email'];
             $password = $_POST['password'];
@@ -29,15 +98,27 @@ class LoginController extends Controller {
             $user = $this->userModel->getUserByEmail($email);
 
             if ($user && password_verify($password, $user['password_hash'])) {
+                // Lưu session với key đúng
                 $_SESSION['user'] = [
-                    'id' => $user['user_id'],
+                    'user_id' => $user['user_id'], // Đổi 'id' thành 'user_id'
                     'first_name' => $user['first_name'],
                     'last_name' => $user['last_name'],
                     'email' => $user['email'],
                     'role' => $user['role']
                 ];
 
-                // Chuyển hướng đến dashboard hoặc home
+//                // Kiểm tra session đã lưu đúng chưa
+//                if (!isset($_SESSION['user']['user_id'])) {
+//                    die("<h3 style='color: red;'>❌ Error: Failed to set session.</h3>");
+//                }
+//
+//                // Debug session (Chỉ dùng kiểm tra, có thể xóa sau khi xác nhận)
+//                echo "<pre>";
+//                print_r($_SESSION);
+//                echo "</pre>";
+//                exit;
+
+                // Chuyển hướng đến dashboard
                 header("Location: /eTutoring/public/?url=user/index");
                 exit;
             } else {
@@ -49,15 +130,27 @@ class LoginController extends Controller {
         }
     }
 
-    public function logout() {
-        session_start();
-        
+    public function logout()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
         // Xóa tất cả dữ liệu trong session
-        session_unset();
-        
-        // Hủy bỏ session
+        $_SESSION = [];
+
+        // Hủy session
         session_destroy();
-    
+
+        // Xóa cookie session (nếu có)
+        if (ini_get("session.use_cookies")) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', time() - 42000,
+                $params["path"], $params["domain"],
+                $params["secure"], $params["httponly"]
+            );
+        }
+
         // Chuyển hướng về trang chủ
         header("Location: ?url=home/index");
         exit;

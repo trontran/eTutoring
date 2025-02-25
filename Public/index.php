@@ -1,6 +1,7 @@
 <?php
 
 use App\Controllers\LoginController;
+use App\Controllers\MessageController;
 
 session_start();
 
@@ -13,6 +14,8 @@ require_once '../app/controllers/LoginController.php';
 require_once '../app/controllers/TutorController.php';
 require_once '../app/models/User.php';
 require_once '../app/models/PersonalTutor.php';
+require_once '../app/controllers/MessageController.php';
+
 
 
 // Lấy URL từ query string, ví dụ: ?url=user/index
@@ -93,12 +96,21 @@ if ($url === '' || $url === 'home/index') {
 } elseif ($url === 'user/reallocate') {
     $controller = new UserController();
     $controller->reallocate();
-
 // Xử lý lưu reallocation (POST)
 } elseif ($url === 'user/storeReallocation') {
     $controller = new UserController();
     $controller->storeReallocation();
-// Nếu không khớp route nào, báo 404
+} elseif ($url === 'tutor/tutee_list') {
+    $controller = new TutorController();
+    $controller->tuteeList();
+} elseif ($url === 'tutor/dashboard') {
+    $controller = new TutorController();
+    $controller->dashboard();
+} elseif ($url === 'user/profile') {
+    $controller = new UserController();
+    $controller->profile();
+    //test
+
 } else {
     echo "404 Not Found or Route not handled yet.";
 }

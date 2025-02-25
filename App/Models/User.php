@@ -35,10 +35,12 @@ class User {
     }
 
     // Lấy thông tin user theo ID
-    public function getUserById($id) {
-        $query = "SELECT * FROM Users WHERE user_id = :id";
-        $stmt = $this->db->prepare($query);
-        $stmt->execute([":id" => $id]);
+
+    public function getUserById($userId)
+    {
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE user_id = :user_id");
+        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
@@ -126,6 +128,49 @@ class User {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
-    
-    
+
+    public function emailExists($email) {
+        $db = Database::getInstance()->getConnection();
+        $stmt = $db->prepare("SELECT * FROM users WHERE email = :email");
+        $stmt->bindParam(':email', $email);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC) ? true : false;
+    }
+
+
+
+    //test
+
+    public function getTuteesByTutorSorted($tutorId, $sort = 'assigned_at', $order = 'DESC') {
+        $validSortColumns = ['first_name', 'last_name', 'email', 'assigned_at'];
+        $sort = in_array($sort, $validSortColumns) ? $sort : 'assigned_at';
+        $order = strtoupper($order) === 'ASC' ? 'ASC' : 'DESC';
+
+        $sql = "SELECT u.user_id, u.first_name, u.last_name, u.email, pt.assigned_at 
+                FROM PersonalTutors pt
+                JOIN Users u ON pt.student_id = u.user_id
+                WHERE pt.tutor_id = :tutorId
+                ORDER BY $sort $order";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(":tutorId", $tutorId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+    public function getPaginatedUsers($limit, $offset): array
+    {
+        $query = "SELECT * FROM Users ORDER BY user_id ASC LIMIT :limit OFFSET :offset";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getTotalUserCount() {
+        $query = "SELECT COUNT(*) FROM Users";
+        return $this->db->query($query)->fetchColumn();
+    }
 }

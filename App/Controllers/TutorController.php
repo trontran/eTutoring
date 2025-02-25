@@ -9,6 +9,7 @@ class TutorController extends Controller
     private $userModel;
     private $personalTutorModel;
 
+    
     public function __construct()
     {
         $this->userModel = new User();
@@ -61,18 +62,120 @@ class TutorController extends Controller
     }
     
 
+    // public function dashboard() {
+    //     if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'tutor') {
+    //         header("Location: ?url=login");
+    //         exit;
+    //     }
+
+    //     $tutor_id = $_SESSION['user']['id'];
+    //     $tutees = $this->userModel->getTuteesByTutor($tutor_id);
+
+    //     $this->view('tutor/dashboard', [
+    //         'title' => 'My Tutees - Dashboard',
+    //         'tutees' => $tutees
+    //     ]);
+    // }
+
+
+    //test start here
+
+
+
+    // public function dashboard() {
+    //     if (session_status() === PHP_SESSION_NONE) {
+    //         session_start();
+    //     }
+
+    //     if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'tutor') {
+    //                 header("Location: ?url=login");
+    //                 exit;
+    //             }
+
+    //     $tutorId = $_SESSION['user']['id'];
+    //     $filter = $_GET['filter'] ?? "";
+    //     $sort = $_GET['sort'] ?? "assigned_at";
+    //     $order = $_GET['order'] ?? "DESC";
+
+    //     $tutees = $this->personalTutorModel->getTuteesByTutor($tutorId, $filter, $sort, $order);
+
+    //     $this->view('tutor/dashboard', [
+    //         'tutees' => $tutees,
+    //         'filter' => $filter,
+    //         'sort' => $sort,
+    //         'order' => $order
+    //     ]);
+    // }
+
+    // public function dashboard() {
+    //     if (session_status() === PHP_SESSION_NONE) {
+    //         session_start();
+    //     }
+    
+    //     if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'tutor') {
+    //         header("Location: ?url=login");
+    //         exit;
+    //     }
+    
+    //     $tutorId = $_SESSION['user']['id'];
+    //     $filter = $_GET['filter'] ?? "";  // Lấy giá trị lọc từ input
+    //     $tutees = $this->personalTutorModel->getTuteesByTutor($tutorId, $filter);
+    
+    //     $this->view('tutor/dashboard', [
+    //         'tutees' => $tutees,
+    //         'filter' => $filter
+    //     ]);
+    // }
+
     public function dashboard() {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+    
         if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'tutor') {
             header("Location: ?url=login");
             exit;
         }
-
-        $tutor_id = $_SESSION['user']['id'];
-        $tutees = $this->userModel->getTuteesByTutor($tutor_id);
-
+    
+        $tutorId = $_SESSION['user']['user_id'];
+        $filter = $_GET['filter'] ?? "";  // Lấy giá trị tìm kiếm
+        $sortBy = $_GET['sort_by'] ?? "assigned_at";  // Giá trị sắp xếp mặc định
+    
+        $tutees = $this->personalTutorModel->getTuteesByTutor($tutorId, $filter, $sortBy);
+    
         $this->view('tutor/dashboard', [
-            'title' => 'My Tutees - Dashboard',
-            'tutees' => $tutees
+            'tutees' => $tutees,
+            'filter' => $filter,
+            'sortBy' => $sortBy
         ]);
     }
+
+    public function getTuteesByTutor($tutorId, $filter = "", $sortBy = "assigned_at") {
+    $validSortColumns = ['first_name', 'email', 'assigned_at']; // Chỉ cho phép các giá trị hợp lệ
+    if (!in_array($sortBy, $validSortColumns)) {
+        $sortBy = "assigned_at"; // Mặc định nếu giá trị không hợp lệ
+    }
+
+    $sql = "SELECT u.user_id, u.first_name, u.last_name, u.email, pt.assigned_at 
+            FROM PersonalTutors pt
+            JOIN Users u ON pt.student_id = u.user_id
+            WHERE pt.tutor_id = :tutorId";
+
+    if (!empty($filter)) {
+        $sql .= " AND (u.first_name LIKE :filter OR u.last_name LIKE :filter OR u.email LIKE :filter)";
+    }
+
+    $sql .= " ORDER BY $sortBy ASC";  // Sắp xếp theo tiêu chí được chọn
+
+    $stmt = $this->db->prepare($sql);
+    $stmt->bindParam(':tutorId', $tutorId, PDO::PARAM_INT);
+    
+    if (!empty($filter)) {
+        $filter = "%$filter%";
+        $stmt->bindParam(':filter', $filter, PDO::PARAM_STR);
+    }
+
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 }
