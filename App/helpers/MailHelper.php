@@ -5,7 +5,8 @@ use PHPMailer\PHPMailer\Exception;
 require __DIR__ . '/../../vendor/autoload.php'; // Load thư viện PHPMailer từ Composer
 
 class MailHelper {
-    public static function sendMail($to, $subject, $body) {
+    public static function sendMail($to, $subject, $body): bool
+    {
         $mail = new PHPMailer(true);
 
         try {

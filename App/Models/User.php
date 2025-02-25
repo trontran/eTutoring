@@ -20,7 +20,8 @@ class User {
     }
 
     // Tạo user mới
-    public function createUser($data) {
+    public function createUser($data): bool
+    {
         $query = "INSERT INTO Users (first_name, last_name, email, password_hash, role) 
                   VALUES (:first_name, :last_name, :email, :password_hash, :role)";
         $stmt = $this->db->prepare($query);
@@ -45,7 +46,8 @@ class User {
     }
 
     // Cập nhật thông tin user
-    public function updateUser($id, $data) {
+    public function updateUser($id, $data): bool
+    {
         $query = "UPDATE Users SET first_name = :first_name, last_name = :last_name, 
                   email = :email, role = :role WHERE user_id = :id";
         $stmt = $this->db->prepare($query);
@@ -60,7 +62,8 @@ class User {
     }
 
     // Xóa user
-    public function deleteUser($id) {
+    public function deleteUser($id): bool
+    {
         $query = "DELETE FROM Users WHERE user_id = :id";
         $stmt = $this->db->prepare($query);
         return $stmt->execute([":id" => $id]);
@@ -89,7 +92,8 @@ class User {
     }
 
     // Lấy danh sách sinh viên chưa có gia sư
-    public function getStudentsWithoutTutor() {
+    public function getStudentsWithoutTutor(): array
+    {
         $query = "SELECT u.user_id, u.first_name, u.last_name 
                   FROM Users u
                   LEFT JOIN PersonalTutors pt ON u.user_id = pt.student_id
@@ -101,14 +105,16 @@ class User {
     }
 
     // Lấy danh sách tất cả gia sư
-    public function getAllTutors() {
+    public function getAllTutors(): array
+    {
         $query = "SELECT user_id, first_name, last_name FROM Users WHERE role = 'tutor'";
         $stmt = $this->db->prepare($query);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getTuteesByTutor($tutor_id) {
+    public function getTuteesByTutor($tutor_id): array
+    {
         $query = "SELECT u.user_id, u.first_name, u.last_name, u.email
                   FROM Users u
                   INNER JOIN PersonalTutors pt ON u.user_id = pt.student_id
@@ -121,7 +127,8 @@ class User {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getTutors() {
+    public function getTutors(): array
+    {
         $query = "SELECT user_id, first_name, last_name, email FROM Users WHERE role = 'tutor'";
         $stmt = $this->db->prepare($query);
         $stmt->execute();

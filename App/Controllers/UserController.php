@@ -32,7 +32,8 @@ class UserController extends Controller
         }
     }
 
-    public function index() {
+    public function index()
+    {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
@@ -160,139 +161,11 @@ class UserController extends Controller
         $this->view('user/detail', $data);
     }
 
-
-//    public function reallocate()
-//    {
-//        $this->requireStaffRole(); // Chỉ staff mới có quyền truy cập
-//
-//        $studentId = $_GET['id'] ?? null;
-//        if (!$studentId) {
-//            header("Location: ?url=user/index&error=missing_student_id");
-//            exit;
-//        }
-//
-//        $student = $this->userModel->getUserById($studentId);
-//        $tutors = $this->userModel->getTutors(); // Lấy danh sách tutor
-//
-//        if (!$student) {
-//            header("Location: ?url=user/index&error=student_not_found");
-//            exit;
-//        }
-//
-//        $data = [
-//            'student' => $student,
-//            'tutors' => $tutors
-//        ];
-//        $this->view('user/reallocate', $data);
-//    }
-
-
-    //test new function here
-
-//    public function reallocate()
-//    {
-//        if (session_status() === PHP_SESSION_NONE) {
-//            session_start();
-//        }
-//
-//        // Kiểm tra session có tồn tại không
-//        if (!isset($_SESSION['user']['user_id'])) {
-//            die("<h3 style='color: red;'>❌ Error: User ID is not set in session.</h3>");
-//        }
-//
-//        $this->requireStaffRole();
-//
-//        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-//            $studentId = $_POST['student_id'] ?? null;
-//            $newTutorId = $_POST['new_tutor_id'] ?? null;
-//            $assignedBy = $_SESSION['user']['user_id'];
-//
-//            if (!$studentId || !$newTutorId) {
-//                header("Location: ?url=user/index&error=missing_data");
-//                exit;
-//            }
-//
-//            require_once __DIR__ . '/../helpers/MailHelper.php';
-//
-//            // Lấy thông tin old tutor (nếu có)
-//            $oldTutorQuery = "SELECT tutor_id FROM PersonalTutors WHERE student_id = :student_id";
-//            $stmt = $this->db->prepare($oldTutorQuery);
-//            $stmt->bindParam(":student_id", $studentId, PDO::PARAM_INT);
-//            $stmt->execute();
-//            $oldTutorId = $stmt->fetchColumn();
-//            $oldTutor = null;
-//
-//            if (!empty($oldTutorId)) {
-//                $oldTutor = $this->userModel->getUserById($oldTutorId);
-//            }
-//
-//            // Cập nhật database
-//            $this->personalTutor->assignTutor($studentId, $newTutorId, $assignedBy);
-//
-//            // Lấy thông tin người dùng
-//            $student = $this->userModel->getUserById($studentId);
-//            $newTutor = $this->userModel->getUserById($newTutorId);
-//
-//            // Gửi email cho student
-//            $studentSubject = "Tutor Reassignment Notification";
-//            $studentBody = "Dear {$student['first_name']},<br><br>Your tutor has been changed ";
-//            if ($oldTutor) {
-//                $studentBody .= "from <b>{$oldTutor['first_name']} {$oldTutor['last_name']}</b> ";
-//            }
-//            $studentBody .= "to <b>{$newTutor['first_name']} {$newTutor['last_name']}</b>.";
-//
-//            MailHelper::sendMail($student['email'], $studentSubject, $studentBody);
-//
-//            // Gửi email cho old tutor (nếu có)
-//            if ($oldTutor) {
-//                $oldTutorSubject = "Student Reassignment Notification";
-//                $oldTutorBody = "Dear {$oldTutor['first_name']},<br><br>Your student <b>{$student['first_name']} {$student['last_name']}</b> has been reassigned.";
-//                MailHelper::sendMail($oldTutor['email'], $oldTutorSubject, $oldTutorBody);
-//            }
-//
-//            // Gửi email cho new tutor
-//            $newTutorSubject = "New Student Assigned";
-//            $newTutorBody = "Dear {$newTutor['first_name']},<br><br>You have been assigned a new student: <b>{$student['first_name']} {$student['last_name']}</b>.";
-//
-//            MailHelper::sendMail($newTutor['email'], $newTutorSubject, $newTutorBody);
-//
-//            header("Location: ?url=user/index&success=reallocated");
-//            exit;
-//        }
-//
-//        // Hiển thị danh sách student & tutor
-//        $studentId = $_GET['id'] ?? null;
-//        if (!$studentId) {
-//            header("Location: ?url=user/index&error=missing_student_id");
-//            exit;
-//        }
-//
-//        $student = $this->userModel->getUserById($studentId);
-//        $tutors = $this->userModel->getTutors();
-//
-//        if (!$student) {
-//            header("Location: ?url=user/index&error=student_not_found");
-//            exit;
-//        }
-//
-//        $data = [
-//            'student' => $student,
-//            'tutors' => $tutors
-//        ];
-//        $this->view('user/reallocate', $data);
-//    }
-
     public function storeReallocation()
     {
-
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-
-        // Debug session
-        echo "<pre>";
-        print_r($_SESSION);
-        echo "</pre>";
 
         // Kiểm tra nếu session không tồn tại hoặc không có user ID
         if (!isset($_SESSION['user']) || !isset($_SESSION['user']['user_id'])) {
@@ -314,14 +187,13 @@ class UserController extends Controller
             // Cập nhật tutor trong database
             $this->personalTutor->updateTutorAssignment($studentId, $newTutorId, $assignedBy);
 
-//            // Debug: Kiểm tra giá trị sau khi cập nhật
-//            echo "✔ Tutor assignment updated successfully!";
-//            exit;
+            // ⚠️ Gọi `reallocateTutor()` để gửi email
+            $this->personalTutor->reallocateTutor($studentId, $newTutorId, $assignedBy);
 
             echo "<script>
-                    alert('✔ Tutor reassignment was successful!');
-                    window.location.href = '?url=user/index';
-                  </script>";
+                alert('✔ Tutor reassignment was successful!');
+                window.location.href = '?url=user/index';
+              </script>";
             exit;
         }
     }

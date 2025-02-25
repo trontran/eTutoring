@@ -25,7 +25,7 @@ class PersonalTutor
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function assignTutor($student_id, $tutor_id, $assigned_by)
+    public function assignTutor($student_id, $tutor_id, $assigned_by): bool
     {
         $query = "INSERT INTO PersonalTutors (student_id, tutor_id, assigned_by) 
                   VALUES (:student_id, :tutor_id, :assigned_by) 
@@ -90,9 +90,7 @@ class PersonalTutor
 
         return false;
     }
-
-    // Cập nhật gia sư nếu đã có sẵn
-    public function updateTutor($student_id, $tutor_id, $assigned_by)
+    public function updateTutor($student_id, $tutor_id, $assigned_by): bool
     {
         $query = "UPDATE PersonalTutors SET tutor_id = ?, assigned_by = ? WHERE student_id = ?";
         $stmt = $this->db->prepare($query);
@@ -115,7 +113,7 @@ class PersonalTutor
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function updateTutorAssignment($studentId, $newTutorId, $assignedBy)
+    public function updateTutorAssignment($studentId, $newTutorId, $assignedBy): bool
     {
         $query = "UPDATE PersonalTutors 
                     SET tutor_id = :tutor_id, assigned_by = :assigned_by, assigned_at = NOW()
@@ -147,7 +145,7 @@ class PersonalTutor
      *
      * @return array Returns an array of tutees with their details, including user ID, first name, last name, email, and assigned date.
      */
-    public function getTuteesByTutor($tutorId, $filter = "", $sortBy = "assigned_at")
+    public function getTuteesByTutor(int $tutorId, string $filter = "", string $sortBy = "assigned_at"): array
     {
         $validSortColumns = ['first_name', 'email', 'assigned_at']; // Chỉ cho phép các giá trị hợp lệ
         if (!in_array($sortBy, $validSortColumns)) {
@@ -176,20 +174,10 @@ class PersonalTutor
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-    // test##
 
-    /**
-     * Reallocates a tutor for a student by updating the database and notifying relevant parties.
-     *
-     * @param int $studentId The ID of the student whose tutor is being reassigned.
-     * @param int $newTutorId The ID of the new tutor to be assigned to the student.
-     * @param int $assignedBy The ID of the user who is performing the reassignment.
-     *
-     * @return bool Returns true if the reassignment and notifications were successfully completed.
-     */
-    public function reallocateTutor($studentId, $newTutorId, $assignedBy)
+    public function reallocateTutor(int $studentId, int $newTutorId, int $assignedBy): bool
     {
-        // Lấy thông tin old tutor (nếu có)
+        // take information old tutor (if had)
         $oldTutorQuery = "SELECT tutor_id FROM PersonalTutors WHERE student_id = :student_id";
         $stmt = $this->db->prepare($oldTutorQuery);
         $stmt->bindParam(":student_id", $studentId, \PDO::PARAM_INT);
@@ -201,7 +189,7 @@ class PersonalTutor
             $oldTutor = (new User())->getUserById($oldTutorId);
         }
 
-        // Cập nhật database
+        // update database
         $updateQuery = "UPDATE PersonalTutors SET tutor_id = :new_tutor_id, assigned_by = :assigned_by WHERE student_id = :student_id";
         $stmt = $this->db->prepare($updateQuery);
         $stmt->bindParam(":student_id", $studentId, \PDO::PARAM_INT);
@@ -209,52 +197,62 @@ class PersonalTutor
         $stmt->bindParam(":assigned_by", $assignedBy, \PDO::PARAM_INT);
         $stmt->execute();
 
-//        // Lấy thông tin người dùng
-//        $student = (new User())->getUserById($studentId);
-//        $newTutor = (new User())->getUserById($newTutorId);
-//
-//        // Kiểm tra email hợp lệ
-//        if (empty($student['email']) || empty($newTutor['email']) || ($oldTutor && empty($oldTutor['email']))) {
-//            throw new \RuntimeException("❌ Error: One of the email addresses is empty.");
-//        }
-//
-//        // Gửi email cho student
-//        $studentSubject = "Tutor Reassignment Notification";
-//        $studentBody = "Dear {$student['first_name']},<br><br>Your tutor has been changed ";
-//        if ($oldTutor) {
-//            $studentBody .= "from <b>{$oldTutor['first_name']} {$oldTutor['last_name']}</b> ";
-//        }
-//        $studentBody .= "to <b>{$newTutor['first_name']} {$newTutor['last_name']}</b>.";
-//
-//        MailHelper::sendMail($student['email'], $studentSubject, $studentBody);
-//        if (!MailHelper::sendMail($student['email'], $studentSubject, $studentBody)) {
-//            die("❌ Failed to send email to student: {$student['email']}");
-//        }
-//
-//        echo "✅ Email sent successfully to Student!";
-//        // Gửi email cho old tutor (nếu có)
-//        if ($oldTutor) {
-//            $oldTutorSubject = "Student Reassignment Notification";
-//            $oldTutorBody = "Dear {$oldTutor['first_name']},<br><br>Your student <b>{$student['first_name']} {$student['last_name']}</b> has been reassigned.";
-//
-//            MailHelper::sendMail($oldTutor['email'], $oldTutorSubject, $oldTutorBody);
-//            if (!MailHelper::sendMail($student['email'], $studentSubject, $studentBody)) {
-//                die("❌ Failed to send email to student: {$student['email']}");
-//            }
-//
-//            echo "✅ Email sent successfully to Student!";
-//        }
-//
-//        // Gửi email cho new tutor
-//        $newTutorSubject = "New Student Assigned";
-//        $newTutorBody = "Dear {$newTutor['first_name']},<br><br>You have been assigned a new student: <b>{$student['first_name']} {$student['last_name']}</b>.";
-//
-//        MailHelper::sendMail($newTutor['email'], $newTutorSubject, $newTutorBody);
-//        if (!MailHelper::sendMail($student['email'], $studentSubject, $studentBody)) {
-//            die("❌ Failed to send email to student: {$student['email']}");
-//        }
-//
-//        echo "✅ Email sent successfully to Student!";
+        // take information
+        $student = (new User())->getUserById($studentId);
+        $newTutor = (new User())->getUserById($newTutorId);
+
+        // Check email valid
+        if (empty($student['email']) || empty($newTutor['email']) || ($oldTutor && empty($oldTutor['email']))) {
+            throw new \RuntimeException("❌ Error: One of the email addresses is empty.");
+        }
+
+        // Gửi email cho Student
+        $studentSubject = "Notification: Your Tutor Has Been Reassigned";
+        $studentBody = "Dear {$student['first_name']},<br><br>";
+        $studentBody .= "We wish to inform you that your personal tutor assignment has been updated. ";
+        if ($oldTutor) {
+            $studentBody .= "Previously, your tutor was <b>{$oldTutor['first_name']} {$oldTutor['last_name']}</b>. ";
+        }
+        $studentBody .= "Your new tutor is <b>{$newTutor['first_name']} {$newTutor['last_name']}</b> ";
+        $studentBody .= "(Email: <a href='mailto:{$newTutor['email']}'>{$newTutor['email']}</a>).<br><br>";
+        $studentBody .= "We trust that this change will enhance your learning experience. Should you have any questions or require further assistance, ";
+        $studentBody .= "please feel free to contact our support team or reach out directly to your new tutor using the email above.<br><br>";
+        $studentBody .= "Best regards,<br>eTutoring System Team";
+
+        if (!MailHelper::sendMail($student['email'], $studentSubject, $studentBody)) {
+            die(" Failed to send email to student: {$student['email']}");
+        }
+        echo "✅ Email sent successfully to Student!";
+
+
+        // Send email for Old Tutor (if had)
+        if ($oldTutor) {
+            $oldTutorSubject = "Notification: Student Reassignment";
+            $oldTutorBody = "Dear {$oldTutor['first_name']},<br><br>";
+            $oldTutorBody .= "We wish to notify you that your student, <b>{$student['first_name']} {$student['last_name']}</b>, ";
+            $oldTutorBody .= "has been reassigned to a new tutor.<br><br>";
+            $oldTutorBody .= "Thank you for your continued support. If you have any questions regarding this change, please do not hesitate to contact us.<br><br>";
+            $oldTutorBody .= "Best regards,<br>eTutoring System Team";
+
+            if (!MailHelper::sendMail($oldTutor['email'], $oldTutorSubject, $oldTutorBody)) {
+                die("Failed to send email to old tutor: {$oldTutor['email']}");
+            }
+            echo " Email sent successfully to Old Tutor!";
+        }
+
+
+        // Send email for New Tutor
+        $newTutorSubject = "Notification: New Student Assignment";
+        $newTutorBody = "Dear {$newTutor['first_name']},<br><br>";
+        $newTutorBody .= "We are pleased to inform you that you have been assigned a new student: <b>{$student['first_name']} {$student['last_name']}</b>.<br><br>";
+        $newTutorBody .= "For your reference, you may contact the student via email if necessary. We trust in your expertise and commitment to support your student's academic journey.<br><br>";
+        $newTutorBody .= "If you require further assistance, please contact our support team.<br><br>";
+        $newTutorBody .= "Best regards,<br>eTutoring System Team";
+
+        if (!MailHelper::sendMail($newTutor['email'], $newTutorSubject, $newTutorBody)) {
+            die(" Failed to send email to new tutor: {$newTutor['email']}");
+        }
+        echo " Email sent successfully to New Tutor!";
 
         return true;
     }
