@@ -86,28 +86,28 @@ class SMTP
     const DEBUG_OFF = 0;
 
     /**
-     * Debug level to show client -> server messages.
+     * Debug level to show client -> server message.
      *
      * @var int
      */
     const DEBUG_CLIENT = 1;
 
     /**
-     * Debug level to show client -> server and server -> client messages.
+     * Debug level to show client -> server and server -> client message.
      *
      * @var int
      */
     const DEBUG_SERVER = 2;
 
     /**
-     * Debug level to show connection status, client -> server and server -> client messages.
+     * Debug level to show connection status, client -> server and server -> client message.
      *
      * @var int
      */
     const DEBUG_CONNECTION = 3;
 
     /**
-     * Debug level to show all messages.
+     * Debug level to show all message.
      *
      * @var int
      */
@@ -120,7 +120,7 @@ class SMTP
      * * self::DEBUG_CLIENT (`1`) Client commands
      * * self::DEBUG_SERVER (`2`) Client commands and server responses
      * * self::DEBUG_CONNECTION (`3`) As DEBUG_SERVER plus connection status
-     * * self::DEBUG_LOWLEVEL (`4`) Low-level data output, all messages.
+     * * self::DEBUG_LOWLEVEL (`4`) Low-level data output, all message.
      *
      * @var int
      */
@@ -1365,7 +1365,7 @@ class SMTP
     }
 
     /**
-     * Set error messages and codes.
+     * Set error message and codes.
      *
      * @param string $message      The error message
      * @param string $detail       Further detail on the error

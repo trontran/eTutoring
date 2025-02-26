@@ -1,18 +1,59 @@
 <?php
-
 // Kiểm tra session
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Xác định vai trò của người dùng
+// Kiểm tra xem người dùng có đăng nhập không
 $isLoggedIn = isset($_SESSION['user']);
 $isAdmin = $isLoggedIn && $_SESSION['user']['role'] === 'staff';
 $isStudent = $isLoggedIn && $_SESSION['user']['role'] === 'student';
 $isTutor = $isLoggedIn && $_SESSION['user']['role'] === 'tutor';
 $username = $isLoggedIn ? $_SESSION['user']['first_name'] : 'Guest';
 
+// Import model Notification & User
+require_once '../app/models/Notification.php';
+require_once '../app/models/User.php';
+
+use App\Models\Notification;
+use App\Models\User;
+
+// Khởi tạo đối tượng model
+$notificationModel = new Notification();
+$userModel = new User();
+
+$unreadMessages = 0;
+$receiverId = null;
+
+// Kiểm tra session user_id trước khi truy cập
+$userId = $_SESSION['user']['user_id'] ?? null;
+
+if ($isLoggedIn && !empty($userId) && is_numeric($userId)) {
+    // Cập nhật thông báo đã đọc trước khi lấy số lượng tin nhắn chưa đọc
+    if (isset($_GET['url']) && $_GET['url'] === 'message/chat' && isset($_GET['receiver_id'])) {
+        $receiverId = $_GET['receiver_id'];
+        $notificationModel->markAsRead($userId, $receiverId); // Cập nhật trạng thái đọc
+    }
+
+    // Cập nhật số lượng tin nhắn chưa đọc
+    $unreadMessages = count($notificationModel->getUnreadNotifications($userId));
+
+    if ($isStudent) {
+        // Lấy tutor ID của student
+        $tutor = $userModel->getTutorId($userId);
+        if ($tutor) {
+            $receiverId = $tutor['tutor_id'];
+        }
+    } elseif ($isTutor) {
+        // Lấy danh sách tutees của tutor
+        $students = $userModel->getTuteesByTutor($userId);
+        if (!empty($students) && isset($students[0]['user_id'])) {
+            $receiverId = $students[0]['user_id'];
+        }
+    }
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,7 +64,6 @@ $username = $isLoggedIn ? $_SESSION['user']['first_name'] : 'Guest';
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <link rel="stylesheet" href="/eTutoring/public/Css/style.css">
     <link rel="icon" href="/eTutoring/public/images/favicon.ico" type="image/x-icon">
-
 </head>
 <body>
 <div class="wrapper d-flex flex-column min-vh-100">
@@ -43,6 +83,19 @@ $username = $isLoggedIn ? $_SESSION['user']['first_name'] : 'Guest';
                             <i class="bi bi-house-door-fill"></i> Home
                         </a>
                     </li>
+
+                    <?php if ($isLoggedIn && $receiverId): ?>
+                        <!-- Tin nhắn -->
+                        <li class="nav-item">
+                            <a class="nav-link <?= ($_GET['url'] ?? '') === 'message/chat' ? 'active' : '' ?>"
+                               href="?url=message/chat&receiver_id=<?= htmlspecialchars($receiverId) ?>">
+                                <i class="bi bi-chat-dots"></i> Messages
+                                <?php if ($unreadMessages > 0): ?>
+                                    <span class="badge bg-danger"><?= $unreadMessages ?></span>
+                                <?php endif; ?>
+                            </a>
+                        </li>
+                    <?php endif; ?>
 
                     <?php if ($isLoggedIn): ?>
                         <!-- User Dropdown -->

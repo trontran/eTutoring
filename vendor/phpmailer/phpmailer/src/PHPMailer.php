@@ -396,8 +396,8 @@ class PHPMailer
      * Debug output level.
      * Options:
      * @see SMTP::DEBUG_OFF: No output
-     * @see SMTP::DEBUG_CLIENT: Client messages
-     * @see SMTP::DEBUG_SERVER: Client and server messages
+     * @see SMTP::DEBUG_CLIENT: Client message
+     * @see SMTP::DEBUG_SERVER: Client and server message
      * @see SMTP::DEBUG_CONNECTION: As SERVER plus connection status
      * @see SMTP::DEBUG_LOWLEVEL: Noisy, low-level data output, rarely needed
      *
@@ -437,7 +437,7 @@ class PHPMailer
      * Whether to keep the SMTP connection open after each message.
      * If this is set to true then the connection will remain open after a send,
      * and closing the connection will require an explicit call to smtpClose().
-     * It's a good idea to use this if you are sending multiple messages as it reduces overhead.
+     * It's a good idea to use this if you are sending multiple message as it reduces overhead.
      * See the mailing list example for how to use it.
      *
      * @var bool
@@ -445,7 +445,7 @@ class PHPMailer
     public $SMTPKeepAlive = false;
 
     /**
-     * Whether to split multiple to addresses into multiple messages
+     * Whether to split multiple to addresses into multiple message
      * or send them all in one message.
      * Only supported in `mail` and `sendmail` transports, not in SMTP.
      *
@@ -474,7 +474,7 @@ class PHPMailer
     public $do_verp = false;
 
     /**
-     * Whether to allow sending messages with an empty body.
+     * Whether to allow sending message with an empty body.
      *
      * @var bool
      */
@@ -800,7 +800,7 @@ class PHPMailer
     /**
      * The maximum line length supported by mail().
      *
-     * Background: mail() will sometimes corrupt messages
+     * Background: mail() will sometimes corrupt message
      * with headers longer than 65 chars, see #818.
      *
      * @var int
@@ -960,7 +960,7 @@ class PHPMailer
     }
 
     /**
-     * Send messages using SMTP.
+     * Send message using SMTP.
      */
     public function isSMTP()
     {
@@ -968,7 +968,7 @@ class PHPMailer
     }
 
     /**
-     * Send messages using PHP's mail() function.
+     * Send message using PHP's mail() function.
      */
     public function isMail()
     {
@@ -976,7 +976,7 @@ class PHPMailer
     }
 
     /**
-     * Send messages using $Sendmail.
+     * Send message using $Sendmail.
      */
     public function isSendmail()
     {
@@ -991,7 +991,7 @@ class PHPMailer
     }
 
     /**
-     * Send messages using qmail.
+     * Send message using qmail.
      */
     public function isQmail()
     {
@@ -2297,7 +2297,7 @@ class PHPMailer
     }
 
     /**
-     * Set the language for error messages.
+     * Set the language for error message.
      * The default language is English.
      *
      * @param string $langcode  ISO 639-1 2-character language code (e.g. French is "fr")
@@ -2329,7 +2329,7 @@ class PHPMailer
         //Define full set of translatable strings in English
         $PHPMAILER_LANG = [
             'authenticate' => 'SMTP Error: Could not authenticate.',
-            'buggy_php' => 'Your version of PHP is affected by a bug that may result in corrupted messages.' .
+            'buggy_php' => 'Your version of PHP is affected by a bug that may result in corrupted message.' .
                 ' To fix it, switch to sending using SMTP, disable the mail.add_x_header option in' .
                 ' your php.ini, switch to MacOS or Linux, or upgrade your PHP to version 7.0.17+ or 7.1.3+.',
             'connect_host' => 'SMTP Error: Could not connect to SMTP host.',
@@ -2483,7 +2483,7 @@ class PHPMailer
     /**
      * Word-wrap message.
      * For use with mailers that do not automatically perform wrapping
-     * and for quoted-printable encoded messages.
+     * and for quoted-printable encoded message.
      * Original written by philippe.
      *
      * @param string $message The message to wrap
@@ -3797,7 +3797,7 @@ class PHPMailer
      * This can include images, sounds, and just about any other document type.
      * These differ from 'regular' attachments in that they are intended to be
      * displayed inline with the message, not just attached for download.
-     * This is used in HTML messages that embed the images
+     * This is used in HTML message that embed the images
      * the HTML refers to using the `$cid` value in `img` tags, for example `<img src="cid:mylogo">`.
      * Never use a user-supplied path to a file!
      *

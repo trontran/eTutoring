@@ -11,12 +11,12 @@ class MailHelper {
 
         try {
             $mail->isSMTP();
-            $mail->Host = 'sandbox.smtp.mailtrap.io'; // Thay bằng Host từ Mailtrap
+            $mail->Host = 'smtp.gmail.com'; // Thay bằng Host từ Mailtrap
             $mail->SMTPAuth = true;
-            $mail->Username = 'e4b6662025a79f'; // Thay bằng Username
-            $mail->Password = '7b6eda3764a596'; // Thay bằng Password
+            $mail->Username = 'trontran126@Gmail.com'; // Thay bằng Username
+            $mail->Password = 'ybyl edns agkt hrki'; // Thay bằng Password
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port = 2525;
+            $mail->Port = 587;
 
             $mail->setFrom('noreply@etutoring.com', 'eTutoring System');
             $mail->addAddress($to);

@@ -67,8 +67,8 @@ class POP3
      * Debug output level.
      * Options:
      * @see POP3::DEBUG_OFF: No output
-     * @see POP3::DEBUG_SERVER: Server messages, connection/server errors
-     * @see POP3::DEBUG_CLIENT: Client and Server messages, connection/server errors
+     * @see POP3::DEBUG_SERVER: Server message, connection/server errors
+     * @see POP3::DEBUG_CLIENT: Client and Server message, connection/server errors
      *
      * @var int
      */
@@ -143,7 +143,7 @@ class POP3
     const DEBUG_OFF = 0;
 
     /**
-     * Debug level to show server -> client messages
+     * Debug level to show server -> client message
      * also shows clients connection errors or errors from server
      *
      * @var int
@@ -151,7 +151,7 @@ class POP3
     const DEBUG_SERVER = 1;
 
     /**
-     * Debug level to show client -> server and server -> client messages.
+     * Debug level to show client -> server and server -> client message.
      *
      * @var int
      */
@@ -394,7 +394,7 @@ class POP3
     protected function sendString($string)
     {
         if ($this->pop_conn) {
-            if ($this->do_debug >= self::DEBUG_CLIENT) { //Show client messages when debug >= 2
+            if ($this->do_debug >= self::DEBUG_CLIENT) { //Show client message when debug >= 2
                 echo 'Client -> Server: ', $string;
             }
 
@@ -442,7 +442,7 @@ class POP3
     }
 
     /**
-     * Get an array of error messages, if any.
+     * Get an array of error message, if any.
      *
      * @return array
      */

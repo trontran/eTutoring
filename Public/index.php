@@ -15,8 +15,8 @@ require_once '../app/controllers/TutorController.php';
 require_once '../app/models/User.php';
 require_once '../app/models/PersonalTutor.php';
 require_once '../app/controllers/MessageController.php';
-
-
+require_once '../app/models/Message.php';
+require_once '../app/models/Notification.php';
 
 // Lấy URL từ query string, ví dụ: ?url=user/index
 $url = isset($_GET['url']) ? $_GET['url'] : '';
@@ -110,7 +110,12 @@ if ($url === '' || $url === 'home/index') {
     $controller = new UserController();
     $controller->profile();
     //test
-
+} elseif ($url === 'message/chat') {
+    $controller = new MessageController();
+    $controller->chat();
+} elseif ($url === 'message/send') {
+        $controller = new MessageController();
+        $controller->send();
 } else {
     echo "404 Not Found or Route not handled yet.";
 }

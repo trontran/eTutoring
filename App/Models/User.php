@@ -180,4 +180,11 @@ class User {
         $query = "SELECT COUNT(*) FROM Users";
         return $this->db->query($query)->fetchColumn();
     }
+
+    public function getTutorId($studentId) {
+        $stmt = $this->db->prepare("SELECT tutor_id FROM PersonalTutors WHERE student_id = :studentId");
+        $stmt->bindParam(':studentId', $studentId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }
