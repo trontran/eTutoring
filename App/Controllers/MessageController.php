@@ -9,11 +9,13 @@ class MessageController extends Controller
 {
     private $messageModel;
     private $notificationModel;
+    private $userModel;
 
     public function __construct()
     {
         $this->messageModel = new \App\Models\Message();
         $this->notificationModel = new Notification();
+        $this->userModel = new \App\Models\User();
     }
 
     public function chat() {
@@ -36,7 +38,15 @@ class MessageController extends Controller
 
         // Đánh dấu tin nhắn đã đọc
         $this->notificationModel->markAsRead($senderId);
+        $receiver = $this->userModel->getUserById($receiverId);
 
+        $receiverName = $receiver ? $receiver['first_name'] . " " . $receiver['last_name'] : "Unknown";
+
+        $this->view('message/chat', [
+            'messages' => $messages,
+            'receiverId' => $receiverId,
+            'receiverName' => $receiverName
+        ]);
         $this->view('message/chat', ['messages' => $messages, 'receiverId' => $receiverId]);
     }
 
