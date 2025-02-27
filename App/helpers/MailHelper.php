@@ -11,10 +11,10 @@ class MailHelper {
 
         try {
             $mail->isSMTP();
-            $mail->Host = 'smtp.gmail.com'; // Thay bằng Host từ Mailtrap
+            $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
-            $mail->Username = 'trontran126@Gmail.com'; // Thay bằng Username
-            $mail->Password = 'ybyl edns agkt hrki'; // Thay bằng Password
+            $mail->Username = 'trontran126@Gmail.com';
+            $mail->Password = 'ybyl edns agkt hrki';
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
 

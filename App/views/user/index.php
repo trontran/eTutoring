@@ -66,20 +66,20 @@ ob_start();
     <nav aria-label="User pagination">
         <ul class="pagination justify-content-center">
             <!-- Nút Previous -->
-            <li class="page-item <?= ($currentPage <= 1) ? 'disabled' : '' ?>">
-                <a class="page-link" href="?url=user/index&page=<?= $currentPage - 1 ?>" tabindex="-1">Previous</a>
+            <li class="page-item <?= (isset($currentPage) && $currentPage <= 1) ? 'disabled' : '' ?>">
+                <a class="page-link" href="?url=user/index&page=<?= isset($currentPage) ? $currentPage - 1 : 1 ?>" tabindex="-1">Previous</a>
             </li>
 
             <!-- Hiển thị số trang -->
-            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                <li class="page-item <?= ($currentPage == $i) ? 'active' : '' ?>">
+            <?php $totalPages = isset($totalPages) ? $totalPages : 1; for ($i = 1; $i <= $totalPages; $i++): ?>
+                <li class="page-item <?= (isset($currentPage) && $currentPage == $i) ? 'active' : '' ?>">
                     <a class="page-link" href="?url=user/index&page=<?= $i ?>"><?= $i ?></a>
                 </li>
             <?php endfor; ?>
 
             <!-- Nút Next -->
-            <li class="page-item <?= ($currentPage >= $totalPages) ? 'disabled' : '' ?>">
-                <a class="page-link" href="?url=user/index&page=<?= $currentPage + 1 ?>">Next</a>
+            <li class="page-item <?= (isset($currentPage) && $currentPage >= $totalPages) ? 'disabled' : '' ?>">
+                <a class="page-link" href="?url=user/index&page=<?= isset($currentPage) ? $currentPage + 1 : 1 ?>">Next</a>
             </li>
         </ul>
     </nav>

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 use App\Core\Database;
+use PDO;
 
 class Message
 {
@@ -43,4 +44,34 @@ class Message
 
         return $this->db->lastInsertId();
     }
+
+    public function getChatUsers($userId): array
+    {
+        $query = "SELECT u.user_id, u.first_name, u.last_name, u.email, 
+                (SELECT message_text FROM Messages 
+                 WHERE (sender_id = u.user_id AND receiver_id = :userId) 
+                    OR (sender_id = :userId AND receiver_id = u.user_id) 
+                 ORDER BY sent_at DESC LIMIT 1) AS last_message,
+                
+                (SELECT sent_at FROM Messages 
+                 WHERE (sender_id = u.user_id AND receiver_id = :userId) 
+                    OR (sender_id = :userId AND receiver_id = u.user_id) 
+                 ORDER BY sent_at DESC LIMIT 1) AS last_message_time
+
+              FROM Users u
+              WHERE u.user_id IN 
+                (SELECT DISTINCT sender_id FROM Messages WHERE receiver_id = :userId 
+                 UNION 
+                 SELECT DISTINCT receiver_id FROM Messages WHERE sender_id = :userId)
+              ORDER BY last_message_time DESC";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+
 }

@@ -116,6 +116,9 @@ if ($url === '' || $url === 'home/index') {
 } elseif ($url === 'message/send') {
         $controller = new MessageController();
         $controller->send();
+} elseif ($url === 'message/chatList') {
+    $controller = new MessageController();
+    $controller->chatList();
 } else {
     echo "404 Not Found or Route not handled yet.";
 }

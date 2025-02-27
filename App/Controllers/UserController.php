@@ -187,7 +187,7 @@ class UserController extends Controller
             // Cập nhật tutor trong database
             $this->personalTutor->updateTutorAssignment($studentId, $newTutorId, $assignedBy);
 
-            // ⚠️ Gọi `reallocateTutor()` để gửi email
+
             $this->personalTutor->reallocateTutor($studentId, $newTutorId, $assignedBy);
 
             echo "<script>
@@ -205,7 +205,7 @@ class UserController extends Controller
         }
 
         if (!isset($_SESSION['user']['user_id'])) {
-            die("<h3 style='color: red;'>❌ Error: User ID is not set in session.</h3>");
+            die("<h3 style='color: red;'> Error: User ID is not set in session.</h3>");
         }
 
         $this->requireStaffRole();
@@ -224,7 +224,7 @@ class UserController extends Controller
                 $this->personalTutor->reallocateTutor($studentId, $newTutorId, $assignedBy);
                 header("Location: ?url=user/index&success=reallocated");
             } catch (\Exception $e) {
-                die("<h3 style='color: red;'>❌ Error: " . $e->getMessage() . "</h3>");
+                die("<h3 style='color: red;'> Error: " . $e->getMessage() . "</h3>");
             }
             exit;
         }

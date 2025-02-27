@@ -1,4 +1,4 @@
-/* CSS variables for easy color management */
+/* Define color variables for consistent styling */
 :root {
     --primary-color: #4a6fdc;
     --secondary-color: #e6f0ff;
@@ -24,7 +24,7 @@
     overflow: hidden;
 }
 
-/* Header */
+/* Chat Header */
 .chat-header {
     padding: 15px 20px;
     background-color: white;
@@ -88,7 +88,7 @@
     color: var(--light-text);
 }
 
-/* Message */
+/* Chat Messages */
 .message {
     display: flex;
     margin-bottom: 15px;
@@ -123,6 +123,7 @@
     max-width: 70%;
 }
 
+/* Message Bubble */
 .message .bubble {
     padding: 10px 15px;
     border-radius: 18px;
@@ -130,16 +131,17 @@
     line-height: 1.5;
     word-wrap: break-word;
     position: relative;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-/* Message Colors */
+/* Sent Message Styling */
 .sent .bubble {
     background-color: var(--sent-msg-color);
     color: white;
     border-bottom-right-radius: 4px;
 }
 
+/* Received Message Styling */
 .received .bubble {
     background-color: var(--received-msg-color);
     color: var(--text-color);
@@ -208,7 +210,7 @@
     background-color: var(--hover-color);
 }
 
-/* Responsive design */
+/* Responsive Design */
 @media (max-width: 768px) {
     .chat-container {
         margin: 0;
@@ -237,4 +239,119 @@
 
 .chat-box::-webkit-scrollbar-thumb:hover {
     background: #a8b2c7;
+}
+
+/* Chat Header */
+.chat-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    background: #007bff;
+    color: white;
+    padding: 10px;
+    border-radius: 8px 8px 0 0;
+    position: relative;
+}
+
+.back-btn {
+    margin-right: 10px;
+    background: white;
+    color: #007bff;
+    border-radius: 50%;
+    padding: 5px 10px;
+    font-size: 18px;
+    text-decoration: none;
+}
+
+.back-btn:hover {
+    background: #f0f0f0;
+}
+
+/* Chat List Container */
+.messages-container {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    border: 2px solid #007bff;
+}
+
+/* Chat List */
+.chat-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Chat Item */
+.chat-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border-radius: 8px;
+    background: #f9f9f9;
+    transition: 0.3s ease;
+    border: 1px solid #ddd;
+    text-decoration: none; /* Remove underline */
+    color: black; /* Ensure text is visible */
+}
+
+
+.chat-item:hover {
+    background: #e9ecef;
+    border-color: #007bff;
+}
+
+/* Avatar */
+.chat-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #007bff;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: bold;
+    margin-right: 15px;
+}
+
+/* Message Information */
+.chat-info {
+    flex-grow: 1;
+}
+
+.chat-name {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.chat-last-message {
+    font-size: 14px;
+    color: #6c757d;
+}
+
+/* Message Meta */
+.chat-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.chat-time {
+    font-size: 12px;
+    color: #6c757d;
+}
+
+/* Unread Message Badge */
+.chat-badge {
+    background: red;
+    color: white;
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-weight: bold;
 }

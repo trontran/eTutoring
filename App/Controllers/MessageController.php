@@ -76,4 +76,22 @@ class MessageController extends Controller
             exit;
         }
     }
+
+    public function chatList()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        if (!isset($_SESSION['user'])) {
+            header("Location: ?url=login");
+            exit;
+        }
+
+        $userId = $_SESSION['user']['user_id'];
+        $chatUsers = $this->messageModel->getChatUsers($userId);
+
+        $this->view('message/chat_list', ['chatUsers' => $chatUsers]);
+    }
+
+
 }

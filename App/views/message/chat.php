@@ -7,6 +7,11 @@
     <div class="chat-container">
         <!-- Chat Header -->
         <div class="chat-header">
+            <!-- Nút Back -->
+            <a href="?url=message/chatList" class="btn btn-light btn-sm back-btn">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+
             <div class="chat-header-info">
                 <div class="user-avatar">
                     <?php echo strtoupper(substr($receiverName, 0, 1)); ?>
@@ -19,21 +24,17 @@
 
         <!-- Chat Messages -->
         <div class="chat-box" id="chatBox">
-            <div class="chat-date-divider">
-                <span>Today</span>
-            </div>
-
             <?php
             $currentDate = '';
+            $messages = isset($messages) ? $messages : []; // Ensure $messages is defined
             foreach ($messages as $message):
                 $messageDate = date('d/m/Y', strtotime($message['sent_at']));
 
                 // Add date separator if date changes
                 if ($messageDate != $currentDate) {
                     $currentDate = $messageDate;
-                    // Display "Today" if current date
                     $displayDate = (date('d/m/Y') == $messageDate) ? 'Today' : $messageDate;
-                    if ($message !== reset($messages)): // Don't show for first message as "Today" is already displayed
+                    if ($message !== reset($messages)):
                         ?>
                         <div class="chat-date-divider">
                             <span><?= $displayDate ?></span>

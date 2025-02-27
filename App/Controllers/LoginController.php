@@ -106,18 +106,6 @@ class LoginController extends Controller
                     'email' => $user['email'],
                     'role' => $user['role']
                 ];
-
-//                // Kiểm tra session đã lưu đúng chưa
-//                if (!isset($_SESSION['user']['user_id'])) {
-//                    die("<h3 style='color: red;'>❌ Error: Failed to set session.</h3>");
-//                }
-//
-//                // Debug session (Chỉ dùng kiểm tra, có thể xóa sau khi xác nhận)
-//                echo "<pre>";
-//                print_r($_SESSION);
-//                echo "</pre>";
-//                exit;
-
                 // Chuyển hướng đến dashboard
                 header("Location: /eTutoring/public/?url=user/index");
                 exit;

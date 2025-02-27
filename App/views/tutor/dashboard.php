@@ -1,12 +1,12 @@
 <?php
 $title = "My Tutees";
 
-// Kiểm tra session
+// Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Bảo vệ trang, chỉ tutor mới có quyền truy cập
+// Restrict access to tutors only
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'tutor') {
     header("Location: ?url=login");
     exit;
@@ -17,59 +17,54 @@ ob_start();
 ?>
 
     <section class="mb-4">
-        <h1 class="mb-4 text-center"><i class="bi bi-people-fill"></i> My Tutees</h1>
+        <h1 class="mb-4 text-center text-primary"><i class="bi bi-people-fill"></i> My Tutees</h1>
 
+        <!-- Search & Filter -->
         <form method="GET" action="?url=tutor/dashboard" class="d-flex mb-3">
             <input type="hidden" name="url" value="tutor/dashboard">
-            <input type="text" name="filter" class="form-control me-2" placeholder="Search by name or email" value="<?= htmlspecialchars($filter ?? '') ?>">
+            <input type="text" name="filter" class="form-control me-2 shadow-sm" placeholder="Search by name or email" value="<?= htmlspecialchars($filter ?? '') ?>">
 
-            <!-- Dropdown chọn kiểu sắp xếp -->
-            <select name="sort_by" class="form-select me-2">
+            <select name="sort_by" class="form-select me-2 shadow-sm">
                 <option value="assigned_at" <?= ($sortBy == 'assigned_at') ? 'selected' : '' ?>>Sort by Assigned Date</option>
                 <option value="first_name" <?= ($sortBy == 'first_name') ? 'selected' : '' ?>>Sort by Name</option>
                 <option value="email" <?= ($sortBy == 'email') ? 'selected' : '' ?>>Sort by Email</option>
             </select>
 
-            <button type="submit" class="btn btn-primary"><i class="bi bi-funnel-fill"></i> Filter</button>
+            <button type="submit" class="btn btn-primary shadow-sm"><i class="bi bi-funnel-fill"></i> Filter</button>
         </form>
 
         <?php if (!empty($tutees)): ?>
-            <div class="card shadow">
-                <div class="card-header bg-success text-white">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="bi bi-list-ul"></i> Tutee List</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-bordered table-hover">
-                            <thead class="table-light">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-primary">
                             <tr>
-                                <th><a href="?url=tutor/dashboard&sort=first_name&order=<?= ($sort === 'first_name' && $order === 'ASC') ? 'DESC' : 'ASC' ?>">Name</a></th>
-                                <th><a href="?url=tutor/dashboard&sort=email&order=<?= ($sort === 'email' && $order === 'ASC') ? 'DESC' : 'ASC' ?>">Email</a></th>
-                                <th><a href="?url=tutor/dashboard&sort=assigned_at&order=<?= ($sort === 'assigned_at' && $order === 'ASC') ? 'DESC' : 'ASC' ?>">Assigned At</a></th>
+                                <th><a href="?url=tutor/dashboard&sort=first_name&order=<?= ($sort === 'first_name' && $order === 'ASC') ? 'DESC' : 'ASC' ?>" class="text-dark">Name</a></th>
+                                <th><a href="?url=tutor/dashboard&sort=email&order=<?= ($sort === 'email' && $order === 'ASC') ? 'DESC' : 'ASC' ?>" class="text-dark">Email</a></th>
+                                <th><a href="?url=tutor/dashboard&sort=assigned_at&order=<?= ($sort === 'assigned_at' && $order === 'ASC') ? 'DESC' : 'ASC' ?>" class="text-dark">Assigned At</a></th>
                                 <th>Actions</th>
                             </tr>
                             </thead>
                             <tbody>
                             <?php foreach ($tutees as $tutee): ?>
-                                <tr>
+                                <tr class="shadow-sm">
                                     <td>
-                                        <a href="?url=user/profile&id=<?= htmlspecialchars($tutee['user_id']) ?>" class="text-decoration-none">
+                                        <a href="?url=user/profile&id=<?= htmlspecialchars($tutee['user_id']) ?>" class="text-decoration-none text-dark fw-bold">
                                             <?= htmlspecialchars($tutee['first_name'] . " " . $tutee['last_name']) ?>
                                         </a>
                                     </td>
                                     <td><?= htmlspecialchars($tutee['email']) ?></td>
                                     <td><?= htmlspecialchars($tutee['assigned_at']) ?></td>
                                     <td>
-                                        <div class="btn-group btn-group-sm">
-<!--                                            <a href="mailto:--><?php //= htmlspecialchars($tutee['email']) ?><!--" class="btn btn-primary"><i class="bi bi-envelope-fill"></i></a>-->
-<!--                                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#messageModal"-->
-<!--                                                    data-student-id="--><?php //= htmlspecialchars($tutee['user_id']) ?><!--"-->
-<!--                                                    data-student-name="--><?php //= htmlspecialchars($tutee['first_name'] . ' ' . $tutee['last_name']) ?><!--">-->
-<!--                                                <i class="bi bi-chat-dots-fill"></i>-->
-<!--                                            </button>-->
-                                            <a href="?url=user/profile&id=<?= htmlspecialchars($tutee['user_id']) ?>" class="btn btn-info">
-                                                <i class="bi bi-person-lines-fill"></i>
+                                        <div class="btn-group">
+                                            <a href="?url=user/profile&id=<?= htmlspecialchars($tutee['user_id']) ?>" class="btn btn-info btn-sm">
+                                                <i class="bi bi-person-lines-fill"></i> View
                                             </a>
+
                                         </div>
                                     </td>
                                 </tr>
@@ -86,7 +81,7 @@ ob_start();
         <?php endif; ?>
     </section>
 
-    <!-- Modal gửi tin nhắn -->
+    <!-- Message Modal -->
     <div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -114,16 +109,18 @@ ob_start();
         </div>
     </div>
 
-    <!-- JavaScript để điền dữ liệu vào modal -->
+    <!-- JavaScript to fill modal fields -->
     <script>
-        var messageModal = document.getElementById('messageModal');
-        messageModal.addEventListener('show.bs.modal', function (event) {
-            var button = event.relatedTarget;
-            var studentId = button.getAttribute('data-student-id');
-            var studentName = button.getAttribute('data-student-name');
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.message-btn').forEach(button => {
+                button.addEventListener('click', function () {
+                    let studentId = this.getAttribute('data-student-id');
+                    let studentName = this.getAttribute('data-student-name');
 
-            document.getElementById('messageStudentId').value = studentId;
-            document.getElementById('messageStudentName').value = studentName;
+                    document.getElementById('messageStudentId').value = studentId;
+                    document.getElementById('messageStudentName').value = studentName;
+                });
+            });
         });
     </script>
 

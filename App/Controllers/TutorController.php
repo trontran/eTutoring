@@ -16,7 +16,6 @@ class TutorController extends Controller
         $this->personalTutorModel = new PersonalTutor();
     }
 
-    // Hiển thị danh sách sinh viên và gia sư
     public function assign()
     {
         if (session_status() === PHP_SESSION_NONE) {
