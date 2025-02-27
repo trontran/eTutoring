@@ -29,6 +29,7 @@ $title = $title ?? 'eTutoring System';
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/eTutoring/public/Css/style.css">
     <link rel="icon" href="/eTutoring/public/images/favicon.ico" type="image/x-icon">
+
 </head>
 <body>
 <div class="wrapper d-flex flex-column min-vh-100">

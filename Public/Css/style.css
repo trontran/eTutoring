@@ -1,0 +1,136 @@
+/*For dashboard tutor*/
+/* Card box radius & shadow */
+.card {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+/* Table heading */
+.table thead th {
+    font-weight: 600;
+}
+
+/* Table row hover effect */
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa !important;
+}
+
+/* Nút 'Add New User' & 'Back to Home' style */
+.btn-success i, .btn-secondary i {
+    margin-right: 5px;
+}
+
+/* Align table text to center in all cells */
+.table td {
+    vertical-align: middle;
+    text-align: center;
+}
+
+/* Pagination style */
+.pagination .page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: #fff;
+}
+
+/*//assign view*/
+/* Card styling for consistency */
+.card {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.card-header {
+    border-radius: 8px 8px 0 0;
+}
+
+/* Table */
+.table th, .table td {
+    vertical-align: middle;
+    text-align: center;
+    font-size: 14px;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn i {
+    margin-right: 5px;
+}
+
+/* Alert styling for success message */
+.alert-success {
+    margin-bottom: 15px;
+}
+
+/* Minor spacing for text */
+.text-muted {
+    margin-bottom: 20px;
+}
+
+/*index home*/
+.hero-section {
+    color: white;
+    text-shadow: 1px 1px 6px rgba(0,0,0,0.5);
+}
+
+.initials-avatar {
+    margin: 0 auto;
+}
+
+.card-header h5, .card-header h2 {
+    margin-bottom: 0;
+}
+
+.bg-light {
+    background-color: #f8f9fa!important;
+}
+
+/*create index*/
+
+.card-header h2 {
+    margin-bottom: 0;
+    font-size: 1.4rem;
+}
+
+.form-label {
+    font-weight: 500;
+}
+
+.btn i {
+    margin-right: 5px;
+}
+
+.alert-danger {
+    margin-bottom: 15px;
+}
+/*details index*/
+.avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    color: #fff;
+    font-weight: bold;
+    font-size: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-header h4 {
+    margin-bottom: 0;
+}
+
+.badge.bg-success {
+    background-color: #28a745!important; /* Màu xanh lá đậm */
+    font-size: 0.9rem;
+}

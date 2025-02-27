@@ -3,15 +3,52 @@ $title = "User Details";
 ob_start();
 ?>
 
-    <h2 class="text-center mb-4">User Details</h2>
-    <div class="card shadow-lg p-4">
-        <div class="card-body">
-            <h4><i class="bi bi-person-circle"></i> <?= htmlspecialchars($user['first_name'] . ' ' . $user['last_name']) ?></h4>
-            <p><strong>Email:</strong> <?= htmlspecialchars($user['email']) ?></p>
-            <p><strong>Role:</strong> <?= ucfirst(htmlspecialchars($user['role'])) ?></p>
-            <a href="?url=user/index" class="btn btn-secondary">
-                <i class="bi bi-arrow-left"></i> Back to Users
-            </a>
+    <div class="container mt-4">
+        <div class="card shadow border-0 mx-auto" style="max-width: 600px;">
+            <!-- Header -->
+            <div class="card-header bg-primary text-white text-center">
+                <h4 class="mb-0">
+                    <i class="bi bi-person-circle"></i> User Details
+                </h4>
+            </div>
+            <!-- Body -->
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <?php
+                    // Tạo avatar (dựa trên chữ cái đầu, nếu cần)
+                    $firstName = $user['first_name'] ?? '';
+                    $lastName = $user['last_name'] ?? '';
+                    $initials = strtoupper(substr($firstName, 0, 1) . substr($lastName, 0, 1));
+                    ?>
+                    <div class="avatar bg-primary text-white d-inline-flex justify-content-center align-items-center me-3"
+                         style="width: 60px; height: 60px; border-radius: 50%; font-size: 1.5rem;">
+                        <?= htmlspecialchars($initials) ?>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0">
+                            <?= htmlspecialchars($user['first_name'] . ' ' . $user['last_name']) ?>
+                        </h5>
+                        <small class="text-muted">
+                            <i class="bi bi-envelope-fill"></i> <?= htmlspecialchars($user['email']) ?>
+                        </small>
+                    </div>
+                </div>
+
+                <hr>
+
+                <p class="mb-1"><strong>Role:</strong>
+                    <span class="badge bg-success">
+                    <?= ucfirst(htmlspecialchars($user['role'])) ?>
+                </span>
+                </p>
+
+                <!-- Nút trở về danh sách user -->
+                <div class="mt-4 text-end">
+                    <a href="?url=user/index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to Users
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 

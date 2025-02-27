@@ -1,29 +1,25 @@
-
 <?php
 include __DIR__ . '/header.php';
 
-// Xử lý session và logic của trang
+// Session and role checks
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
 $isLoggedIn = isset($_SESSION['user']);
-$isAdmin = isset($_SESSION['user']) && $_SESSION['user']['role'] === 'staff';
-$isStudent = isset($_SESSION['user']) && $_SESSION['user']['role'] === 'student';
-$isTutor = isset($_SESSION['user']) && $_SESSION['user']['role'] === 'tutor';
+$isAdmin = $isLoggedIn && $_SESSION['user']['role'] === 'staff';
+$isStudent = $isLoggedIn && $_SESSION['user']['role'] === 'student';
+$isTutor = $isLoggedIn && $_SESSION['user']['role'] === 'tutor';
 $username = $isLoggedIn ? $_SESSION['user']['first_name'] : 'Guest';
 
-// Ensure $tutor is defined
+// If student, load tutor info
 $tutor = $tutor ?? null;
-
-// Fetch assigned tutor if student is logged in
 if ($isStudent && isset($_SESSION['user']['user_id'])) {
     require_once '../app/models/PersonalTutor.php';
     $personalTutorModel = new App\Models\PersonalTutor();
     $tutor = $personalTutorModel->getTutorDetails($_SESSION['user']['user_id']);
 }
 
-// Fetch tutees if tutor is logged in
+// If tutor, load tutees
 $tutees = [];
 if ($isTutor && isset($_SESSION['user']['user_id'])) {
     require_once '../app/models/User.php';
@@ -32,120 +28,198 @@ if ($isTutor && isset($_SESSION['user']['user_id'])) {
 }
 ?>
 
-<!-- Nội dung trang index (Main Content) -->
-<section class="hero-section py-5 text-center" style="background: linear-gradient(to right, #0056b3, #007bff);">
-    <div class="container">
-        <h1 class="fw-bold text-white">
-            <?php
-            if ($isLoggedIn) {
-                echo "Welcome back, " . htmlspecialchars($username) . "!";
-            } else {
-                echo "Welcome to eTutoring!";
-            }
-            ?>
-        </h1>
-        <?php if ($isStudent): ?>
-            <p class="lead text-white">Ready to learn? Explore your courses and connect with your tutor.</p>
-            <?php if ($tutor): ?>
-                <!-- Nút liên hệ tutor nếu cần -->
-            <?php endif; ?>
-        <?php elseif ($isTutor): ?>
-            <p class="lead text-white">Manage your tutees and help them succeed.</p>
-            <a href="?url=tutor/dashboard" class="btn btn-light btn-lg">
-                <i class="bi bi-people"></i> View My Tutees
-            </a>
-        <?php elseif ($isAdmin): ?>
-            <p class="lead text-white">Welcome, Administrator. Manage users, courses, and tutor assignments.</p>
-            <a href="?url=user/index" class="btn btn-light btn-lg">
-                <i class="bi bi-gear"></i> Go to Admin Panel
-            </a>
-        <?php else: ?>
-            <p class="lead text-white">
-                An online platform connecting students and tutors.
-            </p>
-            <p class="lead text-white">Log in to access your personalized dashboard.</p>
-            <a href="?url=login" class="btn btn-light btn-lg">
-                <i class="bi bi-box-arrow-in-right"></i> Login
-            </a>
-        <?php endif; ?>
-    </div>
-</section>
+    <!-- Hero Section -->
+    <section class="hero-section py-5 text-center" style="background: linear-gradient(to right, #0056b3, #007bff);">
+        <div class="container">
+            <h1 class="fw-bold text-white">
+                <?php if ($isLoggedIn): ?>
+                    Welcome back, <?= htmlspecialchars($username) ?>!
+                <?php else: ?>
+                    Welcome to eTutoring!
+                <?php endif; ?>
+            </h1>
 
-<main class="container my-4 flex-grow-1">
-    <?php if ($isStudent && $tutor): ?>
-        <section class="mb-4">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white text-center">
-                    <h5 class="mb-0"><i class="bi bi-person-badge-fill"></i> Your Personal Tutor</h5>
-                </div>
-                <div class="card-body text-center">
-                    <?php
-                    $firstName = $tutor['first_name'] ?? '';
-                    $lastName = $tutor['last_name'] ?? '';
-                    $initials = '';
-                    if (!empty($firstName)) {
-                        $initials .= strtoupper(substr($firstName, 0, 1));
-                    }
-                    if (!empty($lastName)) {
-                        $initials .= strtoupper(substr($lastName, 0, 1));
-                    }
-                    ?>
-                    <div class="initials-avatar" style="width: 150px; height: 150px; border-radius: 50%; background-color: #007bff; color: white; font-size: 4rem; display: flex; justify-content: center; align-items: center; margin: 0 auto 1rem;">
-                        <?= htmlspecialchars($initials) ?>
+            <?php if ($isStudent): ?>
+                <p class="lead text-white">Ready to learn? Explore your courses and connect with your tutor.</p>
+            <?php elseif ($isTutor): ?>
+                <p class="lead text-white">Manage your tutees and help them succeed.</p>
+                <a href="?url=tutor/dashboard" class="btn btn-light btn-lg">
+                    <i class="bi bi-people"></i> View My Tutees
+                </a>
+            <?php elseif ($isAdmin): ?>
+                <p class="lead text-white">Welcome, Administrator. Manage users, courses, and tutor assignments.</p>
+                <a href="?url=user/index" class="btn btn-light btn-lg">
+                    <i class="bi bi-gear"></i> Go to Admin Panel
+                </a>
+            <?php else: ?>
+                <p class="lead text-white">
+                    An online platform connecting students and tutors.
+                </p>
+                <p class="lead text-white">Log in to access your personalized dashboard.</p>
+                <a href="?url=login" class="btn btn-light btn-lg">
+                    <i class="bi bi-box-arrow-in-right"></i> Login
+                </a>
+            <?php endif; ?>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="container my-4 flex-grow-1">
+        <!-- Section: Key Features or Stats -->
+        <section class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body text-center">
+                        <i class="bi bi-mortarboard-fill fs-1 text-primary"></i>
+                        <h5 class="card-title mt-3">Personalized Tutoring</h5>
+                        <p class="card-text text-muted">
+                            Each student gets a dedicated tutor, ensuring personalized guidance tailored to their needs.
+                        </p>
                     </div>
-                    <h4 class="card-title"><?= htmlspecialchars($tutor['first_name'] . " " . $tutor['last_name']) ?></h4>
-                    <p class="card-text text-muted">
-                        <i class="bi bi-envelope-fill"></i> <?= htmlspecialchars($tutor['email']) ?>
-                    </p>
-                    <p class="card-text">
-                        <strong>Total Students:</strong> <span class="badge bg-primary"><?= htmlspecialchars($tutor['total_students'] ?? 0) ?></span>
-                    </p>
-                    <a href="mailto:<?= htmlspecialchars($tutor['email']) ?>" class="btn btn-primary">
-                        <i class="bi bi-envelope-fill"></i> Contact Tutor
-                    </a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body text-center">
+                        <i class="bi bi-chat-dots fs-1 text-primary"></i>
+                        <h5 class="card-title mt-3">Seamless Communication</h5>
+                        <p class="card-text text-muted">
+                            Message your tutor, schedule meetings, and stay updated with instant notifications.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body text-center">
+                        <i class="bi bi-journal-text fs-1 text-primary"></i>
+                        <h5 class="card-title mt-3">Resource Sharing</h5>
+                        <p class="card-text text-muted">
+                            Upload and share learning materials easily with your tutor and classmates.
+                        </p>
+                    </div>
                 </div>
             </div>
         </section>
-    <?php endif; ?>
 
-<!--    --><?php //if ($isTutor && !empty($tutees)): ?>
-<!--        <section class="mb-4">-->
-<!--            <div class="card shadow">-->
-<!--                <div class="card-header bg-success text-white text-center">-->
-<!--                    <h5 class="mb-0"><i class="bi bi-people-fill"></i> My Tutees</h5>-->
-<!--                </div>-->
-<!--                <div class="card-body">-->
-<!--                    <div class="table-responsive">-->
-<!--                        <table class="table table-hover">-->
-<!--                            <thead>-->
-<!--                                <tr>-->
-<!--                                    <th>Name</th>-->
-<!--                                    <th>Email</th>-->
-<!--                                    <th>Actions</th>-->
-<!--                                </tr>-->
-<!--                            </thead>-->
-<!--                            <tbody>-->
-<!--                                --><?php //foreach ($tutees as $tutee): ?>
-<!--                                    <tr>-->
-<!--                                        <td>--><?php //= htmlspecialchars($tutee['first_name'] . " " . $tutee['last_name']) ?><!--</td>-->
-<!--                                        <td>--><?php //= htmlspecialchars($tutee['email']) ?><!--</td>-->
-<!--                                        <td>-->
-<!--                                            <a href="mailto:--><?php //= htmlspecialchars($tutee['email']) ?><!--" class="btn btn-sm btn-primary">-->
-<!--                                                <i class="bi bi-envelope-fill"></i> Contact-->
-<!--                                            </a>-->
-<!--                                            <a href="?url=user/profile&id=--><?php //= htmlspecialchars($tutee['user_id']) ?><!--" class="btn btn-sm btn-secondary">-->
-<!--                                                <i class="bi bi-person-fill"></i> View Profile-->
-<!--                                            </a>-->
-<!--                                        </td>-->
-<!--                                    </tr>-->
-<!--                                --><?php //endforeach; ?>
-<!--                            </tbody>-->
-<!--                        </table>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </section>-->
-<!--    --><?php //endif; ?>
-</main>
+        <!-- Section: Student has a tutor -->
+        <?php if ($isStudent && $tutor): ?>
+            <section class="mb-5">
+                <div class="card shadow border-0">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h5 class="mb-0">
+                            <i class="bi bi-person-badge-fill"></i> Your Personal Tutor
+                        </h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <?php
+                        $firstName = $tutor['first_name'] ?? '';
+                        $lastName = $tutor['last_name'] ?? '';
+                        $initials = strtoupper(substr($firstName, 0, 1) . substr($lastName, 0, 1));
+                        ?>
+                        <div class="initials-avatar d-inline-flex mb-3"
+                             style="width: 120px; height: 120px; border-radius: 50%; background-color: #007bff; color: white; font-size: 3rem; justify-content: center; align-items: center;">
+                            <?= htmlspecialchars($initials) ?>
+                        </div>
+                        <h4 class="card-title"><?= htmlspecialchars($tutor['first_name'] . " " . $tutor['last_name']) ?></h4>
+                        <p class="card-text text-muted">
+                            <i class="bi bi-envelope-fill"></i> <?= htmlspecialchars($tutor['email']) ?>
+                        </p>
+                        <p class="card-text">
+                            <strong>Total Students:</strong>
+                            <span class="badge bg-primary">
+                            <?= htmlspecialchars($tutor['total_students'] ?? 0) ?>
+                        </span>
+                        </p>
+                        <a href="mailto:<?= htmlspecialchars($tutor['email']) ?>" class="btn btn-primary">
+                            <i class="bi bi-envelope-fill"></i> Contact Tutor
+                        </a>
+                    </div>
+                </div>
+            </section>
+        <?php endif; ?>
+
+        <!-- Section: Tutor with Tutees -->
+        <?php if ($isTutor && !empty($tutees)): ?>
+            <section class="mb-5">
+                <div class="card shadow border-0">
+                    <div class="card-header bg-success text-white text-center">
+                        <h5 class="mb-0">
+                            <i class="bi bi-people-fill"></i> My Tutees
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <?php foreach ($tutees as $tutee): ?>
+                                    <tr>
+                                        <td><?= htmlspecialchars($tutee['first_name'] . " " . $tutee['last_name']) ?></td>
+                                        <td><?= htmlspecialchars($tutee['email']) ?></td>
+                                        <td>
+                                            <a href="mailto:<?= htmlspecialchars($tutee['email']) ?>" class="btn btn-sm btn-primary">
+                                                <i class="bi bi-envelope-fill"></i> Contact
+                                            </a>
+                                            <a href="?url=user/detail&id=<?= htmlspecialchars($tutee['user_id']) ?>" class="btn btn-sm btn-secondary">
+                                                <i class="bi bi-person-fill"></i> View Profile
+                                            </a>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        <?php endif; ?>
+
+        <!-- Section: Info / Announcements or Demo Stats -->
+    <!-- Section: Student/Staff Testimonials -->
+    <section class="bg-light p-4 rounded">
+        <h4 class="mb-3"><i class="bi bi-chat-left-quote-fill"></i> What Our Users Say</h4>
+        <div class="row g-4">
+            <!-- Testimonial 1 -->
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body">
+                        <p class="card-text">
+                            "eTutoring has revolutionized the way I connect with my tutor. Meetings are easy to schedule and resources are always at my fingertips!"
+                        </p>
+                        <h6 class="card-subtitle text-muted mt-3">- Alice, Student</h6>
+                    </div>
+                </div>
+            </div>
+            <!-- Testimonial 2 -->
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body">
+                        <p class="card-text">
+                            "Managing my tutees and providing them feedback has never been simpler. eTutoring keeps everything organized in one place."
+                        </p>
+                        <h6 class="card-subtitle text-muted mt-3">- Dr. Smith, Tutor</h6>
+                    </div>
+                </div>
+            </div>
+            <!-- Testimonial 3 -->
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body">
+                        <p class="card-text">
+                            "User-friendly, efficient, and reliable! As an admin, I can easily manage user roles and assignments."
+                        </p>
+                        <h6 class="card-subtitle text-muted mt-3">- Jason, Staff</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
 <?php include __DIR__ . '/footer.php'; ?>
