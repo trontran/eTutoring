@@ -28,7 +28,7 @@ class HomeController extends Controller
             $tutor = $this->personalTutorModel->getTutorDetails($student_id);
         }
 
-        // Render view với dữ liệu tutor (nếu có)
+        // Render view with tutor's data
         $this->view('home/index', [
             'title' => 'Home Page - eTutoring System',
             'tutor' => $tutor
