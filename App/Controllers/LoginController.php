@@ -82,7 +82,7 @@ class LoginController extends Controller
         $this->userModel = new User();
     }
 
-    // Hiển thị form đăng nhập
+    //Show the login form
     public function index()
     {
         $this->view('auth/login');
