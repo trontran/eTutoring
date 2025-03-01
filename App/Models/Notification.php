@@ -18,32 +18,34 @@ class Notification
         $this->db = Database::getInstance()->getConnection();
     }
 
-
+    // Tạo thông báo mới, trạng thái mặc định của cột status là 'unread' theo định nghĩa bảng
     public function createNotification($userId, $text): bool
     {
-        $stmt = $this->db->prepare("INSERT INTO Notifications (user_id, notification_text)
+        $stmt = $this->db->prepare("INSERT INTO Notifications (user_id, notification_text) 
                                     VALUES (:user_id, :text)");
-        $stmt->bindParam(':user_id', $userId, \PDO::PARAM_INT);
-        $stmt->bindParam(':text', $text, \PDO::PARAM_STR);
+        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        $stmt->bindParam(':text', $text, PDO::PARAM_STR);
         return $stmt->execute();
     }
 
+    // Lấy danh sách thông báo chưa đọc của người dùng
     public function getUnreadNotifications($userId): array
     {
-        $stmt = $this->db->prepare("SELECT * FROM Notifications WHERE user_id = :userId AND status = 'unread'");
+        $stmt = $this->db->prepare("SELECT * FROM Notifications 
+                                    WHERE user_id = :userId AND status = 'unread' 
+                                    ORDER BY created_at DESC");
         $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    // Đánh dấu tất cả thông báo chưa đọc của người dùng thành 'read'
     public function markAsRead($userId): bool
     {
-        $stmt = $this->db->prepare("UPDATE Notifications SET status = 'read' WHERE user_id = :userId AND status = 'unread'");
+        $stmt = $this->db->prepare("UPDATE Notifications 
+                                    SET status = 'read' 
+                                    WHERE user_id = :userId AND status = 'unread'");
         $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
         return $stmt->execute();
     }
-//    test message
-
-
-
-
 }

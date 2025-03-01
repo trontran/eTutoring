@@ -122,6 +122,9 @@ if ($url === '' || $url === 'home/index') {
 } elseif ($url === 'message/getMessages') {
     $controller = new MessageController();
     $controller->getMessages();
+} elseif ($url === 'message/getUnreadCount') {
+    $controller = new MessageController();
+    $controller->getUnreadCount();
 } else {
     echo "404 Not Found or Route not handled yet.";
 }

@@ -122,27 +122,27 @@ $currentPage = $_GET['url'] ?? 'home/index';
     </nav>
 
 
-<!--    <script>-->
-<!--        document.addEventListener("DOMContentLoaded", function () {-->
-<!--            const notificationBadge = document.getElementById("unreadMessages");-->
-<!---->
-<!--            function updateNotifications() {-->
-<!--                fetch("?url=message/getUnreadCount")-->
-<!--                    .then(response => response.json())-->
-<!--                    .then(data => {-->
-<!--                        if (data.status === "success") {-->
-<!--                            if (data.unread_count > 0) {-->
-<!--                                notificationBadge.innerText = data.unread_count;-->
-<!--                                notificationBadge.classList.remove("d-none");-->
-<!--                            } else {-->
-<!--                                notificationBadge.classList.add("d-none");-->
-<!--                            }-->
-<!--                        }-->
-<!--                    })-->
-<!--                    .catch(error => console.error("Error fetching notifications:", error));-->
-<!--            }-->
-<!---->
-<!--            setInterval(updateNotifications, 5000); // Cập nhật thông báo mỗi 5 giây-->
-<!--            updateNotifications(); // Gọi ngay khi trang tải-->
-<!--        });-->
-<!--    </script>-->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const notificationBadge = document.getElementById("unreadMessages");
+
+            function updateNotifications() {
+                fetch("?url=message/getUnreadCount")
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === "success") {
+                            if (data.unread_count > 0) {
+                                notificationBadge.innerText = data.unread_count;
+                                notificationBadge.classList.remove("d-none");
+                            } else {
+                                notificationBadge.classList.add("d-none");
+                            }
+                        }
+                    })
+                    .catch(error => console.error("Error fetching notifications:", error));
+            }
+
+            setInterval(updateNotifications, 5000); // Cập nhật thông báo mỗi 5 giây
+            updateNotifications(); // Gọi ngay khi trang tải
+        });
+    </script>
