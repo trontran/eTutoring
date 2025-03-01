@@ -80,7 +80,7 @@ class MessageController extends Controller
             if ($messageId) {
                 // Tạo thông báo cho người nhận
                 // Sử dụng tên người gửi để tạo thông báo thân thiện
-                $notificationText = "Bạn có tin nhắn mới từ " . $_SESSION['user']['first_name'];
+                $notificationText = "You have a new message from  " . $_SESSION['user']['first_name'];
                 $this->notificationModel->createNotification($receiverId, $notificationText);
 
                 echo json_encode(["status" => "success", "message" => "Message sent successfully"]);
