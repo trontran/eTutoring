@@ -71,6 +71,23 @@ class Message
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    //test function chat
+    public function getNewMessages($senderId, $receiverId, $lastMessageId)
+    {
+        $sql = "SELECT * FROM messages 
+            WHERE ((sender_id = :sender AND receiver_id = :receiver) 
+                OR (sender_id = :receiver AND receiver_id = :sender))
+            AND message_id > :lastMessageId
+            ORDER BY sent_at ASC";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            ':sender' => $senderId,
+            ':receiver' => $receiverId,
+            ':lastMessageId' => $lastMessageId
+        ]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
 
 

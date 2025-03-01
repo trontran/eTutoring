@@ -21,7 +21,7 @@ class Notification
 
     public function createNotification($userId, $text): bool
     {
-        $stmt = $this->db->prepare("INSERT INTO Notifications (user_id, notification_text) 
+        $stmt = $this->db->prepare("INSERT INTO Notifications (user_id, notification_text)
                                     VALUES (:user_id, :text)");
         $stmt->bindParam(':user_id', $userId, \PDO::PARAM_INT);
         $stmt->bindParam(':text', $text, \PDO::PARAM_STR);
@@ -41,4 +41,9 @@ class Notification
         $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
         return $stmt->execute();
     }
+//    test message
+
+
+
+
 }

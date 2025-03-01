@@ -23,34 +23,13 @@ $notificationModel = new Notification();
 $userModel = new User();
 
 $unreadMessages = 0;
-$receiverId = null;
 
 // Kiểm tra session user_id trước khi truy cập
 $userId = $_SESSION['user']['user_id'] ?? null;
 
 if ($isLoggedIn && !empty($userId) && is_numeric($userId)) {
-    // Cập nhật thông báo đã đọc trước khi lấy số lượng tin nhắn chưa đọc
-    if (isset($_GET['url']) && $_GET['url'] === 'message/chat' && isset($_GET['receiver_id'])) {
-        $receiverId = $_GET['receiver_id'];
-        $notificationModel->markAsRead($userId, $receiverId); // Cập nhật trạng thái đọc
-    }
-
     // Cập nhật số lượng tin nhắn chưa đọc
     $unreadMessages = count($notificationModel->getUnreadNotifications($userId));
-
-    if ($isStudent) {
-        // Lấy tutor ID của student
-        $tutor = $userModel->getTutorId($userId);
-        if ($tutor) {
-            $receiverId = $tutor['tutor_id'];
-        }
-    } elseif ($isTutor) {
-        // Lấy danh sách tutees của tutor
-        $students = $userModel->getTuteesByTutor($userId);
-        if (!empty($students) && isset($students[0]['user_id'])) {
-            $receiverId = $students[0]['user_id'];
-        }
-    }
 }
 
 // Xác định trang hiện tại
@@ -79,53 +58,91 @@ $currentPage = $_GET['url'] ?? 'home/index';
                 <i class="bi bi-mortarboard-fill"></i> eTutoring
             </a>
 
-            <!-- Navigation Menu -->
-            <div class="navbar-nav ms-auto">
-                <!-- Home -->
-                <a class="nav-link <?= $currentPage === 'home/index' ? 'active' : '' ?>" href="?url=home/index">
-                    <i class="bi bi-house-door-fill"></i> Home
-                </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-                <?php if ($isLoggedIn): ?>
-                    <!-- Messages -->
-                    <a class="nav-link <?= strpos($currentPage, 'message') === 0 ? 'active' : '' ?>" href="?url=message/chatList">
-                        <i class="bi bi-chat-dots-fill"></i> Messages
-                        <?php if ($unreadMessages > 0): ?>
-                            <span class="badge bg-danger rounded-pill"><?= $unreadMessages ?></span>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <!-- Home -->
+                    <li class="nav-item">
+                        <a class="nav-link <?= $currentPage === 'home/index' ? 'active' : '' ?>" href="?url=home/index">
+                            <i class="bi bi-house-door-fill"></i> Home
+                        </a>
+                    </li>
+
+                    <?php if ($isLoggedIn): ?>
+                        <!-- Messages -->
+                        <li class="nav-item">
+                            <a class="nav-link <?= strpos($currentPage, 'message') === 0 ? 'active' : '' ?>" href="?url=message/chatList">
+                                <i class="bi bi-chat-dots-fill"></i> Messages
+                                <span id="unreadMessages" class="badge bg-danger rounded-pill <?= $unreadMessages > 0 ? '' : 'd-none' ?>">
+                                    <?= $unreadMessages ?>
+                                </span>
+                            </a>
+                        </li>
+
+                        <!-- My Tutees (for Tutors) -->
+                        <?php if ($isTutor): ?>
+                            <li class="nav-item">
+                                <a class="nav-link <?= $currentPage === 'tutor/dashboard' ? 'active' : '' ?>" href="?url=tutor/dashboard">
+                                    <i class="bi bi-people-fill"></i> My Tutees
+                                </a>
+                            </li>
                         <?php endif; ?>
-                    </a>
 
-                    <!-- My Tutees (for Tutors) -->
-                    <?php if ($isTutor): ?>
-                        <a class="nav-link <?= $currentPage === 'tutor/dashboard' ? 'active' : '' ?>" href="?url=tutor/dashboard">
-                            <i class="bi bi-people-fill"></i> My Tutees
-                        </a>
+                        <!-- User Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-person-circle me-1"></i> <?= htmlspecialchars($username) ?>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="?url=user/profile"><i class="bi bi-person-fill me-2"></i> Profile</a></li>
+                                <?php if ($isStudent): ?>
+                                    <li><a class="dropdown-item" href="?url=student/courses"><i class="bi bi-book-fill me-2"></i> My Courses</a></li>
+                                <?php endif; ?>
+                                <?php if ($isAdmin): ?>
+                                    <li><a class="dropdown-item" href="?url=user/index"><i class="bi bi-people-fill me-2"></i> Manage Users</a></li>
+                                    <li><a class="dropdown-item" href="?url=tutor/assign"><i class="bi bi-person-plus-fill me-2"></i> Assign Tutor</a></li>
+                                <?php endif; ?>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="?url=logout"><i class="bi bi-box-arrow-right me-2"></i> Logout</a></li>
+                            </ul>
+                        </li>
+                    <?php else: ?>
+                        <li class="nav-item">
+                            <a class="nav-link <?= $currentPage === 'login' ? 'active' : '' ?>" href="?url=login">
+                                <i class="bi bi-box-arrow-in-right"></i> Login
+                            </a>
+                        </li>
                     <?php endif; ?>
-
-                    <!-- User Dropdown -->
-                    <div class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                           data-bs-toggle="dropdown" aria-expanded="false">
-                            <?= htmlspecialchars($username) ?> <i class="bi bi-person-circle ms-1"></i>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="?url=user/profile"><i class="bi bi-person-fill me-2"></i> Profile</a></li>
-                            <?php if ($isStudent): ?>
-                                <li><a class="dropdown-item" href="?url=student/courses"><i class="bi bi-book-fill me-2"></i> My Courses</a></li>
-                            <?php endif; ?>
-                            <?php if ($isAdmin): ?>
-                                <li><a class="dropdown-item" href="?url=user/index"><i class="bi bi-people-fill me-2"></i> Manage Users</a></li>
-                                <li><a class="dropdown-item" href="?url=tutor/assign"><i class="bi bi-person-plus-fill me-2"></i> Assign Tutor</a></li>
-                            <?php endif; ?>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="?url=logout"><i class="bi bi-box-arrow-right me-2"></i> Logout</a></li>
-                        </ul>
-                    </div>
-                <?php else: ?>
-                    <a class="nav-link <?= $currentPage === 'login' ? 'active' : '' ?>" href="?url=login">
-                        <i class="bi bi-box-arrow-in-right"></i> Login
-                    </a>
-                <?php endif; ?>
+                </ul>
             </div>
         </div>
     </nav>
+
+
+<!--    <script>-->
+<!--        document.addEventListener("DOMContentLoaded", function () {-->
+<!--            const notificationBadge = document.getElementById("unreadMessages");-->
+<!---->
+<!--            function updateNotifications() {-->
+<!--                fetch("?url=message/getUnreadCount")-->
+<!--                    .then(response => response.json())-->
+<!--                    .then(data => {-->
+<!--                        if (data.status === "success") {-->
+<!--                            if (data.unread_count > 0) {-->
+<!--                                notificationBadge.innerText = data.unread_count;-->
+<!--                                notificationBadge.classList.remove("d-none");-->
+<!--                            } else {-->
+<!--                                notificationBadge.classList.add("d-none");-->
+<!--                            }-->
+<!--                        }-->
+<!--                    })-->
+<!--                    .catch(error => console.error("Error fetching notifications:", error));-->
+<!--            }-->
+<!---->
+<!--            setInterval(updateNotifications, 5000); // Cập nhật thông báo mỗi 5 giây-->
+<!--            updateNotifications(); // Gọi ngay khi trang tải-->
+<!--        });-->
+<!--    </script>-->

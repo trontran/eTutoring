@@ -3,6 +3,6 @@ return [
     'host' => 'localhost',
     'dbname' => 'eTutoringSystem',
     'user' => 'root',
-    'password' => '',
+    'password' => 'root',
 ];
 ?>

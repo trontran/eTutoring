@@ -7,14 +7,12 @@
     <div class="chat-container">
         <!-- Chat Header -->
         <div class="chat-header">
-            <!-- Nút Back -->
             <a href="?url=message/chatList" class="btn btn-light btn-sm back-btn">
                 <i class="bi bi-arrow-left"></i>
             </a>
-
             <div class="chat-header-info">
                 <div class="user-avatar">
-                    <?php echo strtoupper(substr($receiverName, 0, 1)); ?>
+                    <?= strtoupper(substr($receiverName, 0, 1)); ?>
                 </div>
                 <div class="user-details">
                     <div class="user-name"><?= htmlspecialchars($receiverName) ?></div>
@@ -24,61 +22,78 @@
 
         <!-- Chat Messages -->
         <div class="chat-box" id="chatBox">
-            <?php
-            $currentDate = '';
-            $messages = isset($messages) ? $messages : []; // Ensure $messages is defined
-            foreach ($messages as $message):
-                $messageDate = date('d/m/Y', strtotime($message['sent_at']));
-
-                // Add date separator if date changes
-                if ($messageDate != $currentDate) {
-                    $currentDate = $messageDate;
-                    $displayDate = (date('d/m/Y') == $messageDate) ? 'Today' : $messageDate;
-                    if ($message !== reset($messages)):
-                        ?>
-                        <div class="chat-date-divider">
-                            <span><?= $displayDate ?></span>
-                        </div>
-                    <?php
-                    endif;
-                }
-                ?>
-                <div class="message <?= $message['sender_id'] == $_SESSION['user']['user_id'] ? 'sent' : 'received' ?>">
-                    <?php if ($message['sender_id'] != $_SESSION['user']['user_id']): ?>
-                        <div class="avatar-wrapper">
-                            <div class="message-avatar">
-                                <?php echo strtoupper(substr($receiverName, 0, 1)); ?>
-                            </div>
-                        </div>
-                    <?php endif; ?>
-
-                    <div class="message-content">
-                        <div class="bubble">
-                            <?= htmlspecialchars($message['message_text']) ?>
-                        </div>
-                        <div class="timestamp">
-                            <?= date('H:i - d/m/Y', strtotime($message['sent_at'])) ?>
-                        </div>
-                    </div>
-                </div>
-            <?php endforeach; ?>
         </div>
 
         <!-- Message Input -->
         <div class="chat-input-container">
-            <form action="?url=message/send" method="POST" class="chat-input">
-                <input type="hidden" name="receiver_id" value="<?= $receiverId ?>">
-                <input type="text" name="message" placeholder="Type a message..." required>
+            <form id="messageForm" class="chat-input">
+                <input type="hidden" id="receiverId" value="<?= $receiverId ?>">
+                <input type="text" id="messageInput" placeholder="Type a message..." required>
                 <button type="submit" class="send-btn"><i class="bi bi-send-fill"></i></button>
             </form>
         </div>
     </div>
 
     <script>
-        // Auto scroll to newest message
-        document.addEventListener('DOMContentLoaded', function() {
-            var chatBox = document.getElementById('chatBox');
-            chatBox.scrollTop = chatBox.scrollHeight;
+        document.addEventListener("DOMContentLoaded", function () {
+            const chatBox = document.getElementById("chatBox");
+            const messageForm = document.getElementById("messageForm");
+            const messageInput = document.getElementById("messageInput");
+            const receiverId = document.getElementById("receiverId").value;
+            let lastMessageId = 0;  // Biến lưu ID của tin nhắn cuối cùng
+
+            // Hàm lấy tin nhắn mới
+            function fetchMessages() {
+                fetch(`?url=message/getMessages&receiver_id=${receiverId}&last_message_id=${lastMessageId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === "success" && data.messages.length > 0) {
+                            data.messages.forEach(msg => {
+                                appendMessage(msg);
+                                lastMessageId = msg.message_id; // Cập nhật ID tin nhắn mới nhất
+                            });
+                            chatBox.scrollTop = chatBox.scrollHeight; // Tự động cuộn xuống
+                        }
+                    })
+                    .catch(error => console.error("Error fetching messages:", error));
+            }
+
+            // Hàm thêm tin nhắn vào khung chat
+            function appendMessage(msg) {
+                const messageElement = document.createElement("div");
+                messageElement.classList.add("message", msg.sender_id === parseInt(receiverId) ? "received" : "sent");
+                messageElement.innerHTML = `
+                    <div class="bubble">${msg.message_text}</div>
+                    <div class="timestamp">${new Date(msg.sent_at).toLocaleTimeString()}</div>
+                `;
+                chatBox.appendChild(messageElement);
+            }
+
+            // Gửi tin nhắn
+            messageForm.addEventListener("submit", function (e) {
+                e.preventDefault();
+
+                const messageText = messageInput.value.trim();
+                if (messageText === "") return;
+
+                fetch("?url=message/send", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: `receiver_id=${receiverId}&message=${encodeURIComponent(messageText)}`
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === "success") {
+                            messageInput.value = "";
+                            fetchMessages(); // Lấy tin nhắn ngay lập tức
+                        }
+                    })
+                    .catch(error => console.error("Error sending message:", error));
+            });
+
+            // Tự động tải tin nhắn mới mỗi 2 giây
+            setInterval(fetchMessages, 2000);
+            fetchMessages(); // Lấy tin nhắn ngay khi trang tải
         });
     </script>
 
