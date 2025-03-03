@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: `receiver_id=${receiverId}&message=${encodeURIComponent(messageText)}`
         })
-            .then(response => response.json()) // Chuyển phản hồi về JSON
+            .then(response => response.json()) // Direction response to JSON
             .then(data => {
                 if (data.status === "success") {
                     messageInput.value = "";
@@ -29,11 +29,11 @@ document.addEventListener("DOMContentLoaded", function () {
         fetch(`?url=message/getMessages&receiver_id=${receiverId}`)
             .then(response => response.json())
             .then(data => {
-                chatBox.innerHTML = ""; // Xóa nội dung cũ
+                chatBox.innerHTML = ""; // delete old content before add
                 data.messages.forEach(msg => {
                     appendMessage(msg);
                 });
-                chatBox.scrollTop = chatBox.scrollHeight; // Cuộn xuống cuối
+                chatBox.scrollTop = chatBox.scrollHeight; // auto roll down
             });
     }
 
@@ -45,5 +45,5 @@ document.addEventListener("DOMContentLoaded", function () {
         chatBox.appendChild(messageElement);
     }
 
-    setInterval(fetchMessages, 3000); // Cập nhật tin nhắn mỗi 3 giây
+    setInterval(fetchMessages, 3000); //update message every 3 minuste
 });

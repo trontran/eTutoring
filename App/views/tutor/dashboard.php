@@ -76,7 +76,7 @@ ob_start();
             </div>
         <?php else: ?>
             <div class="alert alert-info text-center">
-                <i class="bi bi-info-circle-fill"></i> You have no assigned tutees.
+                <i class="bi bi-info-circle-fill"></i> You have no Allocate tutees.
             </div>
         <?php endif; ?>
     </section>

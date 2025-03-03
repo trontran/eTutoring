@@ -38,7 +38,7 @@ class MessageController extends Controller
         $messages = $this->messageModel->getMessages($senderId, $receiverId);
 
         // Khi người dùng mở cửa sổ chat, đánh dấu các thông báo của chính họ đã đọc
-        // (Nếu bạn muốn chỉ đánh dấu thông báo liên quan đến cuộc hội thoại cụ thể thì cần chỉnh sửa thêm)
+
         $this->notificationModel->markAsRead($senderId);
 
         $receiver = $this->userModel->getUserById($receiverId);
@@ -49,7 +49,7 @@ class MessageController extends Controller
             'receiverId' => $receiverId,
             'receiverName' => $receiverName
         ]);
-        // Lưu ý: Dòng dưới có vẻ thừa nếu đã gọi view bên trên, bạn có thể bỏ đi nếu không cần thiết
+
         $this->view('message/chat', ['messages' => $messages, 'receiverId' => $receiverId]);
     }
 
