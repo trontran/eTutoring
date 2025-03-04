@@ -1,8 +1,13 @@
 <?php
 $title = "User Management";
 ob_start();
-?>
 
+?>
+<?php if (isset($_SESSION['success'])): ?>
+    <div class="alert alert-success" role="alert">
+        <?= $_SESSION['success']; unset($_SESSION['success']); ?>
+    </div>
+<?php endif; ?>
     <h1 class="mb-4 text-center text-primary">
         <i class="bi bi-people-fill"></i> User Management
     </h1>

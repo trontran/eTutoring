@@ -169,7 +169,7 @@ class UserController extends Controller
 
         // Kiểm tra nếu session không tồn tại hoặc không có user ID
         if (!isset($_SESSION['user']) || !isset($_SESSION['user']['user_id'])) {
-            die("<h3 style='color: red;'>❌ Error: User ID is not set in session.</h3>");
+            die("<h3 style='color: red;'> Error: User ID is not set in session.</h3>");
         }
 
         $this->requireStaffRole();
@@ -190,10 +190,10 @@ class UserController extends Controller
 
             $this->personalTutor->reallocateTutor($studentId, $newTutorId, $assignedBy);
 
-            echo "<script>
-                alert('✔ Tutor reassignment was successful!');
-                window.location.href = '?url=user/index';
-              </script>";
+            // Set a flash message
+            $_SESSION['success'] = "Tutor reassignment was successful!";
+            // Redirect to the user index page
+            header("Location: ?url=user/index");
             exit;
         }
     }

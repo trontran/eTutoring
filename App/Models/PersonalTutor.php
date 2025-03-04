@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Models;
-
+use App\Models\User;
 use App\Core\Database;
 use MailHelper;
 use PDO;
@@ -175,84 +175,126 @@ class PersonalTutor
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getOldTutorByStudentId(int $studentId): ?array
+    {
+        $query = "SELECT u.user_id, u.first_name, u.last_name, u.email
+              FROM PersonalTutors pt
+              JOIN Users u ON pt.tutor_id = u.user_id
+              WHERE pt.student_id = :student_id
+              ORDER BY pt.assigned_at DESC
+              LIMIT 1";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(":student_id", $studentId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ?: null;
+    }
+
     public function reallocateTutor(int $studentId, int $newTutorId, int $assignedBy): bool
     {
-        // take information old tutor (if had)
-        $oldTutorQuery = "SELECT tutor_id FROM PersonalTutors WHERE student_id = :student_id";
-        $stmt = $this->db->prepare($oldTutorQuery);
-        $stmt->bindParam(":student_id", $studentId, \PDO::PARAM_INT);
-        $stmt->execute();
-        $oldTutorId = $stmt->fetchColumn();
+        try {
+            // 1. Begin a transaction
+            $this->db->beginTransaction();
+
+            // 2. Retrieve the current (old) tutor_id from the PersonalTutors table (if exists)
+            $sqlOld = "SELECT tutor_id FROM PersonalTutors 
+                   WHERE student_id = :student_id 
+                   ORDER BY assigned_at DESC 
+                   LIMIT 1";
+            $stmtOld = $this->db->prepare($sqlOld);
+            $stmtOld->bindParam(':student_id', $studentId, PDO::PARAM_INT);
+            $stmtOld->execute();
+            $oldTutorId = $stmtOld->fetchColumn();
+
+            // 3. If an old tutor exists, insert the record into TutorHistory to store the assignment history
+            if ($oldTutorId) {
+                $insertHistory = "INSERT INTO TutorHistory (student_id, tutor_id, assigned_by, assigned_at) 
+                              VALUES (:student_id, :tutor_id, :assigned_by, NOW())";
+                $stmtHistory = $this->db->prepare($insertHistory);
+                $stmtHistory->bindParam(':student_id', $studentId, PDO::PARAM_INT);
+                $stmtHistory->bindParam(':tutor_id', $oldTutorId, PDO::PARAM_INT);
+                $stmtHistory->bindParam(':assigned_by', $assignedBy, PDO::PARAM_INT);
+                $stmtHistory->execute();
+            }
+
+            // 4. Update the student's current tutor in the PersonalTutors table with the new tutor
+            $updateQuery = "UPDATE PersonalTutors 
+                        SET tutor_id = :new_tutor_id, assigned_by = :assigned_by, assigned_at = NOW() 
+                        WHERE student_id = :student_id";
+            $stmtUpdate = $this->db->prepare($updateQuery);
+            $stmtUpdate->bindParam(':student_id', $studentId, PDO::PARAM_INT);
+            $stmtUpdate->bindParam(':new_tutor_id', $newTutorId, PDO::PARAM_INT);
+            $stmtUpdate->bindParam(':assigned_by', $assignedBy, PDO::PARAM_INT);
+            $stmtUpdate->execute();
+
+            // 5. Commit the transaction to ensure the TutorHistory record is saved
+            $this->db->commit();
+
+        } catch (\Exception $e) {
+            // Roll back the transaction in case of any error
+            $this->db->rollBack();
+            throw $e;
+        }
+        $userModel = new User();
+
+        $oldTutorIdFromHistory = null;
+        if ($oldTutorId) {
+            // Retrieve the second most recent tutor_id (skipping the latest record)
+            $sqlHistory = "SELECT tutor_id 
+                       FROM TutorHistory 
+                       WHERE student_id = :student_id 
+                       ORDER BY assigned_at DESC 
+                       LIMIT 1 OFFSET 1"; // OFFSET 1 để bỏ qua bản ghi mới nhất
+            $stmtH = $this->db->prepare($sqlHistory);
+            $stmtH->bindParam(':student_id', $studentId, PDO::PARAM_INT);
+            $stmtH->execute();
+            $oldTutorIdFromHistory = $stmtH->fetchColumn();
+        }
+
+        // 7. Retrieve the details for the student, the new tutor, and the old tutor (if exists)
+        $student  = $userModel->getUserById($studentId);
+        $newTutor = $userModel->getUserById($newTutorId);
         $oldTutor = null;
-
-        if (!empty($oldTutorId)) {
-            $oldTutor = (new User())->getUserById($oldTutorId);
+        if ($oldTutorIdFromHistory) {
+            $oldTutor = $userModel->getUserById($oldTutorIdFromHistory);
         }
 
-        // update database
-        $updateQuery = "UPDATE PersonalTutors SET tutor_id = :new_tutor_id, assigned_by = :assigned_by WHERE student_id = :student_id";
-        $stmt = $this->db->prepare($updateQuery);
-        $stmt->bindParam(":student_id", $studentId, \PDO::PARAM_INT);
-        $stmt->bindParam(":new_tutor_id", $newTutorId, \PDO::PARAM_INT);
-        $stmt->bindParam(":assigned_by", $assignedBy, \PDO::PARAM_INT);
-        $stmt->execute();
-
-        // take information
-        $student = (new User())->getUserById($studentId);
-        $newTutor = (new User())->getUserById($newTutorId);
-
-        // Check email valid
-        if (empty($student['email']) || empty($newTutor['email']) || ($oldTutor && empty($oldTutor['email']))) {
-            throw new \RuntimeException("❌ Error: One of the email addresses is empty.");
+        // Log the final old tutor information before sending emails
+        error_log("Final Old Tutor ID for Email: " . ($oldTutorIdFromHistory ?: "NULL"));
+        if ($oldTutor) {
+            error_log("Final Old Tutor Email: " . $oldTutor['email']);
         }
 
-        // Gửi email cho Student
+        // ------------------------------------------------------
+        // 8. Send notification emails
+        // ------------------------------------------------------
+
+        // Send email to the student
         $studentSubject = "Notification: Your Tutor Has Been Reassigned";
         $studentBody = "Dear {$student['first_name']},<br><br>";
-        $studentBody .= "We wish to inform you that your personal tutor assignment has been updated. ";
         if ($oldTutor) {
             $studentBody .= "Previously, your tutor was <b>{$oldTutor['first_name']} {$oldTutor['last_name']}</b>. ";
         }
         $studentBody .= "Your new tutor is <b>{$newTutor['first_name']} {$newTutor['last_name']}</b> ";
         $studentBody .= "(Email: <a href='mailto:{$newTutor['email']}'>{$newTutor['email']}</a>).<br><br>";
-        $studentBody .= "We trust that this change will enhance your learning experience. Should you have any questions or require further assistance, ";
-        $studentBody .= "please feel free to contact our support team or reach out directly to your new tutor using the email above.<br><br>";
-        $studentBody .= "Best regards,<br>eTutoring System Team";
+        MailHelper::sendMail($student['email'], $studentSubject, $studentBody);
 
-        if (!MailHelper::sendMail($student['email'], $studentSubject, $studentBody)) {
-            die(" Failed to send email to student: {$student['email']}");
-        }
-        echo "✅ Email sent successfully to Student!";
-
-
-        // Send email for Old Tutor (if had)
-        if ($oldTutor) {
+        // Send email to the old tutor (if exists)
+        if ($oldTutor && !empty($oldTutor['email'])) {
             $oldTutorSubject = "Notification: Student Reassignment";
             $oldTutorBody = "Dear {$oldTutor['first_name']},<br><br>";
-            $oldTutorBody .= "We wish to notify you that your student, <b>{$student['first_name']} {$student['last_name']}</b>, ";
-            $oldTutorBody .= "has been reassigned to a new tutor.<br><br>";
-            $oldTutorBody .= "Thank you for your continued support. If you have any questions regarding this change, please do not hesitate to contact us.<br><br>";
-            $oldTutorBody .= "Best regards,<br>eTutoring System Team";
-
-            if (!MailHelper::sendMail($oldTutor['email'], $oldTutorSubject, $oldTutorBody)) {
-                die("Failed to send email to old tutor: {$oldTutor['email']}");
-            }
-            echo " Email sent successfully to Old Tutor!";
+            $oldTutorBody .= "Your student, <b>{$student['first_name']} {$student['last_name']}</b>, ";
+            $oldTutorBody .= "has been reassigned to another tutor.<br><br>";
+            MailHelper::sendMail($oldTutor['email'], $oldTutorSubject, $oldTutorBody);
         }
 
-
-        // Send email for New Tutor
+        // Send email to the new tutor
         $newTutorSubject = "Notification: New Student Assignment";
         $newTutorBody = "Dear {$newTutor['first_name']},<br><br>";
-        $newTutorBody .= "We are pleased to inform you that you have been assigned a new student: <b>{$student['first_name']} {$student['last_name']}</b>.<br><br>";
-        $newTutorBody .= "For your reference, you may contact the student via email if necessary. We trust in your expertise and commitment to support your student's academic journey.<br><br>";
-        $newTutorBody .= "If you require further assistance, please contact our support team.<br><br>";
-        $newTutorBody .= "Best regards,<br>eTutoring System Team";
-
-        if (!MailHelper::sendMail($newTutor['email'], $newTutorSubject, $newTutorBody)) {
-            die(" Failed to send email to new tutor: {$newTutor['email']}");
-        }
-        echo " Email sent successfully to New Tutor!";
+        $newTutorBody .= "You have been assigned a new student: <b>{$student['first_name']} {$student['last_name']}</b>.<br><br>";
+        MailHelper::sendMail($newTutor['email'], $newTutorSubject, $newTutorBody);
 
         return true;
     }
