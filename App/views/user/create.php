@@ -1,7 +1,7 @@
-<?php
-$title = "Add New User";
-ob_start();
-?>
+    <?php
+    $title = "Add New User";
+    ob_start();
+    ?>
 
     <div class="container mt-4">
         <div class="card mx-auto shadow border-0" style="max-width: 600px;">

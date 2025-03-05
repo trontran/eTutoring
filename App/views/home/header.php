@@ -71,6 +71,41 @@ $currentPage = $_GET['url'] ?? 'home/index';
                         </a>
                     </li>
 
+                    <!-- Blog -->
+                    <li class="nav-item">
+                        <a class="nav-link <?= $currentPage === 'blog/index' ? 'active' : '' ?>" href="?url=blog/index">
+                            <i class="bi bi-journal-text"></i> Blog
+                        </a>
+                    </li>
+
+                    <!-- Meetings -->
+                    <?php if ($isLoggedIn): ?>
+                        <!-- Dropdown menu cho Meetings -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle <?= strpos($currentPage, 'meeting') === 0 ? 'active' : '' ?>" href="#" id="meetingsDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-calendar-check-fill"></i> Meetings
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item" href="?url=meeting/list">
+                                        <i class="bi bi-calendar"></i> My Meetings
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="?url=meeting/create">
+                                        <i class="bi bi-calendar-plus"></i> Schedule Meeting
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" href="?url=meeting/completed">
+                                        <i class="bi bi-journal-check"></i> Completed Meetings
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    <?php endif; ?>
+
                     <?php if ($isLoggedIn): ?>
                         <!-- Messages -->
                         <li class="nav-item">

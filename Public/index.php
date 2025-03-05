@@ -2,10 +2,10 @@
 
 use App\Controllers\LoginController;
 use App\Controllers\MessageController;
-
 session_start();
 
 // Require core, controllers, and models
+require_once '../app/models/Meeting.php';
 require_once '../app/core/Controller.php';
 require_once '../app/core/Database.php';
 require_once '../app/controllers/HomeController.php';
@@ -17,6 +17,8 @@ require_once '../app/models/PersonalTutor.php';
 require_once '../app/controllers/MessageController.php';
 require_once '../app/models/Message.php';
 require_once '../app/models/Notification.php';
+require_once '../vendor/autoload.php';
+
 
 // Lấy URL từ query string, ví dụ: ?url=user/index
 $url = isset($_GET['url']) ? $_GET['url'] : '';
@@ -125,6 +127,65 @@ if ($url === '' || $url === 'home/index') {
 } elseif ($url === 'message/getUnreadCount') {
     $controller = new MessageController();
     $controller->getUnreadCount();
+    // Route for displaying the meeting scheduling form
+} elseif ($url === 'meeting/create') {
+    require_once '../app/controllers/MeetingController.php';
+    $controller = new MeetingController();
+    $controller->create();
+
+// Route for processing the meeting scheduling form (POST)
+} elseif ($url === 'meeting/store') {
+    require_once '../app/controllers/MeetingController.php';
+    $controller = new MeetingController();
+    $controller->store();
+
+// Route for listing all meetings
+} elseif ($url === 'meeting/list') {
+    require_once '../app/controllers/MeetingController.php';
+    $controller = new MeetingController();
+    $controller->list();
+
+// Route for viewing meeting details
+} elseif ($url === 'meeting/view') {
+    require_once '../app/controllers/MeetingController.php';
+    $controller = new MeetingController();
+    $controller->viewDetails(); // Thay đổi từ view() thành viewDetails()
+
+// Route for updating meeting status (confirm/cancel)
+} elseif ($url === 'meeting/updateStatus') {
+    require_once '../app/controllers/MeetingController.php';
+    $controller = new MeetingController();
+    $controller->updateStatus();
+// Route for generating a meeting link
+} elseif ($url === 'meeting/generateLink') {
+    require_once '../app/controllers/MeetingController.php';
+    $controller = new MeetingController();
+    $controller->generateLink();
+
+// Route for adding a meeting link manually
+} elseif ($url === 'meeting/addMeetingLink') {
+    require_once '../app/controllers/MeetingController.php';
+    $controller = new MeetingController();
+    $controller->addMeetingLink();
+
+// Route for displaying the record outcome form
+} elseif ($url === 'meeting/recordOutcome') {
+    require_once '../app/controllers/MeetingController.php';
+    $controller = new MeetingController();
+    $controller->recordOutcome();
+
+// Route for saving meeting outcomes
+} elseif ($url === 'meeting/saveOutcome') {
+    require_once '../app/controllers/MeetingController.php';
+    $controller = new MeetingController();
+    $controller->saveOutcome();
+
+// Route for viewing completed meetings
+} elseif ($url === 'meeting/completed') {
+    require_once '../app/controllers/MeetingController.php';
+    $controller = new MeetingController();
+    $controller->completed();
+
 } else {
     echo "404 Not Found or Route not handled yet.";
 }
