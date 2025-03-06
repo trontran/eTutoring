@@ -45,7 +45,7 @@ class BlogParticipant
      * @param int $studentId Student ID
      * @return bool True if successful, false otherwise
      */
-    public function removeParticipant($blogId, $studentId)
+    public function removeParticipant(int $blogId, int $studentId)
     {
         $query = "DELETE FROM BlogParticipants 
                   WHERE blog_id = :blog_id AND student_id = :student_id";
@@ -64,7 +64,7 @@ class BlogParticipant
      * @param int $studentId Student ID
      * @return bool True if participant, false otherwise
      */
-    public function isParticipant($blogId, $studentId)
+    public function isParticipant(int $blogId, int $studentId)
     {
         $query = "SELECT COUNT(*) FROM BlogParticipants 
                   WHERE blog_id = :blog_id AND student_id = :student_id";
@@ -83,7 +83,7 @@ class BlogParticipant
      * @param int $blogId Blog ID
      * @return array Participants with user details
      */
-    public function getParticipantsByBlogId($blogId)
+    public function getParticipantsByBlogId(int $blogId)
     {
         $query = "SELECT bp.*, 
                     u.first_name, u.last_name, u.email
@@ -123,7 +123,7 @@ class BlogParticipant
      * @param int $blogId Blog ID
      * @return int Number of participants
      */
-    public function countParticipants($blogId)
+    public function countParticipants(int $blogId)
     {
         $query = "SELECT COUNT(*) FROM BlogParticipants 
                   WHERE blog_id = :blog_id";

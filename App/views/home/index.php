@@ -140,49 +140,49 @@ if ($isTutor && isset($_SESSION['user']['user_id'])) {
     </section>
 <?php endif; ?>
 
-    <!-- Section: Tutor with Tutees -->
-<?php if ($isTutor && !empty($tutees)): ?>
-    <section class="mb-5">
-        <div class="card shadow border-0">
-            <div class="card-header bg-success text-white text-center">
-                <h5 class="mb-0">
-                    <i class="bi bi-people-fill"></i> My Tutees
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light">
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <?php foreach ($tutees as $tutee): ?>
-                            <tr>
-                                <td><?= htmlspecialchars($tutee['first_name'] . " " . $tutee['last_name']) ?></td>
-                                <td><?= htmlspecialchars($tutee['email']) ?></td>
-                                <td>
-                                    <a href="mailto:<?= htmlspecialchars($tutee['email']) ?>"
-                                       class="btn btn-sm btn-primary">
-                                        <i class="bi bi-envelope-fill"></i> Contact
-                                    </a>
-                                    <a href="?url=user/detail&id=<?= htmlspecialchars($tutee['user_id']) ?>"
-                                       class="btn btn-sm btn-secondary">
-                                        <i class="bi bi-person-fill"></i> View Profile
-                                    </a>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </section>
-<?php endif; ?>
+<!--    -- Section: Tutor with Tutees -->
+<?php //if ($isTutor && !empty($tutees)): ?>
+<!--    <section class="mb-5">-->
+<!--        <div class="card shadow border-0">-->
+<!--            <div class="card-header bg-success text-white text-center">-->
+<!--                <h5 class="mb-0">-->
+<!--                    <i class="bi bi-people-fill"></i> My Tutees-->
+<!--                </h5>-->
+<!--            </div>-->
+<!--            <div class="card-body">-->
+<!--                <div class="table-responsive">-->
+<!--                    <table class="table table-hover align-middle">-->
+<!--                        <thead class="table-light">-->
+<!--                        <tr>-->
+<!--                            <th>Name</th>-->
+<!--                            <th>Email</th>-->
+<!--                            <th>Actions</th>-->
+<!--                        </tr>-->
+<!--                        </thead>-->
+<!--                        <tbody>-->
+<!--                        --><?php //foreach ($tutees as $tutee): ?>
+<!--                            <tr>-->
+<!--                                <td>--><?php //= htmlspecialchars($tutee['first_name'] . " " . $tutee['last_name']) ?><!--</td>-->
+<!--                                <td>--><?php //= htmlspecialchars($tutee['email']) ?><!--</td>-->
+<!--                                <td>-->
+<!--                                    <a href="mailto:--><?php //= htmlspecialchars($tutee['email']) ?><!--"-->
+<!--                                       class="btn btn-sm btn-primary">-->
+<!--                                        <i class="bi bi-envelope-fill"></i> Contact-->
+<!--                                    </a>-->
+<!--                                    <a href="?url=user/detail&id=--><?php //= htmlspecialchars($tutee['user_id']) ?><!--"-->
+<!--                                       class="btn btn-sm btn-secondary">-->
+<!--                                        <i class="bi bi-person-fill"></i> View Profile-->
+<!--                                    </a>-->
+<!--                                </td>-->
+<!--                            </tr>-->
+<!--                        --><?php //endforeach; ?>
+<!--                        </tbody>-->
+<!--                    </table>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </section>-->
+<?php //endif; ?>
 
     <!-- Section: Info / Announcements or Demo Stats -->
     <!-- Section: Student/Staff Testimonials -->

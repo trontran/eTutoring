@@ -76,6 +76,13 @@ ob_start();
                                            onclick="return confirm('Are you sure you want to delete this user?');">
                                             <i class="bi bi-trash"></i> Delete
                                         </a>
+                                        <!-- Dashboard button (only for students) -->
+                                        <?php if ($user['role'] === 'student'): ?>
+                                            <a href="?url=dashboard/student&id=<?= $user['user_id'] ?>"
+                                               class="btn btn-primary btn-sm">
+                                                <i class="bi bi-speedometer2"></i> Dashboard
+                                            </a>
+                                        <?php endif; ?>
                                         <!-- Reallocate button (chỉ hiển thị nếu user là student) -->
                                         <?php if ($isAdmin && $user['role'] === 'student'): ?>
                                             <a href="?url=user/reallocate&id=<?= $user['user_id'] ?>"

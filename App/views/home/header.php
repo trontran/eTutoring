@@ -84,7 +84,23 @@ $currentPage = $_GET['url'] ?? 'home/index';
                             <i class="bi bi-journal-text"></i> Blog
                         </a>
                     </li>
-
+                    <!-- Dashboard -->
+                    <?php if ($isLoggedIn): ?>
+                        <li class="nav-item">
+                            <a class="nav-link <?= strpos($currentPage, 'dashboard') === 0 ? 'active' : '' ?>"
+                               href="?url=<?php
+                               if ($isAdmin) {
+                                   echo 'dashboard/index';
+                               } elseif ($isTutor) {
+                                   echo 'dashboard/tutor';
+                               } else {
+                                   echo 'dashboard/student';
+                               }
+                               ?>">
+                                <i class="bi bi-speedometer2"></i> Dashboard
+                            </a>
+                        </li>
+                    <?php endif; ?>
                     <!-- Meetings -->
                     <?php if ($isLoggedIn): ?>
                         <!-- Dropdown menu cho Meetings -->

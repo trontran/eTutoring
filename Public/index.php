@@ -25,7 +25,10 @@ require_once '../app/models/DocumentComment.php';  // New model
 require_once '../app/models/Blog.php';  // New model
 require_once '../app/models/BlogComment.php';  // New model
 require_once '../app/models/BlogParticipant.php';  // New model
+require_once '../app/models/Dashboard.php';
+require_once '../app/controllers/DashboardController.php';
 require_once '../vendor/autoload.php';
+
 
 
 
@@ -257,6 +260,26 @@ $controller->viewDetails();
 } elseif ($url === 'blog/delete') {
     $controller = new BlogController();
     $controller->delete();
+
+    // Dashboard routes
+} elseif ($url === 'dashboard/index') {
+    $controller = new DashboardController();
+    $controller->index();
+} elseif ($url === 'dashboard/student') {
+    $controller = new DashboardController();
+    $controller->student();
+} elseif ($url === 'dashboard/tutor') {
+    $controller = new DashboardController();
+    $controller->tutor();
+} elseif ($url === 'dashboard/studentsWithoutTutor') {
+    $controller = new DashboardController();
+    $controller->studentsWithoutTutor();
+} elseif ($url === 'dashboard/studentsWithoutInteraction') {
+    $controller = new DashboardController();
+    $controller->studentsWithoutInteraction();
+} elseif ($url === 'dashboard/tutorActivity') {
+    $controller = new DashboardController();
+    $controller->tutorActivity();
 } else {
     echo "404 Not Found or Route not handled yet.";
 }
