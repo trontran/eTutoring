@@ -152,6 +152,65 @@ $currentPage = $_GET['url'] ?? 'home/index';
                         </li>
                     <?php endif; ?>
                 </ul>
+                <!-- Thêm đoạn này vào header.php để hiển thị thông báo -->
+
+                <!-- Thông báo / Notifications -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-bell-fill"></i>
+                        <?php if ($unreadMessages > 0): ?>
+                            <span class="badge bg-danger rounded-pill">
+                <?= $unreadMessages ?>
+            </span>
+                        <?php endif; ?>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end notifications-dropdown" aria-labelledby="notificationsDropdown" style="width: 320px; max-height: 400px; overflow-y: auto;">
+                        <li>
+                            <h6 class="dropdown-header">Notifications</h6>
+                        </li>
+
+                        <li><hr class="dropdown-divider"></li>
+
+                        <?php
+                        $notifications = $notificationModel->getUnreadNotifications($userId);
+                        if (empty($notifications)):
+                            ?>
+                            <li><div class="dropdown-item text-muted">No new notifications</div></li>
+                        <?php else: ?>
+                            <?php foreach ($notifications as $notification): ?>
+                                <li>
+                                    <a class="dropdown-item notification-item" href="?url=notifications/markAsRead&id=<?= $notification['notification_id'] ?>">
+                                        <div class="d-flex align-items-start">
+                                            <div class="notification-icon me-3">
+                                                <?php if (strpos($notification['notification_text'], 'meeting') !== false): ?>
+                                                    <i class="bi bi-calendar-check text-primary"></i>
+                                                <?php elseif (strpos($notification['notification_text'], 'message') !== false): ?>
+                                                    <i class="bi bi-chat-dots text-success"></i>
+                                                <?php else: ?>
+                                                    <i class="bi bi-info-circle text-info"></i>
+                                                <?php endif; ?>
+                                            </div>
+                                            <div class="notification-content">
+                                                <div class="small text-muted">
+                                                    <?= date('M d, g:i A', strtotime($notification['created_at'])) ?>
+                                                </div>
+                                                <div><?= htmlspecialchars($notification['notification_text']) ?></div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                            <?php endforeach; ?>
+
+                            <li><hr class="dropdown-divider"></li>
+
+                            <li>
+                                <a class="dropdown-item text-center" href="?url=notifications/markAllAsRead">
+                                    Mark all as read
+                                </a>
+                            </li>
+                        <?php endif; ?>
+                    </ul>
+                </li>
             </div>
         </div>
     </nav>

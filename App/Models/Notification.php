@@ -48,4 +48,37 @@ class Notification
         $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
         return $stmt->execute();
     }
+
+    //
+
+    /**
+     * Get all notifications for a user
+     *
+     * @param int $userId User ID
+     * @return array All notifications for the user
+     */
+    public function getAllNotificationsForUser($userId): array
+    {
+        $stmt = $this->db->prepare("SELECT * FROM Notifications 
+                                WHERE user_id = :userId 
+                                ORDER BY created_at DESC");
+        $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Mark a specific notification as read
+     *
+     * @param int $notificationId Notification ID
+     * @return bool True if successful, false otherwise
+     */
+    public function markNotificationAsRead($notificationId): bool
+    {
+        $stmt = $this->db->prepare("UPDATE Notifications 
+                                SET status = 'read' 
+                                WHERE notification_id = :notificationId");
+        $stmt->bindParam(':notificationId', $notificationId, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
 }

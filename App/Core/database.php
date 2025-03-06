@@ -11,6 +11,7 @@ class Database {
     private function __construct() {
         try {
             $this->pdo = new PDO('mysql:host=localhost;dbname=eTutoringSystem', 'root', 'root');
+//            $this->pdo = new PDO('mysql:host=localhost;dbname=eTutoringSystem;unix_socket=/Applications/MAMP/tmp/mysql/mysql.sock', 'root', 'root');
             $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (PDOException $e) {
             die('Database connection error: ' . $e->getMessage());

@@ -2,6 +2,16 @@
 $title = "Meeting Details";
 ob_start();
 
+// Xác định các biến quan trọng
+$currentTime = time();
+$meetingTime = strtotime($meeting['meeting_date']);
+$isPastMeeting = ($meetingTime < $currentTime);
+$isCompleted = isset($meeting['is_completed']) && $meeting['is_completed'] == 1;
+
+// QUAN TRỌNG: Định nghĩa đúng biến $isTutor
+$userRole = $_SESSION['user']['role'] ?? 'unknown';
+$isTutor = ($userRole === 'tutor');
+
 // Get status class and icon
 $statusClass = 'bg-warning text-dark';
 $statusIcon = 'bi-hourglass-split';
@@ -14,13 +24,20 @@ if ($meeting['status'] === 'confirmed') {
     $statusIcon = 'bi-x-circle';
 }
 
-// Check if meeting is in the past
-$isPastMeeting = strtotime($meeting['meeting_date']) < time();
-$isCompleted = isset($meeting['is_completed']) && $meeting['is_completed'] == 1;
-
-// Check if current user is the tutor (for action buttons)
-$isTutor = $userRole === 'tutor';
-?>
+// Debug information if requested
+if (isset($_GET['debug'])): ?>
+    <div class="alert alert-secondary small mt-2 mb-2">
+        <strong>DEBUG INFO:</strong><br>
+        User ID: <?= $_SESSION['user']['user_id'] ?><br>
+        User Role: <?= $userRole ?><br>
+        Is Tutor: <?= ($isTutor ? 'Yes' : 'No') ?><br>
+        Meeting Status: <?= $meeting['status'] ?><br>
+        Meeting Date: <?= date('Y-m-d H:i:s', $meetingTime) ?><br>
+        Current Time: <?= date('Y-m-d H:i:s', $currentTime) ?><br>
+        Is Past Meeting: <?= ($isPastMeeting ? 'Yes' : 'No') ?><br>
+        Is Completed: <?= ($isCompleted ? 'Yes' : 'No') ?>
+    </div>
+<?php endif; ?>
 
     <div class="container py-4">
         <?php if (isset($_SESSION['success'])): ?>
@@ -252,12 +269,12 @@ $isTutor = $userRole === 'tutor';
                             </a>
 
                             <div>
-                                <?php if ($meeting['status'] === 'confirmed'): ?>
+                                <?php if ($meeting['status'] === 'confirmed' && !$isCompleted && $isPastMeeting): ?>
                                     <!-- Option to record meeting outcomes -->
                                     <a href="?url=meeting/recordOutcome&id=<?= $meeting['meeting_id'] ?>" class="btn btn-success">
                                         <i class="bi bi-journal-check"></i> Record Outcomes
                                     </a>
-                                <?php elseif ($meeting['status'] === 'pending' && !$isPastMeeting): ?>
+                                <?php elseif ($meeting['status'] === 'pending'): ?>
                                     <?php if ($isTutor): ?>
                                         <!-- Tutors can confirm or cancel -->
                                         <form action="?url=meeting/updateStatus" method="POST" class="d-inline">

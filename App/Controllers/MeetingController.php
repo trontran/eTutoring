@@ -1,11 +1,11 @@
 <?php
 
-
 use App\Core\Controller;
 use App\Models\Meeting;
 use App\Models\User;
 use App\Models\PersonalTutor;
 use App\Models\Notification;
+require_once __DIR__ . '/../Helpers/MailHelper.php';
 
 class MeetingController extends Controller
 {
@@ -16,15 +16,16 @@ class MeetingController extends Controller
 
     public function __construct()
     {
-        $this->meetingModel = new Meeting();
-        $this->userModel = new User();
-        $this->personalTutorModel = new PersonalTutor();
-        $this->notificationModel = new Notification();
-
         // Ensure session is started
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
+
+        // Initialize models
+        $this->meetingModel = new Meeting();
+        $this->userModel = new User();
+        $this->personalTutorModel = new PersonalTutor();
+        $this->notificationModel = new Notification();
     }
 
     /**
@@ -47,7 +48,8 @@ class MeetingController extends Controller
             $tutor = $this->personalTutorModel->getTutorDetails($userId);
             $otherParty = $tutor;
             $otherPartyRole = 'tutor';
-        } // If tutor, get specified student or show student selection
+        }
+        // If tutor, get specified student or show student selection
         elseif ($userRole === 'tutor') {
             $studentId = $_GET['student_id'] ?? null;
 
@@ -125,12 +127,12 @@ class MeetingController extends Controller
         $studentId = ($userRole === 'student') ? $userId : $otherPartyId;
         $tutorId = ($userRole === 'tutor') ? $userId : $otherPartyId;
 
-//        // Check if the time slot is available
-//        if (!$this->meetingModel->isTimeSlotAvailable($tutorId, $meetingDateTime)) {
-//            $_SESSION['error'] = "The selected time slot is not available. Please choose another time.";
-//            header("Location: ?url=meeting/create");
-//            exit;
-//        }
+        // Check if the time slot is available
+        if (!$this->meetingModel->isTimeSlotAvailable($tutorId, $meetingDateTime)) {
+            $_SESSION['error'] = "The selected time slot is not available. Please choose another time.";
+            header("Location: ?url=meeting/create");
+            exit;
+        }
 
         // Prepare meeting data
         $meetingData = [
@@ -139,21 +141,45 @@ class MeetingController extends Controller
             'meeting_date' => $meetingDateTime,
             'meeting_type' => $meetingType,
             'meeting_notes' => $meetingNotes,
-            'status' => 'pending'
+            'status' => ($userRole === 'tutor') ? 'confirmed' : 'pending'
         ];
 
         // Create the meeting
         $meetingId = $this->meetingModel->createMeeting($meetingData);
 
         if ($meetingId) {
+            // If meeting is already confirmed (created by tutor), try to schedule reminders
+            if ($meetingData['status'] === 'confirmed') {
+                try {
+                    $this->scheduleReminders(
+                        $meetingId,
+                        $studentId,
+                        $tutorId,
+                        $meetingDateTime
+                    );
+                } catch (\Exception $e) {
+                    // Log error but continue processing
+                    error_log("Error scheduling reminders: " . $e->getMessage());
+                }
+            }
+
             // Create notification for the other party
             $notificationReceiverId = ($userRole === 'student') ? $tutorId : $studentId;
             $senderName = $_SESSION['user']['first_name'] . ' ' . $_SESSION['user']['last_name'];
-            $notificationText = "$senderName has requested a meeting on " . date('F j, Y \a\t g:i A', strtotime($meetingDateTime));
+
+            if ($userRole === 'student') {
+                $notificationText = "$senderName has requested a meeting on " . date('F j, Y \a\t g:i A', strtotime($meetingDateTime));
+            } else {
+                $notificationText = "$senderName has scheduled a meeting with you on " . date('F j, Y \a\t g:i A', strtotime($meetingDateTime));
+            }
 
             $this->notificationModel->createNotification($notificationReceiverId, $notificationText);
 
-            $_SESSION['success'] = "Meeting request has been sent successfully.";
+            // Send email notification
+            $meeting = $this->meetingModel->getMeetingById($meetingId);
+            $this->sendMeetingEmail($meeting, $notificationReceiverId, 'created');
+
+            $_SESSION['success'] = "Meeting has been " . ($userRole === 'tutor' ? "scheduled" : "requested") . " successfully.";
             header("Location: ?url=meeting/list");
         } else {
             $_SESSION['error'] = "Failed to create meeting. Please try again.";
@@ -210,9 +236,8 @@ class MeetingController extends Controller
     /**
      * Show details of a specific meeting
      */
-    public function viewDetails() // Đổi tên từ view() thành viewDetails()
+    public function viewDetails()
     {
-        // Code bên trong vẫn giữ nguyên
         // Check if user is logged in
         if (!isset($_SESSION['user'])) {
             header("Location: ?url=login");
@@ -242,13 +267,9 @@ class MeetingController extends Controller
             exit;
         }
 
-        $isPastMeeting = strtotime($meeting['meeting_date']) < time();
-        $isCompleted = isset($meeting['is_completed']) && $meeting['is_completed'] == 1;
         $data = [
             'meeting' => $meeting,
-            'userRole' => $_SESSION['user']['role'],
-            'isPastMeeting' => $isPastMeeting,
-            'isCompleted' => $isCompleted
+            'userRole' => $_SESSION['user']['role']
         ];
 
         $this->view('meeting/view', $data);
@@ -304,6 +325,16 @@ class MeetingController extends Controller
 
         // Update meeting status
         if ($this->meetingModel->updateMeetingStatus($meetingId, $newStatus)) {
+            // If meeting is being confirmed, try to schedule reminders
+            if ($newStatus === 'confirmed') {
+                try {
+                    $this->updateReminders($meetingId);
+                } catch (\Exception $e) {
+                    // Log error but continue processing
+                    error_log("Error updating reminders: " . $e->getMessage());
+                }
+            }
+
             // Create notification for the other party
             $notificationReceiverId = ($meeting['student_id'] == $userId) ? $meeting['tutor_id'] : $meeting['student_id'];
             $senderName = $_SESSION['user']['first_name'] . ' ' . $_SESSION['user']['last_name'];
@@ -316,6 +347,10 @@ class MeetingController extends Controller
 
             $this->notificationModel->createNotification($notificationReceiverId, $notificationText);
 
+            // Send email notification
+            $updatedMeeting = $this->meetingModel->getMeetingById($meetingId);
+            $this->sendMeetingEmail($updatedMeeting, $notificationReceiverId, $newStatus);
+
             $_SESSION['success'] = "Meeting has been " . ($newStatus === 'confirmed' ? 'confirmed' : 'cancelled') . " successfully.";
         } else {
             $_SESSION['error'] = "Failed to update meeting status. Please try again.";
@@ -326,30 +361,206 @@ class MeetingController extends Controller
     }
 
     /**
-     * Google Calendar integration (placeholder for future implementation)
+     * Process and schedule reminders for a meeting
      *
      * @param int $meetingId Meeting ID
-     * @return bool Success status
+     * @param int $studentId Student ID
+     * @param int $tutorId Tutor ID
+     * @param string $meetingDate Meeting date and time
      */
-    private function syncWithGoogleCalendar($meetingId)
+    private function scheduleReminders($meetingId, $studentId, $tutorId, $meetingDate)
     {
-        // This is a placeholder for future Google Calendar integration
-        // Will be implemented when Google Calendar API is set up
+        try {
+            require_once '../app/models/MeetingReminder.php';
+            $reminderModel = new \App\Models\MeetingReminder();
 
-        // Get meeting details
+            // Schedule reminders for the meeting
+            $reminderModel->scheduleReminders($meetingId, $studentId, $tutorId, $meetingDate);
+            return true;
+        } catch (\Exception $e) {
+            // Log error and continue processing
+            error_log("Error scheduling reminders: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Update or reschedule reminders when a meeting is updated
+     *
+     * @param int $meetingId Meeting ID
+     */
+    private function updateReminders($meetingId)
+    {
+        try {
+            // Get meeting details
+            $meeting = $this->meetingModel->getMeetingById($meetingId);
+
+            if (!$meeting) {
+                return false;
+            }
+
+            require_once '../app/models/MeetingReminder.php';
+            $reminderModel = new \App\Models\MeetingReminder();
+
+            // Delete existing reminders for this meeting
+            $reminderModel->deleteRemindersByMeetingId($meetingId);
+
+            // If meeting is confirmed, schedule new reminders
+            if ($meeting['status'] === 'confirmed') {
+                $this->scheduleReminders(
+                    $meetingId,
+                    $meeting['student_id'],
+                    $meeting['tutor_id'],
+                    $meeting['meeting_date']
+                );
+            }
+
+            return true;
+        } catch (\Exception $e) {
+            // Log error and continue processing
+            error_log("Error updating reminders: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Show form to record meeting outcomes
+     */
+    public function recordOutcome()
+    {
+        // Check if user is logged in
+        if (!isset($_SESSION['user'])) {
+            header("Location: ?url=login");
+            exit;
+        }
+
+        $meetingId = $_GET['id'] ?? null;
+
+        if (!$meetingId) {
+            header("Location: ?url=meeting/list");
+            exit;
+        }
+
         $meeting = $this->meetingModel->getMeetingById($meetingId);
 
         if (!$meeting) {
-            return false;
+            $_SESSION['error'] = "Meeting not found.";
+            header("Location: ?url=meeting/list");
+            exit;
         }
 
-        // In the future, this function will:
-        // 1. Connect to Google Calendar API
-        // 2. Create/update/delete event based on meeting status
-        // 3. Store the Google event ID in the database
+        // Check if user is part of this meeting
+        $userId = $_SESSION['user']['user_id'];
+        if ($meeting['student_id'] != $userId && $meeting['tutor_id'] != $userId) {
+            $_SESSION['error'] = "You don't have permission to update this meeting.";
+            header("Location: ?url=meeting/list");
+            exit;
+        }
 
-        return true;
+        // Check if meeting can be marked as completed
+        // Allow for both students and tutors, but meeting must be confirmed and past
+        if ($meeting['status'] !== 'confirmed') {
+            $_SESSION['error'] = "Only confirmed meetings can be marked as completed.";
+            header("Location: ?url=meeting/view&id=" . $meetingId);
+            exit;
+        }
+
+        // Check if meeting is in the past
+        $isPastMeeting = strtotime($meeting['meeting_date']) < time();
+        if (!$isPastMeeting) {
+            $_SESSION['error'] = "You can only record outcomes after the meeting has taken place.";
+            header("Location: ?url=meeting/view&id=" . $meetingId);
+            exit;
+        }
+
+        // Check if already completed
+        $isCompleted = isset($meeting['is_completed']) && $meeting['is_completed'] == 1;
+        if ($isCompleted) {
+            $_SESSION['error'] = "This meeting has already been marked as completed.";
+            header("Location: ?url=meeting/view&id=" . $meetingId);
+            exit;
+        }
+
+        $data = [
+            'meeting' => $meeting,
+            'userRole' => $_SESSION['user']['role'],
+            'userId' => $userId
+        ];
+
+        $this->view('meeting/record_outcome', $data);
     }
+
+    /**
+     * Save meeting outcomes
+     */
+    public function saveOutcome()
+    {
+        // Check if user is logged in
+        if (!isset($_SESSION['user'])) {
+            header("Location: ?url=login");
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header("Location: ?url=meeting/list");
+            exit;
+        }
+
+        $meetingId = $_POST['meeting_id'] ?? null;
+        $meetingOutcome = $_POST['meeting_outcome'] ?? null;
+
+        if (!$meetingId || !$meetingOutcome) {
+            $_SESSION['error'] = "Meeting outcome cannot be empty.";
+            header("Location: ?url=meeting/recordOutcome&id=" . $meetingId);
+            exit;
+        }
+
+        $meeting = $this->meetingModel->getMeetingById($meetingId);
+
+        if (!$meeting) {
+            $_SESSION['error'] = "Meeting not found.";
+            header("Location: ?url=meeting/list");
+            exit;
+        }
+
+        // Check if user is part of this meeting
+        $userId = $_SESSION['user']['user_id'];
+        if ($meeting['student_id'] != $userId && $meeting['tutor_id'] != $userId) {
+            $_SESSION['error'] = "You don't have permission to update this meeting.";
+            header("Location: ?url=meeting/list");
+            exit;
+        }
+
+        // Save meeting outcome
+        if ($this->meetingModel->completeMeeting($meetingId, $meetingOutcome)) {
+            // Create notification for the other party
+            $notificationReceiverId = ($meeting['student_id'] == $userId) ? $meeting['tutor_id'] : $meeting['student_id'];
+            $senderName = $_SESSION['user']['first_name'] . ' ' . $_SESSION['user']['last_name'];
+            $senderRole = $_SESSION['user']['role'];
+
+            // Create role-specific notification text
+            if ($senderRole === 'student') {
+                $notificationText = "Student $senderName has recorded outcomes for your meeting on " . date('F j, Y \a\t g:i A', strtotime($meeting['meeting_date']));
+            } else {
+                $notificationText = "Tutor $senderName has recorded outcomes for your meeting on " . date('F j, Y \a\t g:i A', strtotime($meeting['meeting_date']));
+            }
+
+            $this->notificationModel->createNotification($notificationReceiverId, $notificationText);
+
+            // Send email notification with meeting outcome
+            $updatedMeeting = $this->meetingModel->getMeetingById($meetingId);
+            $additionalInfo = "The following outcomes were recorded:<br><blockquote>" . nl2br(htmlspecialchars($meetingOutcome)) . "</blockquote>";
+            $this->sendMeetingEmail($updatedMeeting, $notificationReceiverId, 'completed', $additionalInfo);
+
+            $_SESSION['success'] = "Meeting has been marked as completed and outcomes have been recorded.";
+            header("Location: ?url=meeting/view&id=" . $meetingId);
+        } else {
+            $_SESSION['error'] = "Failed to record meeting outcomes. Please try again.";
+            header("Location: ?url=meeting/recordOutcome&id=" . $meetingId);
+        }
+        exit;
+    }
+
     /**
      * Add meeting link for virtual meetings
      */
@@ -393,6 +604,19 @@ class MeetingController extends Controller
 
         // Update meeting link
         if ($this->meetingModel->updateMeetingLink($meetingId, $meetingLink)) {
+            // Notify the other party
+            $notificationReceiverId = ($meeting['student_id'] == $userId) ? $meeting['tutor_id'] : $meeting['student_id'];
+            $senderName = $_SESSION['user']['first_name'] . ' ' . $_SESSION['user']['last_name'];
+
+            $notificationText = "$senderName has added a link to your meeting scheduled for " . date('F j, Y \a\t g:i A', strtotime($meeting['meeting_date']));
+            $this->notificationModel->createNotification($notificationReceiverId, $notificationText);
+
+            // Send email notification with the meeting link
+            $updatedMeeting = $this->meetingModel->getMeetingById($meetingId);
+            $additionalInfo = "A meeting link has been added. You can join the meeting using this link:<br><a href='{$meetingLink}'>{$meetingLink}</a>";
+            $action = $meeting['status'] === 'confirmed' ? 'confirmed' : 'created';
+            $this->sendMeetingEmail($updatedMeeting, $notificationReceiverId, $action, $additionalInfo);
+
             $_SESSION['success'] = "Meeting link has been added successfully.";
         } else {
             $_SESSION['error'] = "Failed to add meeting link. Please try again.";
@@ -459,114 +683,6 @@ class MeetingController extends Controller
     }
 
     /**
-     * Show form to record meeting outcomes
-     */
-    public function recordOutcome()
-    {
-        // Check if user is logged in
-        if (!isset($_SESSION['user'])) {
-            header("Location: ?url=login");
-            exit;
-        }
-
-        $meetingId = $_GET['id'] ?? null;
-
-        if (!$meetingId) {
-            header("Location: ?url=meeting/list");
-            exit;
-        }
-
-        $meeting = $this->meetingModel->getMeetingById($meetingId);
-
-        if (!$meeting) {
-            $_SESSION['error'] = "Meeting not found.";
-            header("Location: ?url=meeting/list");
-            exit;
-        }
-
-        // Check if user is part of this meeting
-        $userId = $_SESSION['user']['user_id'];
-        if ($meeting['student_id'] != $userId && $meeting['tutor_id'] != $userId) {
-            $_SESSION['error'] = "You don't have permission to update this meeting.";
-            header("Location: ?url=meeting/list");
-            exit;
-        }
-
-        // Check if meeting can be marked as completed
-        if ($meeting['status'] !== 'confirmed') {
-            $_SESSION['error'] = "Only confirmed meetings can be marked as completed.";
-            header("Location: ?url=meeting/view&id=" . $meetingId);
-            exit;
-        }
-
-        $data = [
-            'meeting' => $meeting,
-            'userRole' => $_SESSION['user']['role']
-        ];
-
-        $this->view('meeting/record_outcome', $data);
-    }
-
-    /**
-     * Save meeting outcomes
-     */
-    public function saveOutcome()
-    {
-        // Check if user is logged in
-        if (!isset($_SESSION['user'])) {
-            header("Location: ?url=login");
-            exit;
-        }
-
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header("Location: ?url=meeting/list");
-            exit;
-        }
-
-        $meetingId = $_POST['meeting_id'] ?? null;
-        $meetingOutcome = $_POST['meeting_outcome'] ?? null;
-
-        if (!$meetingId || !$meetingOutcome) {
-            $_SESSION['error'] = "Meeting outcome cannot be empty.";
-            header("Location: ?url=meeting/recordOutcome&id=" . $meetingId);
-            exit;
-        }
-
-        $meeting = $this->meetingModel->getMeetingById($meetingId);
-
-        if (!$meeting) {
-            $_SESSION['error'] = "Meeting not found.";
-            header("Location: ?url=meeting/list");
-            exit;
-        }
-
-        // Check if user is part of this meeting
-        $userId = $_SESSION['user']['user_id'];
-        if ($meeting['student_id'] != $userId && $meeting['tutor_id'] != $userId) {
-            $_SESSION['error'] = "You don't have permission to update this meeting.";
-            header("Location: ?url=meeting/list");
-            exit;
-        }
-
-        // Save meeting outcome
-        if ($this->meetingModel->completeMeeting($meetingId, $meetingOutcome)) {
-            // Create notification for the other party
-            $notificationReceiverId = ($meeting['student_id'] == $userId) ? $meeting['tutor_id'] : $meeting['student_id'];
-            $senderName = $_SESSION['user']['first_name'] . ' ' . $_SESSION['user']['last_name'];
-            $notificationText = "$senderName has recorded outcomes for your meeting on " . date('F j, Y \a\t g:i A', strtotime($meeting['meeting_date']));
-
-            $this->notificationModel->createNotification($notificationReceiverId, $notificationText);
-
-            $_SESSION['success'] = "Meeting has been marked as completed and outcomes have been recorded.";
-            header("Location: ?url=meeting/view&id=" . $meetingId);
-        } else {
-            $_SESSION['error'] = "Failed to record meeting outcomes. Please try again.";
-            header("Location: ?url=meeting/recordOutcome&id=" . $meetingId);
-        }
-        exit;
-    }
-
-    /**
      * View completed meetings
      */
     public function completed()
@@ -589,5 +705,107 @@ class MeetingController extends Controller
         ];
 
         $this->view('meeting/completed', $data);
+    }
+
+    /**
+     * Send email notification about a meeting
+     *
+     * @param array $meeting Meeting data
+     * @param int $receiverId User ID of the recipient
+     * @param string $action The action performed (created, confirmed, cancelled, completed)
+     * @param string $additionalInfo Optional additional information for the email
+     */
+    private function sendMeetingEmail($meeting, $receiverId, $action, $additionalInfo = '')
+    {
+        // Get recipient details
+        $recipient = $this->userModel->getUserById($receiverId);
+
+        if (!$recipient) {
+            return false;
+        }
+
+        // Get sender details (current user)
+        $sender = [
+            'name' => $_SESSION['user']['first_name'] . ' ' . $_SESSION['user']['last_name'],
+            'role' => $_SESSION['user']['role']
+        ];
+
+        // Format meeting date and time
+        $meetingDateTime = date('F j, Y \a\t g:i A', strtotime($meeting['meeting_date']));
+
+        // Set email subject based on action
+        switch ($action) {
+            case 'created':
+                $subject = "New Meeting Request - eTutoring System";
+                break;
+            case 'confirmed':
+                $subject = "Meeting Confirmed - eTutoring System";
+                break;
+            case 'cancelled':
+                $subject = "Meeting Cancelled - eTutoring System";
+                break;
+            case 'completed':
+                $subject = "Meeting Completed - eTutoring System";
+                break;
+            default:
+                $subject = "Meeting Update - eTutoring System";
+        }
+
+        // Build email body
+        $body = "<p>Dear {$recipient['first_name']},</p>";
+
+        // Add specific message based on action
+        switch ($action) {
+            case 'created':
+                if ($sender['role'] === 'student') {
+                    $body .= "<p>Your student {$sender['name']} has requested a new meeting with you.</p>";
+                } else {
+                    $body .= "<p>Your tutor {$sender['name']} has scheduled a new meeting with you.</p>";
+                }
+                break;
+            case 'confirmed':
+                $body .= "<p>A meeting has been confirmed by {$sender['name']}.</p>";
+                break;
+            case 'cancelled':
+                $body .= "<p>A meeting has been cancelled by {$sender['name']}.</p>";
+                break;
+            case 'completed':
+                $body .= "<p>A meeting has been marked as completed by {$sender['name']}.</p>";
+                break;
+        }
+
+        // Add meeting details
+        $body .= "
+    <p><strong>Meeting Details:</strong></p>
+    <ul>
+        <li><strong>Date & Time:</strong> {$meetingDateTime}</li>
+        <li><strong>Meeting Type:</strong> " . ucfirst($meeting['meeting_type']) . " Meeting</li>
+    </ul>";
+
+        // Add additional information if provided
+        if (!empty($additionalInfo)) {
+            $body .= "<p>{$additionalInfo}</p>";
+        }
+
+        // Add meeting notes if available
+        if (!empty($meeting['meeting_notes'])) {
+            $body .= "<p><strong>Meeting Notes:</strong><br>" . nl2br(htmlspecialchars($meeting['meeting_notes'])) . "</p>";
+        }
+
+        // Add virtual meeting link if applicable
+        if ($meeting['meeting_type'] === 'virtual' && !empty($meeting['meeting_link'])) {
+            $body .= "<p><strong>Meeting Link:</strong> <a href='{$meeting['meeting_link']}'>{$meeting['meeting_link']}</a></p>";
+        }
+
+        // Add closing
+        $body .= "
+    <p>You can view the full meeting details and updates in your eTutoring dashboard.</p>
+    <p>Best regards,</p>
+    <p><strong>eTutoring Team</strong></p>
+    <hr>
+    <p style='font-size:12px; color:gray;'>This is an automated message, please do not reply to this email.</p>";
+
+        // Send the email
+        return MailHelper::sendMail($recipient['email'], $subject, $body);
     }
 }

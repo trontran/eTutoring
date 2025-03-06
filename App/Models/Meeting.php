@@ -325,4 +325,5 @@ class Meeting
         $uniqueCode = md5('etutoring-' . $meetingId . '-' . time());
         return $baseUrl . substr($uniqueCode, 0, 10);
     }
+
 }

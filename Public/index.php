@@ -185,7 +185,23 @@ if ($url === '' || $url === 'home/index') {
     require_once '../app/controllers/MeetingController.php';
     $controller = new MeetingController();
     $controller->completed();
+// Route for marking a notification as read
+} elseif ($url === 'notifications/markAsRead') {
+    require_once '../app/controllers/NotificationController.php';
+    $controller = new NotificationController();
+    $controller->markAsRead();
 
+// Route for marking all notifications as read
+} elseif ($url === 'notifications/markAllAsRead') {
+    require_once '../app/controllers/NotificationController.php';
+    $controller = new NotificationController();
+    $controller->markAllAsRead();
+
+// Route for viewing all notifications
+} elseif ($url === 'notifications/index') {
+    require_once '../app/controllers/NotificationController.php';
+    $controller = new NotificationController();
+    $controller->index();
 } else {
     echo "404 Not Found or Route not handled yet.";
 }
