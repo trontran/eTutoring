@@ -70,7 +70,14 @@ $currentPage = $_GET['url'] ?? 'home/index';
                             <i class="bi bi-house-door-fill"></i> Home
                         </a>
                     </li>
-
+                    <!-- Documents - new feature -->
+                    <?php if ($isLoggedIn): ?>
+                        <li class="nav-item">
+                            <a class="nav-link <?= strpos($currentPage, 'document') === 0 ? 'active' : '' ?>" href="?url=document/list">
+                                <i class="bi bi-file-earmark-text"></i> Documents
+                            </a>
+                        </li>
+                    <?php endif; ?>
                     <!-- Blog -->
                     <li class="nav-item">
                         <a class="nav-link <?= $currentPage === 'blog/index' ? 'active' : '' ?>" href="?url=blog/index">

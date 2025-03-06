@@ -1,5 +1,6 @@
 <?php
 
+use App\Controllers\BlogController;
 use App\Controllers\LoginController;
 use App\Controllers\MessageController;
 session_start();
@@ -17,7 +18,15 @@ require_once '../app/models/PersonalTutor.php';
 require_once '../app/controllers/MessageController.php';
 require_once '../app/models/Message.php';
 require_once '../app/models/Notification.php';
+require_once '../app/controllers/BlogController.php';
+require_once '../app/controllers/DocumentController.php';  // New controller
+require_once '../app/models/Document.php';  // New model
+require_once '../app/models/DocumentComment.php';  // New model
+require_once '../app/models/Blog.php';  // New model
+require_once '../app/models/BlogComment.php';  // New model
+require_once '../app/models/BlogParticipant.php';  // New model
 require_once '../vendor/autoload.php';
+
 
 
 // Lấy URL từ query string, ví dụ: ?url=user/index
@@ -202,6 +211,52 @@ if ($url === '' || $url === 'home/index') {
     require_once '../app/controllers/NotificationController.php';
     $controller = new NotificationController();
     $controller->index();
+
+    // DOCUMENT ROUTES
+} elseif ($url === 'document/upload') {
+    $controller = new DocumentController();
+    $controller->upload();
+} elseif ($url === 'document/store') {
+    $controller = new DocumentController();
+    $controller->store();
+} elseif ($url === 'document/list') {
+    $controller = new DocumentController();
+    $controller->list();
+} elseif ($url === 'document/view') {
+$controller = new DocumentController();
+$controller->viewDetails();
+} elseif ($url === 'document/comment') {
+    $controller = new DocumentController();
+    $controller->comment();
+} elseif ($url === 'document/download') {
+    $controller = new DocumentController();
+    $controller->download();
+
+// BLOG ROUTES
+} elseif ($url === 'blog/index') {
+    $controller = new BlogController();
+    $controller->index();
+} elseif ($url === 'blog/create') {
+    $controller = new BlogController();
+    $controller->create();
+} elseif ($url === 'blog/store') {
+    $controller = new BlogController();
+    $controller->store();
+} elseif ($url === 'blog/view') {
+    $controller = new BlogController();
+    $controller->viewDetails();
+} elseif ($url === 'blog/comment') {
+    $controller = new BlogController();
+    $controller->comment();
+} elseif ($url === 'blog/edit') {
+    $controller = new BlogController();
+    $controller->edit();
+} elseif ($url === 'blog/update') {
+    $controller = new BlogController();
+    $controller->update();
+} elseif ($url === 'blog/delete') {
+    $controller = new BlogController();
+    $controller->delete();
 } else {
     echo "404 Not Found or Route not handled yet.";
 }
