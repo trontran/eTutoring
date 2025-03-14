@@ -36,9 +36,10 @@ ob_start();
             <div class="col-md-8">
                 <div class="card shadow mb-4">
                     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                        <h4 class="mb-0"><i class="bi bi-journal-richtext"></i> <?= htmlspecialchars($blog['title']); ?></h4>
+                        <h4 class="mb-0"><i class="bi bi-journal-richtext"></i> <?= htmlspecialchars($blog['title'] ?? 'Untitled Blog'); ?></h4>
 
-                        <?php if ($blog['tutor_id'] == $userId || $userRole === 'staff'): ?>
+                        <?php if (($blog['tutor_id'] ?? null) == $userId || $userRole === 'staff' ||
+                            (($blog['created_by_student'] ?? null) == $userId)): ?>
                             <div>
                                 <a href="?url=blog/edit&id=<?= $blog['blog_id']; ?>" class="btn btn-sm btn-light">
                                     <i class="bi bi-pencil"></i> Edit

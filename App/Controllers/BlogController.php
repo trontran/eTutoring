@@ -369,7 +369,8 @@ class BlogController extends Controller
             'participants' => $participants,
             'documents' => $documents,
             'userRole' => $userRole,
-            'userId' => $userId
+            'userId' => $userId,
+            'createdByStudent' => $blog['created_by_student'] ?? null
         ];
 
         $this->view('blog/view', $data);
@@ -491,11 +492,17 @@ class BlogController extends Controller
             exit;
         }
 
-        // Only the owner (tutor) or staff can edit a blog
+        // Allow tutors who own the blog, students who created the blog, or staff to edit
         $userId = $_SESSION['user']['user_id'];
         $userRole = $_SESSION['user']['role'];
 
-        if ($userRole !== 'staff' && $blog['tutor_id'] != $userId) {
+        // Check if the blog was created by a student
+        $createdByStudent = isset($blog['created_by_student']) ? $blog['created_by_student'] : null;
+
+        // Allow edit if: staff, or tutor who owns it, or student who created it
+        if ($userRole !== 'staff' &&
+            !($userRole === 'tutor' && $blog['tutor_id'] == $userId) &&
+            !($userRole === 'student' && $createdByStudent == $userId)) {
             $_SESSION['error'] = "You don't have permission to edit this blog.";
             header("Location: ?url=blog/view&id=" . $blogId);
             exit;
@@ -556,11 +563,17 @@ class BlogController extends Controller
             exit;
         }
 
-        // Only the owner (tutor) or staff can update a blog
+        // Allow tutors who own the blog, students who created the blog, or staff to update
         $userId = $_SESSION['user']['user_id'];
         $userRole = $_SESSION['user']['role'];
 
-        if ($userRole !== 'staff' && $blog['tutor_id'] != $userId) {
+        // Check if the blog was created by a student
+        $createdByStudent = isset($blog['created_by_student']) ? $blog['created_by_student'] : null;
+
+        // Allow update if: staff, or tutor who owns it, or student who created it
+        if ($userRole !== 'staff' &&
+            !($userRole === 'tutor' && $blog['tutor_id'] == $userId) &&
+            !($userRole === 'student' && $createdByStudent == $userId)) {
             $_SESSION['error'] = "You don't have permission to update this blog.";
             header("Location: ?url=blog/view&id=" . $blogId);
             exit;
@@ -643,7 +656,12 @@ class BlogController extends Controller
         $userId = $_SESSION['user']['user_id'];
         $userRole = $_SESSION['user']['role'];
 
-        if ($userRole !== 'staff' && $blog['tutor_id'] != $userId) {
+        $createdByStudent = isset($blog['created_by_student']) ? $blog['created_by_student'] : null;
+
+        // Allow delete if: staff, or tutor who owns it, or student who created it
+        if ($userRole !== 'staff' &&
+            !($userRole === 'tutor' && $blog['tutor_id'] == $userId) &&
+            !($userRole === 'student' && $createdByStudent == $userId)) {
             $_SESSION['error'] = "You don't have permission to delete this blog.";
             header("Location: ?url=blog/view&id=" . $blogId);
             exit;

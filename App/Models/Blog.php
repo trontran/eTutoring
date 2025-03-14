@@ -22,13 +22,18 @@ class Blog
      */
     public function createBlog($data)
     {
-        $query = "INSERT INTO Blogs (tutor_id, title, content) 
-                  VALUES (:tutor_id, :title, :content)";
+        // Verify if we're passing created_by_student in the data
+        $createdByStudent = isset($data['created_by_student']) ? $data['created_by_student'] : null;
+
+        // Modify query to include created_by_student
+        $query = "INSERT INTO Blogs (tutor_id, title, content, created_by_student) 
+              VALUES (:tutor_id, :title, :content, :created_by_student)";
 
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':tutor_id', $data['tutor_id'], PDO::PARAM_INT);
         $stmt->bindParam(':title', $data['title'], PDO::PARAM_STR);
         $stmt->bindParam(':content', $data['content'], PDO::PARAM_STR);
+        $stmt->bindParam(':created_by_student', $createdByStudent, PDO::PARAM_INT);
 
         if ($stmt->execute()) {
             return $this->db->lastInsertId();
@@ -46,10 +51,11 @@ class Blog
     public function getBlogById($blogId)
     {
         $query = "SELECT b.*, 
-                    u.first_name as tutor_first_name, u.last_name as tutor_last_name
-                  FROM Blogs b
-                  JOIN Users u ON b.tutor_id = u.user_id
-                  WHERE b.blog_id = :blog_id";
+                u.first_name as tutor_first_name, u.last_name as tutor_last_name,
+                b.created_by_student
+              FROM Blogs b
+              JOIN Users u ON b.tutor_id = u.user_id
+              WHERE b.blog_id = :blog_id";
 
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':blog_id', $blogId, PDO::PARAM_INT);
