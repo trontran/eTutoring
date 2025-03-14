@@ -35,7 +35,7 @@ class BlogController extends Controller
     /**
      * Display a list of all blogs accessible to the current user
      */
-    public function index()
+    public function index(): void
     {
         // Check if user is logged in
         if (!isset($_SESSION['user'])) {
@@ -105,6 +105,9 @@ class BlogController extends Controller
     /**
      * Process and store a new blog - UPDATED for student blogs
      */
+    /**
+     * Process and store a new blog with optional document upload
+     */
     public function store()
     {
         // Check if user is logged in
@@ -122,6 +125,57 @@ class BlogController extends Controller
         $userRole = $_SESSION['user']['role'];
         $title = $_POST['title'] ?? '';
         $content = $_POST['content'] ?? '';
+
+        // Initialize document variables
+        $documentId = null;
+        $hasDocument = isset($_FILES['document']) && $_FILES['document']['error'] !== UPLOAD_ERR_NO_FILE;
+
+        // Process document upload if present
+        if ($hasDocument) {
+            // Handle file upload
+            if ($_FILES['document']['error'] !== UPLOAD_ERR_OK) {
+                $_SESSION['error'] = "File upload failed. Please try again.";
+                header("Location: ?url=blog/create");
+                exit;
+            }
+
+            $uploadedFile = $_FILES['document'];
+
+            // Validate file type and size
+            $allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+            $maxSize = 10 * 1024 * 1024; // 10 MB
+
+            if (!in_array($uploadedFile['type'], $allowedTypes)) {
+                $_SESSION['error'] = "Invalid file type. Allowed types are PDF, DOC, DOCX, and TXT.";
+                header("Location: ?url=blog/create");
+                exit;
+            }
+
+            if ($uploadedFile['size'] > $maxSize) {
+                $_SESSION['error'] = "File size exceeds the maximum limit of 10 MB.";
+                header("Location: ?url=blog/create");
+                exit;
+            }
+
+            // Create upload directory if it doesn't exist
+            $uploadDir = '../uploads/document/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+
+            // Generate unique filename
+            $originalName = $uploadedFile['name'];
+            $extension = pathinfo($originalName, PATHINFO_EXTENSION);
+            $fileName = uniqid('doc_') . '.' . $extension;
+            $filePath = $uploadDir . $fileName;
+
+            // Move the uploaded file
+            if (!move_uploaded_file($uploadedFile['tmp_name'], $filePath)) {
+                $_SESSION['error'] = "Failed to save the uploaded file. Please try again.";
+                header("Location: ?url=blog/create");
+                exit;
+            }
+        }
 
         // For students, handle differently
         if ($userRole === 'student') {
@@ -152,6 +206,29 @@ class BlogController extends Controller
                 $studentName = $_SESSION['user']['first_name'] . ' ' . $_SESSION['user']['last_name'];
                 $notificationText = "$studentName has created a new blog: " . htmlspecialchars($title);
                 $this->notificationModel->createNotification($tutorId, $notificationText);
+
+                // Save document if uploaded
+                if ($hasDocument) {
+                    // Create document record in database
+                    $documentData = [
+                        'uploader_id' => $userId,
+                        'student_id' => $userId,
+                        'tutor_id' => $tutorId,
+                        'file_path' => 'uploads/document/' . $fileName,
+                        'file_name' => $originalName,
+                        'file_type' => $uploadedFile['type'],
+                        'file_size' => $uploadedFile['size']
+                    ];
+
+                    $documentModel = new \App\Models\Document();
+                    $documentId = $documentModel->createDocument($documentData);
+
+                    // Associate document with blog
+                    if ($documentId) {
+                        $blogDocumentModel = new \App\Models\BlogDocument();
+                        $blogDocumentModel->addDocumentToBlog($blogId, $documentId);
+                    }
+                }
 
                 $_SESSION['success'] = "Blog created successfully.";
                 header("Location: ?url=blog/view&id=" . $blogId);
@@ -193,6 +270,32 @@ class BlogController extends Controller
                     }
                 }
 
+                // Save document if uploaded
+                if ($hasDocument) {
+                    // Determine the student ID (we'll use the first student if multiple)
+                    $studentId = !empty($selectedStudents) ? $selectedStudents[0] : null;
+
+                    // Create document record in database
+                    $documentData = [
+                        'uploader_id' => $userId,
+                        'student_id' => $studentId,
+                        'tutor_id' => $userId,
+                        'file_path' => 'uploads/document/' . $fileName,
+                        'file_name' => $originalName,
+                        'file_type' => $uploadedFile['type'],
+                        'file_size' => $uploadedFile['size']
+                    ];
+
+                    $documentModel = new \App\Models\Document();
+                    $documentId = $documentModel->createDocument($documentData);
+
+                    // Associate document with blog
+                    if ($documentId) {
+                        $blogDocumentModel = new \App\Models\BlogDocument();
+                        $blogDocumentModel->addDocumentToBlog($blogId, $documentId);
+                    }
+                }
+
                 $_SESSION['success'] = "Blog created successfully.";
                 header("Location: ?url=blog/view&id=" . $blogId);
             } else {
@@ -204,7 +307,7 @@ class BlogController extends Controller
     }
 
     /**
-     * View a specific blog with comments
+     * View a specific blog with comments and attached documents
      */
     public function viewDetails(): void
     {
@@ -256,10 +359,15 @@ class BlogController extends Controller
         // Get participants for this blog
         $participants = $this->blogParticipantModel->getParticipantsByBlogId($blogId);
 
+        // Get attached documents for this blog
+        $blogDocumentModel = new \App\Models\BlogDocument();
+        $documents = $blogDocumentModel->getDocumentsByBlogId($blogId);
+
         $data = [
             'blog' => $blog,
             'comments' => $comments,
             'participants' => $participants,
+            'documents' => $documents,
             'userRole' => $userRole,
             'userId' => $userId
         ];
@@ -360,7 +468,7 @@ class BlogController extends Controller
     /**
      * Edit a blog (for tutor/owner only)
      */
-    public function edit()
+    public function edit(): void
     {
         // Check if user is logged in
         if (!isset($_SESSION['user'])) {

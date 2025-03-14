@@ -27,6 +27,7 @@ require_once '../app/models/BlogComment.php';  // New model
 require_once '../app/models/BlogParticipant.php';  // New model
 require_once '../app/models/Dashboard.php';
 require_once '../app/controllers/DashboardController.php';
+require_once '../app/models/BlogDocument.php';
 require_once '../vendor/autoload.php';
 
 
@@ -280,6 +281,17 @@ $controller->viewDetails();
 } elseif ($url === 'dashboard/tutorActivity') {
     $controller = new DashboardController();
     $controller->tutorActivity();
+//    //test
+//    // Add these routes in your routing section for dashboard
+} elseif ($url === 'dashboard/timeBasedActivity') {
+    $controller = new DashboardController();
+    $controller->timeBasedActivity();
+} elseif ($url === 'dashboard/peakUsageTimes') {
+    $controller = new DashboardController();
+    $controller->peakUsageTimes();
+} elseif ($url === 'dashboard/compareTimePeriods') {
+    $controller = new DashboardController();
+    $controller->compareTimePeriods();
 } else {
     echo "404 Not Found or Route not handled yet.";
 }

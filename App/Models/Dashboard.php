@@ -286,4 +286,228 @@ class Dashboard
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    //Test new function for report
+    /**
+     * Get activity data for specified time period
+     *
+     * @param string $period 'weekly', 'monthly', or 'term'
+     * @param string $startDate Starting date (format: 'Y-m-d')
+     * @param string $endDate Ending date (format: 'Y-m-d')
+     * @return array Time-based activity data
+     */
+    public function getTimeBasedActivity($period = 'weekly', $startDate = null, $endDate = null): array
+    {
+        // Set default dates if not provided
+        if (!$startDate) {
+            // Default to past 30 days if no date specified
+            $startDate = date('Y-m-d', strtotime('-30 days'));
+        }
+
+        if (!$endDate) {
+            $endDate = date('Y-m-d');
+        }
+
+        // Format for SQL date grouping based on period
+        $dateFormat = $period == 'weekly' ? '%Y-%u' : ($period == 'monthly' ? '%Y-%m' : '%Y-%m');
+        $dateLabel = $period == 'weekly' ? 'Week' : ($period == 'monthly' ? 'Month' : 'Term');
+
+        $data = [];
+
+        // Get message activity by time period
+        $messageQuery = "SELECT
+                        DATE_FORMAT(sent_at, '{$dateFormat}') as time_period,
+                        COUNT(*) as message_count
+                     FROM Messages
+                     WHERE sent_at BETWEEN :start_date AND :end_date
+                     GROUP BY time_period
+                     ORDER BY time_period ASC";
+
+        $stmt = $this->db->prepare($messageQuery);
+        $stmt->bindParam(':start_date', $startDate);
+        $stmt->bindParam(':end_date', $endDate);
+        $stmt->execute();
+        $data['messages'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Get meeting activity by time period
+        $meetingQuery = "SELECT
+                        DATE_FORMAT(meeting_date, '{$dateFormat}') as time_period,
+                        COUNT(*) as meeting_count,
+                        SUM(CASE WHEN is_completed = 1 THEN 1 ELSE 0 END) as completed_count
+                     FROM Meetings
+                     WHERE meeting_date BETWEEN :start_date AND :end_date
+                     GROUP BY time_period
+                     ORDER BY time_period ASC";
+
+        $stmt = $this->db->prepare($meetingQuery);
+        $stmt->bindParam(':start_date', $startDate);
+        $stmt->bindParam(':end_date', $endDate);
+        $stmt->execute();
+        $data['meetings'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Add period labels
+        $data['period_type'] = $dateLabel;
+        $data['start_date'] = $startDate;
+        $data['end_date'] = $endDate;
+
+        return $data;
+    }
+
+    /**
+     * Get peak usage times for messages and meetings
+     *
+     * @param string $startDate Starting date (format: 'Y-m-d')
+     * @param string $endDate Ending date (format: 'Y-m-d')
+     * @return array Peak usage data
+     */
+    public function getPeakUsageTimes($startDate = null, $endDate = null): array
+    {
+        // Set default dates if not provided
+        if (!$startDate) {
+            $startDate = date('Y-m-d', strtotime('-30 days'));
+        }
+
+        if (!$endDate) {
+            $endDate = date('Y-m-d');
+        }
+
+        $data = [];
+
+        // Get message peak hours
+        $messageHoursQuery = "SELECT
+                            HOUR(sent_at) as hour_of_day,
+                            COUNT(*) as message_count
+                          FROM Messages
+                          WHERE sent_at BETWEEN :start_date AND :end_date
+                          GROUP BY hour_of_day
+                          ORDER BY hour_of_day ASC";
+
+        $stmt = $this->db->prepare($messageHoursQuery);
+        $stmt->bindParam(':start_date', $startDate);
+        $stmt->bindParam(':end_date', $endDate);
+        $stmt->execute();
+        $data['message_hours'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Get message peak days of week
+        $messageDaysQuery = "SELECT
+                           WEEKDAY(sent_at) as day_of_week,
+                           COUNT(*) as message_count
+                         FROM Messages
+                         WHERE sent_at BETWEEN :start_date AND :end_date
+                         GROUP BY day_of_week
+                         ORDER BY day_of_week ASC";
+
+        $stmt = $this->db->prepare($messageDaysQuery);
+        $stmt->bindParam(':start_date', $startDate);
+        $stmt->bindParam(':end_date', $endDate);
+        $stmt->execute();
+        $data['message_days'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Get meeting peak hours
+        $meetingHoursQuery = "SELECT
+                            HOUR(meeting_date) as hour_of_day,
+                            COUNT(*) as meeting_count
+                          FROM Meetings
+                          WHERE meeting_date BETWEEN :start_date AND :end_date
+                          GROUP BY hour_of_day
+                          ORDER BY hour_of_day ASC";
+
+        $stmt = $this->db->prepare($meetingHoursQuery);
+        $stmt->bindParam(':start_date', $startDate);
+        $stmt->bindParam(':end_date', $endDate);
+        $stmt->execute();
+        $data['meeting_hours'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Get meeting peak days of week
+        $meetingDaysQuery = "SELECT
+                           WEEKDAY(meeting_date) as day_of_week,
+                           COUNT(*) as meeting_count
+                         FROM Meetings
+                         WHERE meeting_date BETWEEN :start_date AND :end_date
+                         GROUP BY day_of_week
+                         ORDER BY day_of_week ASC";
+
+        $stmt = $this->db->prepare($meetingDaysQuery);
+        $stmt->bindParam(':start_date', $startDate);
+        $stmt->bindParam(':end_date', $endDate);
+        $stmt->execute();
+        $data['meeting_days'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $data['start_date'] = $startDate;
+        $data['end_date'] = $endDate;
+
+        return $data;
+    }
+
+    /**
+     * Get comparison data between two time periods
+     *
+     * @param string $period1Start Start date of first period
+     * @param string $period1End End date of first period
+     * @param string $period2Start Start date of second period
+     * @param string $period2End End date of second period
+     * @return array Comparison data
+     */
+    public function getComparisonData(string $period1Start, string $period1End, string $period2Start, string $period2End): array
+    {
+        $data = [];
+
+        // First period stats
+        $period1Query = "SELECT
+                        (SELECT COUNT(*) FROM Messages WHERE sent_at BETWEEN :start_date AND :end_date) as message_count,
+                        (SELECT COUNT(*) FROM Meetings WHERE meeting_date BETWEEN :start_date AND :end_date) as meeting_count,
+                        (SELECT COUNT(*) FROM Meetings WHERE meeting_date BETWEEN :start_date AND :end_date AND is_completed = 1) as completed_meeting_count,
+                        (SELECT COUNT(*) FROM Documents WHERE uploaded_at BETWEEN :start_date AND :end_date) as document_count,
+                        (SELECT COUNT(*) FROM BlogComments WHERE created_at BETWEEN :start_date AND :end_date) as blog_comment_count";
+
+        $stmt = $this->db->prepare($period1Query);
+        $stmt->bindParam(':start_date', $period1Start);
+        $stmt->bindParam(':end_date', $period1End);
+        $stmt->execute();
+        $data['period1'] = $stmt->fetch(PDO::FETCH_ASSOC);
+        $data['period1']['start_date'] = $period1Start;
+        $data['period1']['end_date'] = $period1End;
+
+        // Second period stats
+        $period2Query = "SELECT
+                        (SELECT COUNT(*) FROM Messages WHERE sent_at BETWEEN :start_date AND :end_date) as message_count,
+                        (SELECT COUNT(*) FROM Meetings WHERE meeting_date BETWEEN :start_date AND :end_date) as meeting_count,
+                        (SELECT COUNT(*) FROM Meetings WHERE meeting_date BETWEEN :start_date AND :end_date AND is_completed = 1) as completed_meeting_count,
+                        (SELECT COUNT(*) FROM Documents WHERE uploaded_at BETWEEN :start_date AND :end_date) as document_count,
+                        (SELECT COUNT(*) FROM BlogComments WHERE created_at BETWEEN :start_date AND :end_date) as blog_comment_count";
+
+        $stmt = $this->db->prepare($period2Query);
+        $stmt->bindParam(':start_date', $period2Start);
+        $stmt->bindParam(':end_date', $period2End);
+        $stmt->execute();
+        $data['period2'] = $stmt->fetch(PDO::FETCH_ASSOC);
+        $data['period2']['start_date'] = $period2Start;
+        $data['period2']['end_date'] = $period2End;
+
+        // Calculate percentage changes
+        $changes = [];
+        foreach ($data['period1'] as $key => $value) {
+            if ($key !== 'start_date' && $key !== 'end_date') {
+                $period1Value = (int)$value;
+                $period2Value = (int)$data['period2'][$key];
+
+                $percentChange = 0;
+                if ($period1Value > 0) {
+                    $percentChange = (($period2Value - $period1Value) / $period1Value) * 100;
+                } elseif ($period2Value > 0) {
+                    $percentChange = 100; // If period1 was 0 and period2 has value, that's a 100% increase
+                }
+
+                $changes[$key] = [
+                    'period1' => $period1Value,
+                    'period2' => $period2Value,
+                    'difference' => $period2Value - $period1Value,
+                    'percent_change' => round($percentChange, 1)
+                ];
+            }
+        }
+
+        $data['changes'] = $changes;
+
+        return $data;
+    }
 }

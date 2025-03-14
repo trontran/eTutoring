@@ -188,4 +188,12 @@ class User {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    public function getAllStudents(): array
+    {
+        $query = "SELECT user_id, first_name, last_name, email FROM Users WHERE role = 'student'";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 }

@@ -179,7 +179,7 @@ class Meeting
         // Convert meeting date to DateTime object
         $meetingDateTime = new \DateTime($meetingDate);
 
-        // Add 1 hour to get end time (assuming meetings are 1 hour long)
+//        // Add 1 hour to get end time (assuming meetings are 1 hour long)
         $endDateTime = clone $meetingDateTime;
         $endDateTime->modify('+1 hour');
 

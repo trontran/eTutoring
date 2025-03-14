@@ -24,15 +24,15 @@ $userModel = new User();
 
 $unreadMessages = 0;
 
-// Kiểm tra session user_id trước khi truy cập
+
 $userId = $_SESSION['user']['user_id'] ?? null;
 
 if ($isLoggedIn && !empty($userId) && is_numeric($userId)) {
-    // Cập nhật số lượng tin nhắn chưa đọc
+    // Update the number of unread messages
     $unreadMessages = count($notificationModel->getUnreadNotifications($userId));
 }
 
-// Xác định trang hiện tại
+// Determine the current page
 $currentPage = $_GET['url'] ?? 'home/index';
 ?>
 
@@ -47,6 +47,7 @@ $currentPage = $_GET['url'] ?? 'home/index';
     <link rel="stylesheet" href="/eTutoring/public/Css/style.css">
     <link rel="stylesheet" href="/eTutoring/public/Css/header.css">
     <link rel="icon" href="/eTutoring/public/images/favicon.ico" type="image/x-icon">
+
 </head>
 <body>
 <div class="wrapper d-flex flex-column min-vh-100">

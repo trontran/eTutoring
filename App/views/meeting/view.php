@@ -137,9 +137,9 @@ if (isset($_GET['debug'])): ?>
                                             </button>
 
                                             <!-- Button to generate meeting link automatically -->
-                                            <a href="?url=meeting/generateLink&id=<?= $meeting['meeting_id'] ?>" class="btn btn-sm btn-primary">
-                                                <i class="bi bi-magic"></i> Generate Link
-                                            </a>
+<!--                                            <a href="?url=meeting/generateLink&id=--><?php //= $meeting['meeting_id'] ?><!--" class="btn btn-sm btn-primary">-->
+<!--                                                <i class="bi bi-magic"></i> Generate Link-->
+<!--                                            </a>-->
                                         </div>
                                     </div>
 

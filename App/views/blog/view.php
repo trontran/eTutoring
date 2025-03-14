@@ -69,6 +69,99 @@ ob_start();
                         <hr>
 
                         <!-- Comments Section -->
+                        <!-- Document Section - Enhanced Version -->
+                        <?php if (!empty($documents)): ?>
+                            <div class="card mb-4 mt-4 shadow-sm">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="mb-0"><i class="bi bi-file-earmark-text"></i> Attached Documents (<?= count($documents) ?>)</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead class="table-light">
+                                            <tr>
+                                                <th>File Name</th>
+                                                <th>File Type</th>
+                                                <th>Size</th>
+                                                <th>Uploaded By</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <?php foreach ($documents as $document): ?>
+                                                <?php
+                                                // Format file size
+                                                $fileSize = $document['file_size'];
+                                                if ($fileSize >= 1048576) {
+                                                    $formattedSize = number_format($fileSize / 1048576, 2) . ' MB';
+                                                } elseif ($fileSize >= 1024) {
+                                                    $formattedSize = number_format($fileSize / 1024, 2) . ' KB';
+                                                } else {
+                                                    $formattedSize = $fileSize . ' bytes';
+                                                }
+
+                                                // Determine file icon
+                                                $iconClass = 'bi-file-earmark';
+                                                if (strpos($document['file_type'], 'pdf') !== false) {
+                                                    $iconClass = 'bi-file-earmark-pdf';
+                                                } elseif (strpos($document['file_type'], 'word') !== false || strpos($document['file_type'], 'doc') !== false) {
+                                                    $iconClass = 'bi-file-earmark-word';
+                                                } elseif (strpos($document['file_type'], 'text') !== false || strpos($document['file_type'], 'txt') !== false) {
+                                                    $iconClass = 'bi-file-earmark-text';
+                                                }
+
+                                                // Determine file type label
+                                                $fileType = "Unknown";
+                                                if (strpos($document['file_type'], 'pdf') !== false) {
+                                                    $fileType = "PDF";
+                                                } elseif (strpos($document['file_type'], 'word') !== false || strpos($document['file_type'], 'docx') !== false) {
+                                                    $fileType = "Word Document";
+                                                } elseif (strpos($document['file_type'], 'doc') !== false) {
+                                                    $fileType = "Word Document (Old)";
+                                                } elseif (strpos($document['file_type'], 'text') !== false || strpos($document['file_type'], 'txt') !== false) {
+                                                    $fileType = "Text File";
+                                                }
+                                                ?>
+                                                <tr>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <i class="bi <?= $iconClass ?> text-primary me-2 fs-4"></i>
+                                                            <span class="fw-bold text-break" style="max-width: 250px;">
+                                                            <?= htmlspecialchars($document['file_name']); ?>
+                                                             </span>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                    <span class="badge bg-secondary">
+                                                        <?= htmlspecialchars($fileType); ?>
+                                                    </span>
+                                                    </td>
+                                                    <td><?= $formattedSize ?></td>
+                                                    <td>
+                                                        <?= htmlspecialchars($document['uploader_first_name'] . ' ' . $document['uploader_last_name']); ?>
+                                                        <small class="text-muted d-block">
+                                                            <?= date('M d, Y', strtotime($document['uploaded_at'])); ?>
+                                                        </small>
+                                                    </td>
+                                                    <td>
+                                                        <div class="btn-group">
+                                                            <a href="?url=document/download&id=<?= $document['document_id']; ?>" class="btn btn-sm btn-primary">
+                                                                <i class="bi bi-download"></i> Download
+                                                            </a>
+                                                            <a href="?url=document/view&id=<?= $document['document_id']; ?>" class="btn btn-sm btn-secondary">
+                                                                <i class="bi bi-eye"></i> View Details
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                        <!-- Comments Section -->
                         <h5 class="mb-3"><i class="bi bi-chat-dots"></i> Comments (<?= count($comments); ?>)</h5>
 
                         <div class="mb-4">
@@ -85,7 +178,6 @@ ob_start();
                                 </div>
                             </form>
                         </div>
-
                         <?php if (!empty($comments)): ?>
                             <?php foreach ($comments as $comment): ?>
                                 <div class="card mb-3">
@@ -96,8 +188,8 @@ ob_start();
                                             $comment['role'] === 'tutor' ? 'primary' :
                                                 ($comment['role'] === 'student' ? 'success' : 'secondary')
                                             ?>">
-                        <?= htmlspecialchars(ucfirst($comment['role'])); ?>
-                    </span>
+                                             <?= htmlspecialchars(ucfirst($comment['role'])); ?>
+                                             </span>
                                         <?php endif; ?>
                                     </div>
                                     <div class="card-body">

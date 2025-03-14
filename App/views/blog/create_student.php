@@ -18,7 +18,7 @@ ob_start();
                             </div>
                         <?php endif; ?>
 
-                        <form action="?url=blog/store" method="POST">
+                        <form action="?url=blog/store" method="POST" enctype="multipart/form-data">
                             <div class="mb-3">
                                 <label for="title" class="form-label">Blog Title</label>
                                 <input type="text" class="form-control" id="title" name="title" required
@@ -29,6 +29,15 @@ ob_start();
                                 <label for="content" class="form-label">Blog Content</label>
                                 <textarea class="form-control" id="content" name="content" rows="15" required
                                           placeholder="Write your blog content here..."></textarea>
+                            </div>
+
+                            <!-- Document Upload Section -->
+                            <div class="mb-3">
+                                <label for="document" class="form-label">Attach Document (Optional)</label>
+                                <input type="file" class="form-control" id="document" name="document">
+                                <div class="form-text">
+                                    Allowed file types: PDF, DOC, DOCX, and TXT. Maximum size: 10 MB.
+                                </div>
                             </div>
 
                             <?php if (isset($tutor) && $tutor): ?>

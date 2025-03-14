@@ -29,7 +29,7 @@ class DashboardController extends Controller
     /**
      * Display student dashboard
      */
-    public function student()
+    public function student(): void
     {
         $userId = $_SESSION['user']['user_id'];
         $userRole = $_SESSION['user']['role'];
@@ -69,7 +69,7 @@ class DashboardController extends Controller
     /**
      * Display staff dashboard
      */
-    public function index()
+    public function index(): void
     {
         $userRole = $_SESSION['user']['role'];
 
@@ -103,7 +103,7 @@ class DashboardController extends Controller
     /**
      * Display tutor dashboard
      */
-    public function tutor()
+    public function tutor(): void
     {
         $userId = $_SESSION['user']['user_id'];
         $userRole = $_SESSION['user']['role'];
@@ -150,7 +150,7 @@ class DashboardController extends Controller
     /**
      * Display report for students without tutors
      */
-    public function studentsWithoutTutor()
+    public function studentsWithoutTutor(): void
     {
         $userRole = $_SESSION['user']['role'];
 
@@ -171,7 +171,7 @@ class DashboardController extends Controller
     /**
      * Display report for students with no recent interaction
      */
-    public function studentsWithoutInteraction()
+    public function studentsWithoutInteraction(): void
     {
         $userRole = $_SESSION['user']['role'];
 
@@ -198,7 +198,7 @@ class DashboardController extends Controller
     /**
      * Display tutor activity report
      */
-    public function tutorActivity()
+    public function tutorActivity(): void
     {
         $userRole = $_SESSION['user']['role'];
 
@@ -213,6 +213,103 @@ class DashboardController extends Controller
 
         $this->view('dashboard/tutor_activity', [
             'tutors' => $tutors
+        ]);
+    }
+
+    //test new function here
+
+    /**
+     * Display time-based activity report
+     */
+    public function timeBasedActivity(): void
+    {
+        $userRole = $_SESSION['user']['role'];
+
+        // Only staff can access this report
+        if ($userRole !== 'staff') {
+            $_SESSION['error'] = "Access denied.";
+            header("Location: ?url=home/index");
+            exit;
+        }
+
+        // Get period parameter (weekly/monthly/term)
+        $period = isset($_GET['period']) ? $_GET['period'] : 'weekly';
+        if (!in_array($period, ['weekly', 'monthly', 'term'])) {
+            $period = 'weekly'; // Default to weekly if invalid value provided
+        }
+
+        // Get date range parameters
+        $startDate = isset($_GET['start_date']) ? $_GET['start_date'] : date('Y-m-d', strtotime('-30 days'));
+        $endDate = isset($_GET['end_date']) ? $_GET['end_date'] : date('Y-m-d');
+
+        // Get activity data
+        $activityData = $this->dashboardModel->getTimeBasedActivity($period, $startDate, $endDate);
+
+        $this->view('dashboard/time_based_activity', [
+            'period' => $period,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+            'activityData' => $activityData
+        ]);
+    }
+
+    /**
+     * Display peak usage times report
+     */
+    public function peakUsageTimes(): void
+    {
+        $userRole = $_SESSION['user']['role'];
+
+        // Only staff can access this report
+        if ($userRole !== 'staff') {
+            $_SESSION['error'] = "Access denied.";
+            header("Location: ?url=home/index");
+            exit;
+        }
+
+        // Get date range parameters
+        $startDate = isset($_GET['start_date']) ? $_GET['start_date'] : date('Y-m-d', strtotime('-30 days'));
+        $endDate = isset($_GET['end_date']) ? $_GET['end_date'] : date('Y-m-d');
+
+        // Get peak usage data
+        $peakData = $this->dashboardModel->getPeakUsageTimes($startDate, $endDate);
+
+        $this->view('dashboard/peak_usage_times', [
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+            'peakData' => $peakData
+        ]);
+    }
+
+    /**
+     * Display comparison report between time periods
+     */
+    public function compareTimePeriods(): void
+    {
+        $userRole = $_SESSION['user']['role'];
+
+        // Only staff can access this report
+        if ($userRole !== 'staff') {
+            $_SESSION['error'] = "Access denied.";
+            header("Location: ?url=home/index");
+            exit;
+        }
+
+        // Default to comparing the last two months if no dates provided
+        $period1Start = isset($_GET['period1_start']) ? $_GET['period1_start'] : date('Y-m-d', strtotime('-60 days'));
+        $period1End = isset($_GET['period1_end']) ? $_GET['period1_end'] : date('Y-m-d', strtotime('-31 days'));
+        $period2Start = isset($_GET['period2_start']) ? $_GET['period2_start'] : date('Y-m-d', strtotime('-30 days'));
+        $period2End = isset($_GET['period2_end']) ? $_GET['period2_end'] : date('Y-m-d');
+
+        // Get comparison data
+        $comparisonData = $this->dashboardModel->getComparisonData($period1Start, $period1End, $period2Start, $period2End);
+
+        $this->view('dashboard/compare_time_periods', [
+            'period1Start' => $period1Start,
+            'period1End' => $period1End,
+            'period2Start' => $period2Start,
+            'period2End' => $period2End,
+            'comparisonData' => $comparisonData
         ]);
     }
 }
