@@ -33,10 +33,11 @@ ob_start();
 
                             <!-- Document Upload Section -->
                             <div class="mb-3">
-                                <label for="document" class="form-label">Attach Document (Optional)</label>
-                                <input type="file" class="form-control" id="document" name="document">
+                                <label for="document" class="form-label">Attach Documents (Optional)</label>
+                                <input type="file" class="form-control" id="document" name="document[]" multiple>
                                 <div class="form-text">
-                                    Allowed file types: PDF, DOC, DOCX, and TXT. Maximum size: 10 MB.
+                                    Allowed file types: PDF, DOC, DOCX, and TXT. Maximum size per file: 10 MB.
+                                    You can select multiple files to upload at once.
                                 </div>
                             </div>
 

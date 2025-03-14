@@ -95,27 +95,9 @@ class DocumentController extends Controller
             exit;
         }
 
-        // Handle file upload
-        if (!isset($_FILES['document']) || $_FILES['document']['error'] !== UPLOAD_ERR_OK) {
-            $_SESSION['error'] = "File upload failed. Please try again.";
-            header("Location: ?url=document/upload");
-            exit;
-        }
-
-        $uploadedFile = $_FILES['document'];
-
-        // Validate file type and size
-        $allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
-        $maxSize = 10 * 1024 * 1024; // 10 MB
-
-        if (!in_array($uploadedFile['type'], $allowedTypes)) {
-            $_SESSION['error'] = "Invalid file type. Allowed types are PDF, DOC, DOCX, and TXT.";
-            header("Location: ?url=document/upload");
-            exit;
-        }
-
-        if ($uploadedFile['size'] > $maxSize) {
-            $_SESSION['error'] = "File size exceeds the maximum limit of 10 MB.";
+        // Check if any files were uploaded
+        if (!isset($_FILES['document']) || empty($_FILES['document']['name'][0])) {
+            $_SESSION['error'] = "No files were uploaded. Please select at least one file.";
             header("Location: ?url=document/upload");
             exit;
         }
@@ -126,49 +108,95 @@ class DocumentController extends Controller
             mkdir($uploadDir, 0777, true);
         }
 
-        // Generate unique filename
-        $originalName = $uploadedFile['name'];
-        $extension = pathinfo($originalName, PATHINFO_EXTENSION);
-        $fileName = uniqid('doc_') . '.' . $extension;
-        $filePath = $uploadDir . $fileName;
+        // Define allowed file types and maximum size
+        $allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+        $maxSize = 10 * 1024 * 1024; // 10 MB
 
-        // Move the uploaded file
-        if (!move_uploaded_file($uploadedFile['tmp_name'], $filePath)) {
-            $_SESSION['error'] = "Failed to save the uploaded file. Please try again.";
-            header("Location: ?url=document/upload");
-            exit;
+        // Track success and errors
+        $successCount = 0;
+        $errorFiles = [];
+
+        // Process each uploaded file
+        $fileCount = count($_FILES['document']['name']);
+        for ($i = 0; $i < $fileCount; $i++) {
+            // Skip if no file was uploaded in this slot
+            if ($_FILES['document']['error'][$i] === UPLOAD_ERR_NO_FILE) {
+                continue;
+            }
+
+            // Check for upload errors
+            if ($_FILES['document']['error'][$i] !== UPLOAD_ERR_OK) {
+                $errorFiles[] = $_FILES['document']['name'][$i] . " (Upload error)";
+                continue;
+            }
+
+            $fileName = $_FILES['document']['name'][$i];
+            $fileType = $_FILES['document']['type'][$i];
+            $fileSize = $_FILES['document']['size'][$i];
+            $fileTmpName = $_FILES['document']['tmp_name'][$i];
+
+            // Validate file type
+            if (!in_array($fileType, $allowedTypes)) {
+                $errorFiles[] = $fileName . " (Invalid file type)";
+                continue;
+            }
+
+            // Validate file size
+            if ($fileSize > $maxSize) {
+                $errorFiles[] = $fileName . " (Exceeds size limit of 10MB)";
+                continue;
+            }
+
+            // Generate unique filename
+            $extension = pathinfo($fileName, PATHINFO_EXTENSION);
+            $uniqueFileName = uniqid('doc_') . '.' . $extension;
+            $filePath = $uploadDir . $uniqueFileName;
+
+            // Move the uploaded file
+            if (!move_uploaded_file($fileTmpName, $filePath)) {
+                $errorFiles[] = $fileName . " (Failed to save file)";
+                continue;
+            }
+
+            // Save document info to database
+            $documentData = [
+                'uploader_id' => $uploaderId,
+                'student_id' => $studentId,
+                'tutor_id' => $tutorId,
+                'file_path' => 'uploads/document/' . $uniqueFileName,
+                'file_name' => $fileName,
+                'file_type' => $fileType,
+                'file_size' => $fileSize
+            ];
+
+            $documentId = $this->documentModel->createDocument($documentData);
+
+            if ($documentId) {
+                $successCount++;
+
+                // Create notification for the other party
+                $notificationReceiverId = ($userRole === 'student') ? $tutorId : $studentId;
+                $senderName = $_SESSION['user']['first_name'] . ' ' . $_SESSION['user']['last_name'];
+
+                $notificationText = "$senderName has uploaded a new document: " . htmlspecialchars($fileName);
+                $this->notificationModel->createNotification($notificationReceiverId, $notificationText);
+            } else {
+                $errorFiles[] = $fileName . " (Database error)";
+            }
         }
 
-        // Save document info to database
-        $documentData = [
-            'uploader_id' => $uploaderId,
-            'student_id' => $studentId,
-            'tutor_id' => $tutorId,
-            'file_path' => 'uploads/document/' . $fileName,
-            'file_name' => $originalName,
-            'file_type' => $uploadedFile['type'],
-            'file_size' => $uploadedFile['size']
-        ];
-
-        $documentId = $this->documentModel->createDocument($documentData);
-
-        if ($documentId) {
-            // Create notification for the other party
-            $notificationReceiverId = ($userRole === 'student') ? $tutorId : $studentId;
-            $senderName = $_SESSION['user']['first_name'] . ' ' . $_SESSION['user']['last_name'];
-
-            $notificationText = "$senderName has uploaded a new document: " . htmlspecialchars($originalName);
-            $this->notificationModel->createNotification($notificationReceiverId, $notificationText);
-
-            $_SESSION['success'] = "Document uploaded successfully.";
-            header("Location: ?url=document/list");
-        } else {
-            $_SESSION['error'] = "Failed to save document information. Please try again.";
-            header("Location: ?url=document/upload");
+        // Set appropriate session messages
+        if ($successCount > 0) {
+            $_SESSION['success'] = "$successCount document(s) uploaded successfully.";
         }
+
+        if (!empty($errorFiles)) {
+            $_SESSION['error'] = "Failed to upload " . count($errorFiles) . " file(s): " . implode(", ", $errorFiles);
+        }
+
+        header("Location: ?url=document/list");
         exit;
     }
-
     /**
      * List document for the current user
      */

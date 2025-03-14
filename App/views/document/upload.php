@@ -47,10 +47,11 @@ ob_start();
                             <?php endif; ?>
 
                             <div class="mb-3">
-                                <label for="document" class="form-label">Select Document</label>
-                                <input type="file" class="form-control" id="document" name="document" required>
+                                <label for="document" class="form-label">Select Documents</label>
+                                <input type="file" class="form-control" id="document" name="document[]" multiple required>
                                 <div class="form-text">
-                                    Allowed file types: PDF, DOC, DOCX, and TXT. Maximum size: 10 MB.
+                                    Allowed file types: PDF, DOC, DOCX, and TXT. Maximum size per file: 10 MB.
+                                    You can select multiple files to upload at once.
                                 </div>
                             </div>
 

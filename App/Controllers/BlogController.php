@@ -103,210 +103,6 @@ class BlogController extends Controller
     }
 
     /**
-     * Process and store a new blog - UPDATED for student blogs
-     */
-    /**
-     * Process and store a new blog with optional document upload
-     */
-    public function store()
-    {
-        // Check if user is logged in
-        if (!isset($_SESSION['user'])) {
-            header("Location: ?url=login");
-            exit;
-        }
-
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header("Location: ?url=blog/create");
-            exit;
-        }
-
-        $userId = $_SESSION['user']['user_id'];
-        $userRole = $_SESSION['user']['role'];
-        $title = $_POST['title'] ?? '';
-        $content = $_POST['content'] ?? '';
-
-        // Initialize document variables
-        $documentId = null;
-        $hasDocument = isset($_FILES['document']) && $_FILES['document']['error'] !== UPLOAD_ERR_NO_FILE;
-
-        // Process document upload if present
-        if ($hasDocument) {
-            // Handle file upload
-            if ($_FILES['document']['error'] !== UPLOAD_ERR_OK) {
-                $_SESSION['error'] = "File upload failed. Please try again.";
-                header("Location: ?url=blog/create");
-                exit;
-            }
-
-            $uploadedFile = $_FILES['document'];
-
-            // Validate file type and size
-            $allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
-            $maxSize = 10 * 1024 * 1024; // 10 MB
-
-            if (!in_array($uploadedFile['type'], $allowedTypes)) {
-                $_SESSION['error'] = "Invalid file type. Allowed types are PDF, DOC, DOCX, and TXT.";
-                header("Location: ?url=blog/create");
-                exit;
-            }
-
-            if ($uploadedFile['size'] > $maxSize) {
-                $_SESSION['error'] = "File size exceeds the maximum limit of 10 MB.";
-                header("Location: ?url=blog/create");
-                exit;
-            }
-
-            // Create upload directory if it doesn't exist
-            $uploadDir = '../uploads/document/';
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0777, true);
-            }
-
-            // Generate unique filename
-            $originalName = $uploadedFile['name'];
-            $extension = pathinfo($originalName, PATHINFO_EXTENSION);
-            $fileName = uniqid('doc_') . '.' . $extension;
-            $filePath = $uploadDir . $fileName;
-
-            // Move the uploaded file
-            if (!move_uploaded_file($uploadedFile['tmp_name'], $filePath)) {
-                $_SESSION['error'] = "Failed to save the uploaded file. Please try again.";
-                header("Location: ?url=blog/create");
-                exit;
-            }
-        }
-
-        // For students, handle differently
-        if ($userRole === 'student') {
-            $tutorId = $_POST['tutor_id'] ?? null;
-
-            if (!$tutorId || empty($title) || empty($content)) {
-                $_SESSION['error'] = "All required fields must be filled out.";
-                header("Location: ?url=blog/create");
-                exit;
-            }
-
-            // Create blog data
-            $blogData = [
-                'tutor_id' => $tutorId, // Use tutor's ID as owner (keeps model consistent)
-                'title' => $title,
-                'content' => $content,
-                'created_by_student' => $userId // Add a flag if needed
-            ];
-
-            // Create the blog
-            $blogId = $this->blogModel->createBlog($blogData);
-
-            if ($blogId) {
-                // Add the student as a participant
-                $this->blogParticipantModel->addParticipant($blogId, $userId);
-
-                // Create notification for the tutor
-                $studentName = $_SESSION['user']['first_name'] . ' ' . $_SESSION['user']['last_name'];
-                $notificationText = "$studentName has created a new blog: " . htmlspecialchars($title);
-                $this->notificationModel->createNotification($tutorId, $notificationText);
-
-                // Save document if uploaded
-                if ($hasDocument) {
-                    // Create document record in database
-                    $documentData = [
-                        'uploader_id' => $userId,
-                        'student_id' => $userId,
-                        'tutor_id' => $tutorId,
-                        'file_path' => 'uploads/document/' . $fileName,
-                        'file_name' => $originalName,
-                        'file_type' => $uploadedFile['type'],
-                        'file_size' => $uploadedFile['size']
-                    ];
-
-                    $documentModel = new \App\Models\Document();
-                    $documentId = $documentModel->createDocument($documentData);
-
-                    // Associate document with blog
-                    if ($documentId) {
-                        $blogDocumentModel = new \App\Models\BlogDocument();
-                        $blogDocumentModel->addDocumentToBlog($blogId, $documentId);
-                    }
-                }
-
-                $_SESSION['success'] = "Blog created successfully.";
-                header("Location: ?url=blog/view&id=" . $blogId);
-            } else {
-                $_SESSION['error'] = "Failed to create blog. Please try again.";
-                header("Location: ?url=blog/create");
-            }
-            exit;
-        } else {
-            // Original tutor blog creation logic
-            $selectedStudents = $_POST['student_ids'] ?? [];
-
-            // Validate input
-            if (empty($title) || empty($content) || ($userRole === 'tutor' && empty($selectedStudents))) {
-                $_SESSION['error'] = "All required fields must be filled out.";
-                header("Location: ?url=blog/create");
-                exit;
-            }
-
-            // Create blog
-            $blogData = [
-                'tutor_id' => $userId,
-                'title' => $title,
-                'content' => $content
-            ];
-
-            $blogId = $this->blogModel->createBlog($blogData);
-
-            if ($blogId) {
-                // Add selected students as participants
-                if (!empty($selectedStudents)) {
-                    foreach ($selectedStudents as $studentId) {
-                        $this->blogParticipantModel->addParticipant($blogId, $studentId);
-
-                        // Create notification for each student
-                        $tutorName = $_SESSION['user']['first_name'] . ' ' . $_SESSION['user']['last_name'];
-                        $notificationText = "$tutorName has added you to a new blog: " . htmlspecialchars($title);
-                        $this->notificationModel->createNotification($studentId, $notificationText);
-                    }
-                }
-
-                // Save document if uploaded
-                if ($hasDocument) {
-                    // Determine the student ID (we'll use the first student if multiple)
-                    $studentId = !empty($selectedStudents) ? $selectedStudents[0] : null;
-
-                    // Create document record in database
-                    $documentData = [
-                        'uploader_id' => $userId,
-                        'student_id' => $studentId,
-                        'tutor_id' => $userId,
-                        'file_path' => 'uploads/document/' . $fileName,
-                        'file_name' => $originalName,
-                        'file_type' => $uploadedFile['type'],
-                        'file_size' => $uploadedFile['size']
-                    ];
-
-                    $documentModel = new \App\Models\Document();
-                    $documentId = $documentModel->createDocument($documentData);
-
-                    // Associate document with blog
-                    if ($documentId) {
-                        $blogDocumentModel = new \App\Models\BlogDocument();
-                        $blogDocumentModel->addDocumentToBlog($blogId, $documentId);
-                    }
-                }
-
-                $_SESSION['success'] = "Blog created successfully.";
-                header("Location: ?url=blog/view&id=" . $blogId);
-            } else {
-                $_SESSION['error'] = "Failed to create blog. Please try again.";
-                header("Location: ?url=blog/create");
-            }
-            exit;
-        }
-    }
-
-    /**
      * View a specific blog with comments and attached documents
      */
     public function viewDetails(): void
@@ -689,5 +485,245 @@ class BlogController extends Controller
             header("Location: ?url=blog/view&id=" . $blogId);
         }
         exit;
+    }
+
+    /**
+     * Process and store a new blog with optional multiple document uploads
+     */
+    public function store()
+    {
+        // Check if user is logged in
+        if (!isset($_SESSION['user'])) {
+            header("Location: ?url=login");
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header("Location: ?url=blog/create");
+            exit;
+        }
+
+        $userId = $_SESSION['user']['user_id'];
+        $userRole = $_SESSION['user']['role'];
+        $title = $_POST['title'] ?? '';
+        $content = $_POST['content'] ?? '';
+
+        // Check for file uploads
+        $hasDocuments = isset($_FILES['document']) && !empty($_FILES['document']['name'][0]);
+        $uploadedDocumentIds = []; // To store IDs of successfully uploaded documents
+
+        // For students, handle differently
+        if ($userRole === 'student') {
+            $tutorId = $_POST['tutor_id'] ?? null;
+
+            if (!$tutorId || empty($title) || empty($content)) {
+                $_SESSION['error'] = "All required fields must be filled out.";
+                header("Location: ?url=blog/create");
+                exit;
+            }
+
+            // Create blog data
+            $blogData = [
+                'tutor_id' => $tutorId, // Use tutor's ID as owner (keeps model consistent)
+                'title' => $title,
+                'content' => $content,
+                'created_by_student' => $userId // Add a flag if needed
+            ];
+
+            // Create the blog
+            $blogId = $this->blogModel->createBlog($blogData);
+
+            if ($blogId) {
+                // Add the student as a participant
+                $this->blogParticipantModel->addParticipant($blogId, $userId);
+
+                // Create notification for the tutor
+                $studentName = $_SESSION['user']['first_name'] . ' ' . $_SESSION['user']['last_name'];
+                $notificationText = "$studentName has created a new blog: " . htmlspecialchars($title);
+                $this->notificationModel->createNotification($tutorId, $notificationText);
+
+                // Process document uploads if any
+                if ($hasDocuments) {
+                    $uploadedDocumentIds = $this->processDocumentUploads($userId, $userId, $tutorId, $_FILES['document']);
+                }
+
+                // Associate documents with blog if any were uploaded
+                if (!empty($uploadedDocumentIds)) {
+                    $this->associateDocumentsWithBlog($blogId, $uploadedDocumentIds);
+                }
+
+                $_SESSION['success'] = "Blog created successfully.";
+                header("Location: ?url=blog/view&id=" . $blogId);
+            } else {
+                $_SESSION['error'] = "Failed to create blog. Please try again.";
+                header("Location: ?url=blog/create");
+            }
+            exit;
+        } else {
+            // Original tutor blog creation logic
+            $selectedStudents = $_POST['student_ids'] ?? [];
+
+            // Validate input
+            if (empty($title) || empty($content) || ($userRole === 'tutor' && empty($selectedStudents))) {
+                $_SESSION['error'] = "All required fields must be filled out.";
+                header("Location: ?url=blog/create");
+                exit;
+            }
+
+            // Create blog
+            $blogData = [
+                'tutor_id' => $userId,
+                'title' => $title,
+                'content' => $content
+            ];
+
+            $blogId = $this->blogModel->createBlog($blogData);
+
+            if ($blogId) {
+                // Add selected students as participants
+                if (!empty($selectedStudents)) {
+                    foreach ($selectedStudents as $studentId) {
+                        $this->blogParticipantModel->addParticipant($blogId, $studentId);
+
+                        // Create notification for each student
+                        $tutorName = $_SESSION['user']['first_name'] . ' ' . $_SESSION['user']['last_name'];
+                        $notificationText = "$tutorName has added you to a new blog: " . htmlspecialchars($title);
+                        $this->notificationModel->createNotification($studentId, $notificationText);
+                    }
+                }
+
+                // Process document uploads if any
+                if ($hasDocuments) {
+                    // Determine the student ID (we'll use the first student if multiple)
+                    $studentId = !empty($selectedStudents) ? $selectedStudents[0] : null;
+                    $uploadedDocumentIds = $this->processDocumentUploads($userId, $studentId, $userId, $_FILES['document']);
+                }
+
+                // Associate documents with blog if any were uploaded
+                if (!empty($uploadedDocumentIds)) {
+                    $this->associateDocumentsWithBlog($blogId, $uploadedDocumentIds);
+                }
+
+                $_SESSION['success'] = "Blog created successfully.";
+                header("Location: ?url=blog/view&id=" . $blogId);
+            } else {
+                $_SESSION['error'] = "Failed to create blog. Please try again.";
+                header("Location: ?url=blog/create");
+            }
+            exit;
+        }
+    }
+
+    /**
+     * Process multiple document uploads
+     *
+     * @param int $uploaderId ID of the user uploading the documents
+     * @param int $studentId Student ID
+     * @param int $tutorId Tutor ID
+     * @param array $files Files array from $_FILES
+     * @return array Array of document IDs that were successfully uploaded
+     */
+    private function processDocumentUploads($uploaderId, $studentId, $tutorId, $files)
+    {
+        $uploadedDocumentIds = [];
+        $documentModel = new \App\Models\Document();
+
+        // Create upload directory if it doesn't exist
+        $uploadDir = '../uploads/document/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+
+        // Define allowed file types and maximum size
+        $allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+        $maxSize = 10 * 1024 * 1024; // 10 MB
+
+        // Track success and errors
+        $successCount = 0;
+        $errorFiles = [];
+
+        // Process each uploaded file
+        $fileCount = count($files['name']);
+        for ($i = 0; $i < $fileCount; $i++) {
+            // Skip if no file was uploaded in this slot
+            if ($files['error'][$i] === UPLOAD_ERR_NO_FILE) {
+                continue;
+            }
+
+            // Check for upload errors
+            if ($files['error'][$i] !== UPLOAD_ERR_OK) {
+                $errorFiles[] = $files['name'][$i] . " (Upload error)";
+                continue;
+            }
+
+            $fileName = $files['name'][$i];
+            $fileType = $files['type'][$i];
+            $fileSize = $files['size'][$i];
+            $fileTmpName = $files['tmp_name'][$i];
+
+            // Validate file type
+            if (!in_array($fileType, $allowedTypes)) {
+                $errorFiles[] = $fileName . " (Invalid file type)";
+                continue;
+            }
+
+            // Validate file size
+            if ($fileSize > $maxSize) {
+                $errorFiles[] = $fileName . " (Exceeds size limit of 10MB)";
+                continue;
+            }
+
+            // Generate unique filename
+            $extension = pathinfo($fileName, PATHINFO_EXTENSION);
+            $uniqueFileName = uniqid('doc_') . '.' . $extension;
+            $filePath = $uploadDir . $uniqueFileName;
+
+            // Move the uploaded file
+            if (!move_uploaded_file($fileTmpName, $filePath)) {
+                $errorFiles[] = $fileName . " (Failed to save file)";
+                continue;
+            }
+
+            // Save document info to database
+            $documentData = [
+                'uploader_id' => $uploaderId,
+                'student_id' => $studentId,
+                'tutor_id' => $tutorId,
+                'file_path' => 'uploads/document/' . $uniqueFileName,
+                'file_name' => $fileName,
+                'file_type' => $fileType,
+                'file_size' => $fileSize
+            ];
+
+            $documentId = $documentModel->createDocument($documentData);
+
+            if ($documentId) {
+                $uploadedDocumentIds[] = $documentId;
+                $successCount++;
+            } else {
+                $errorFiles[] = $fileName . " (Database error)";
+            }
+        }
+
+        // Set error message if any files failed to upload
+        if (!empty($errorFiles)) {
+            $_SESSION['error'] = "Failed to upload " . count($errorFiles) . " file(s): " . implode(", ", $errorFiles);
+        }
+
+        return $uploadedDocumentIds;
+    }
+
+    /**
+     * Associate multiple documents with a blog
+     *
+     * @param int $blogId Blog ID
+     * @param array $documentIds Array of document IDs to associate
+     */
+    private function associateDocumentsWithBlog($blogId, $documentIds)
+    {
+        $blogDocumentModel = new \App\Models\BlogDocument();
+        foreach ($documentIds as $documentId) {
+            $blogDocumentModel->addDocumentToBlog($blogId, $documentId);
+        }
     }
 }
