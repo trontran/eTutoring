@@ -29,7 +29,8 @@ require_once '../app/models/Dashboard.php';
 require_once '../app/controllers/DashboardController.php';
 require_once '../app/models/BlogDocument.php';
 require_once '../vendor/autoload.php';
-
+require_once '../app/models/EmailQueue.php';
+require_once '../app/controllers/EmailQueueController.php';
 
 
 
@@ -292,6 +293,15 @@ $controller->viewDetails();
 } elseif ($url === 'dashboard/compareTimePeriods') {
     $controller = new DashboardController();
     $controller->compareTimePeriods();
+    //email queue
+} elseif ($url === 'emailqueue/process') {
+    require_once '../app/controllers/EmailQueueController.php';
+    $controller = new EmailQueueController();
+    $controller->process();
+} elseif ($url === 'emailqueue/status') {
+    require_once '../app/controllers/EmailQueueController.php';
+    $controller = new EmailQueueController();
+    $controller->status();
 } else {
     echo "404 Not Found or Route not handled yet.";
 }

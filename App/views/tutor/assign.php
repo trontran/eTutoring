@@ -7,13 +7,31 @@ ob_start();
         <div class="card-header bg-primary text-white d-flex align-items-center">
             <h2 class="mb-0"><i class="bi bi-person-plus-fill"></i> Allocate Personal Tutor</h2>
         </div>
+
         <div class="card-body">
             <?php if (!empty($_GET['success'])): ?>
                 <div class="alert alert-success">
-                    <i class="bi bi-check-circle-fill"></i> Tutor Allocate and email sent successfully!
+                    <i class="bi bi-check-circle-fill"></i> Tutor Allocate successfully!
                 </div>
             <?php endif; ?>
+            <?php if (!empty($_GET['success'])): ?>
+                <div class="alert alert-success">
+                    <i class="bi bi-check-circle-fill"></i> Tutor allocated and emails queued successfully!
 
+                    <?php if (isset($_SESSION['emails_queued']) && $_SESSION['emails_queued'] > 0): ?>
+                        <div class="mt-3">
+                            <p><?= $_SESSION['emails_queued'] ?> emails are queued. You can send them now or later.</p>
+                            <a href="?url=emailqueue/process" class="btn btn-primary">
+                                <i class="bi bi-envelope"></i> Send Emails Now (<?= $_SESSION['emails_queued'] ?>)
+                            </a>
+                            <a href="?url=emailqueue/status" class="btn btn-outline-secondary">
+                                <i class="bi bi-info-circle"></i> View Email Queue Status
+                            </a>
+                        </div>
+                        <?php unset($_SESSION['emails_queued']); ?>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
             <p class="text-muted">
                 Please select a tutor, then choose one or more students, and click "Allocate Tutor".
             </p>
@@ -70,6 +88,8 @@ ob_start();
                 </div>
             </form>
         </div>
+
+
     </div>
 
 <?php

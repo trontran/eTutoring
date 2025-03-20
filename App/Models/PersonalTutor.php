@@ -27,6 +27,7 @@ class PersonalTutor
 
     public function assignTutor($student_id, $tutor_id, $assigned_by): bool
     {
+//        ini_set('max_execution_time', 300);
         $query = "INSERT INTO PersonalTutors (student_id, tutor_id, assigned_by) 
                   VALUES (:student_id, :tutor_id, :assigned_by) 
                   ON DUPLICATE KEY UPDATE tutor_id = VALUES(tutor_id), assigned_by = VALUES(assigned_by)";
@@ -297,6 +298,30 @@ class PersonalTutor
         MailHelper::sendMail($newTutor['email'], $newTutorSubject, $newTutorBody);
 
         return true;
+    }
+
+    //test queue email
+
+    /**
+     * Assign a tutor to a student without sending emails
+     *
+     * @param int $student_id Student ID
+     * @param int $tutor_id Tutor ID
+     * @param int $assigned_by User ID of who assigned the tutor
+     * @return bool True if successful, false otherwise
+     */
+    public function assignTutorWithoutEmail($student_id, $tutor_id, $assigned_by): bool
+    {
+        $query = "INSERT INTO PersonalTutors (student_id, tutor_id, assigned_by) 
+              VALUES (:student_id, :tutor_id, :assigned_by) 
+              ON DUPLICATE KEY UPDATE tutor_id = VALUES(tutor_id), assigned_by = VALUES(assigned_by)";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(":student_id", $student_id, PDO::PARAM_INT);
+        $stmt->bindParam(":tutor_id", $tutor_id, PDO::PARAM_INT);
+        $stmt->bindParam(":assigned_by", $assigned_by, PDO::PARAM_INT);
+
+        return $stmt->execute();
     }
 
 }
