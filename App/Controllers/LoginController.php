@@ -89,34 +89,34 @@ class LoginController extends Controller
     }
 
     // Xử lý đăng nhập
-    public function process()
-    {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $email = $_POST['email'];
-            $password = $_POST['password'];
-
-            $user = $this->userModel->getUserByEmail($email);
-
-            if ($user && password_verify($password, $user['password_hash'])) {
-                // Lưu session với key đúng
-                $_SESSION['user'] = [
-                    'user_id' => $user['user_id'], // Đổi 'id' thành 'user_id'
-                    'first_name' => $user['first_name'],
-                    'last_name' => $user['last_name'],
-                    'email' => $user['email'],
-                    'role' => $user['role']
-                ];
-                // Chuyển hướng đến dashboard
-                header("Location: /eTutoring/public/?url=user/index");
-                exit;
-            } else {
-                $this->view('auth/login', ['error' => 'Invalid email or password']);
-            }
-        } else {
-            header("Location: ?url=login");
-            exit;
-        }
-    }
+//    public function process()
+//    {
+//        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+//            $email = $_POST['email'];
+//            $password = $_POST['password'];
+//
+//            $user = $this->userModel->getUserByEmail($email);
+//
+//            if ($user && password_verify($password, $user['password_hash'])) {
+//                // Lưu session với key đúng
+//                $_SESSION['user'] = [
+//                    'user_id' => $user['user_id'], // Đổi 'id' thành 'user_id'
+//                    'first_name' => $user['first_name'],
+//                    'last_name' => $user['last_name'],
+//                    'email' => $user['email'],
+//                    'role' => $user['role']
+//                ];
+//                // Chuyển hướng đến dashboard
+//                header("Location: /eTutoring/public/?url=user/index");
+//                exit;
+//            } else {
+//                $this->view('auth/login', ['error' => 'Invalid email or password']);
+//            }
+//        } else {
+//            header("Location: ?url=login");
+//            exit;
+//        }
+//    }
 
     public function logout()
     {
@@ -142,5 +142,44 @@ class LoginController extends Controller
         // Chuyển hướng về trang chủ
         header("Location: ?url=home/index");
         exit;
+    }
+
+    //test new function for sprint 6
+    public function process()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $email = $_POST['email'];
+            $password = $_POST['password'];
+
+            $user = $this->userModel->getUserByEmail($email);
+
+            if ($user && password_verify($password, $user['password_hash'])) {
+                // Get previous login time before updating it
+                $previousLogin = $this->userModel->getPreviousLoginTime($user['user_id']);
+
+                // Update login timestamps
+                $this->userModel->updateLoginTimestamps($user['user_id']);
+
+                // Store previous login time in session for display
+                $_SESSION['previous_login'] = $previousLogin;
+
+                // Original login processing continues...
+                $_SESSION['user'] = [
+                    'user_id' => $user['user_id'],
+                    'first_name' => $user['first_name'],
+                    'last_name' => $user['last_name'],
+                    'email' => $user['email'],
+                    'role' => $user['role']
+                ];
+
+                header("Location: ?url=home/index");
+                exit;
+            } else {
+                $this->view('auth/login', ['error' => 'Invalid email or password']);
+            }
+        } else {
+            header("Location: ?url=login");
+            exit;
+        }
     }
 }

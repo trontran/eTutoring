@@ -26,6 +26,7 @@ if ($isTutor && isset($_SESSION['user']['user_id'])) {
     $personalTutorModel = new App\Models\User();
     $tutees = $personalTutorModel->getTuteesByTutor($_SESSION['user']['user_id']);
 }
+
 ?>
 
     <!-- Hero Section -->
@@ -68,7 +69,7 @@ if ($isTutor && isset($_SESSION['user']['user_id'])) {
         <div class="col-md-4">
             <div class="card h-100 shadow-sm border-0">
                 <div class="card-body text-center">
-                    <!-- Thay bi-mortarboard-fill bằng bi-person-check-fill -->
+
                     <i class="bi bi-person-check-fill fs-1 text-primary"></i>
                     <h5 class="card-title mt-3">Personalized Tutoring</h5>
                     <p class="card-text text-muted">
@@ -80,7 +81,7 @@ if ($isTutor && isset($_SESSION['user']['user_id'])) {
         <div class="col-md-4">
             <div class="card h-100 shadow-sm border-0">
                 <div class="card-body text-center">
-                    <!-- Thay bi-chat-dots bằng bi-chat-left-text-fill -->
+
                     <i class="bi bi-chat-left-text-fill fs-1 text-primary"></i>
                     <h5 class="card-title mt-3">Seamless Communication</h5>
                     <p class="card-text text-muted">
@@ -92,7 +93,7 @@ if ($isTutor && isset($_SESSION['user']['user_id'])) {
         <div class="col-md-4">
             <div class="card h-100 shadow-sm border-0">
                 <div class="card-body text-center">
-                    <!-- Thay bi-journal-text bằng bi-cloud-arrow-up-fill -->
+
                     <i class="bi bi-cloud-arrow-up-fill fs-1 text-primary"></i>
                     <h5 class="card-title mt-3">Resource Sharing</h5>
                     <p class="card-text text-muted">

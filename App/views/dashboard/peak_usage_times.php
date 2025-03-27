@@ -258,7 +258,7 @@ function formatHour($hour) {
         document.addEventListener('DOMContentLoaded', function() {
             // Convert PHP arrays to JavaScript
             <?php
-            // Prepare data for hour charts
+             //Prepare data for hour charts
             $hours = range(0, 23);
             $messageHourData = array_fill(0, 24, 0);
             $meetingHourData = array_fill(0, 24, 0);

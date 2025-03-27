@@ -11,7 +11,7 @@ class User {
         $this->db = Database::getInstance()->getConnection();
     }
 
-    // Lấy danh sách tất cả user
+
     public function getAllUsers() {
         $query = "SELECT * FROM Users ORDER BY created_at DESC";
         $stmt = $this->db->prepare($query);
@@ -19,7 +19,7 @@ class User {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Tạo user mới
+
     public function createUser($data): bool
     {
         $query = "INSERT INTO Users (first_name, last_name, email, password_hash, role) 
@@ -35,7 +35,7 @@ class User {
         ]);
     }
 
-    // Lấy thông tin user theo ID
+
 
     public function getUserById($userId)
     {
@@ -45,7 +45,7 @@ class User {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // Cập nhật thông tin user
+
     public function updateUser($id, $data): bool
     {
         $query = "UPDATE Users SET first_name = :first_name, last_name = :last_name, 
@@ -61,7 +61,7 @@ class User {
         ]);
     }
 
-    // Xóa user
+
     public function deleteUser($id): bool
     {
         $query = "DELETE FROM Users WHERE user_id = :id";
@@ -69,14 +69,14 @@ class User {
         return $stmt->execute([":id" => $id]);
     }
 
-    // Lấy thông tin user theo email
+
     public function getUserByEmail($email) {
         $stmt = $this->db->prepare("SELECT * FROM Users WHERE email = :email LIMIT 1");
         $stmt->execute([":email" => $email]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // Lấy thông tin gia sư của sinh viên
+
     public function getTutorByStudentId($studentId) {
         $query = "SELECT u.user_id AS tutor_id, u.first_name, u.last_name, 
                          t.total_students, t.total_messages 
@@ -88,10 +88,10 @@ class User {
         $stmt = $this->db->prepare($query);
         $stmt->execute([":student_id" => $studentId]);
 
-        return $stmt->fetch(PDO::FETCH_ASSOC); // Trả về thông tin tutor
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // Lấy danh sách sinh viên chưa có gia sư
+
     public function getStudentsWithoutTutor(): array
     {
         $query = "SELECT u.user_id, u.first_name, u.last_name 
@@ -104,7 +104,7 @@ class User {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Lấy danh sách tất cả gia sư
+
     public function getAllTutors(): array
     {
         $query = "SELECT user_id, first_name, last_name FROM Users WHERE role = 'tutor'";
@@ -194,6 +194,53 @@ class User {
         $stmt = $this->db->prepare($query);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    //test new function for sprint 6
+
+    /**
+     * Update the user's login timestamps
+     * @param int $userId User ID
+     * @return bool Success status
+     */
+    public function updateLoginTimestamps($userId)
+    {
+        $currentTime = date('Y-m-d H:i:s');
+
+        // First get the current last_login value
+        $query = "SELECT last_login FROM Users WHERE user_id = :user_id";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+        $lastLogin = $stmt->fetchColumn();
+
+        // Now update both timestamps
+        $query = "UPDATE Users SET 
+              previous_login = :last_login,
+              last_login = :current_time 
+              WHERE user_id = :user_id";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':last_login', $lastLogin, PDO::PARAM_STR);
+        $stmt->bindParam(':current_time', $currentTime, PDO::PARAM_STR);
+        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+
+        return $stmt->execute();
+    }
+
+    /**
+     * Get the previous login time for a user
+     * @param int $userId User ID
+     * @return string|null Previous login timestamp or null if first login
+     */
+    public function getPreviousLoginTime($userId)
+    {
+        $query = "SELECT previous_login FROM Users WHERE user_id = :user_id";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchColumn();
     }
 
 }

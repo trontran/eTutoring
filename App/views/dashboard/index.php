@@ -35,7 +35,7 @@ ob_start();
                     <div class="card-body">
                         <i class="bi bi-chat-dots-fill text-primary" style="font-size: 2rem;"></i>
                         <h5 class="card-title mt-3">Recent Messages</h5>
-                        <p class="card-text display-6 fw-bold"><?= number_format($systemStats['recent_messages']) ?></p>
+                        <p class="card-text display-6 fw-bold"><?= number_format($systemStats['recent_messages'] ?? 0) ?></p>
                         <p class="text-muted">In the last 7 days</p>
                     </div>
                 </div>
@@ -47,7 +47,7 @@ ob_start();
                     <div class="card-body">
                         <i class="bi bi-person-badge-fill text-success" style="font-size: 2rem;"></i>
                         <h5 class="card-title mt-3">Avg. Messages per Tutor</h5>
-                        <p class="card-text display-6 fw-bold"><?= number_format($systemStats['avg_tutor_messages'], 1) ?></p>
+                        <p class="card-text display-6 fw-bold"><?= number_format($systemStats['avg_tutor_messages'] ?? 0, 1) ?></p>
                         <p class="text-muted">All time average</p>
                     </div>
                 </div>
@@ -55,11 +55,11 @@ ob_start();
 
             <!-- Students without tutors -->
             <div class="col-md-3 mb-4">
-                <div class="card shadow-sm text-center h-100 <?= $systemStats['students_without_tutor'] > 0 ? 'border-danger' : '' ?>">
+                <div class="card shadow-sm text-center h-100 <?= ($systemStats['students_without_tutor'] ?? 0) > 0 ? 'border-danger' : '' ?>">
                     <div class="card-body">
                         <i class="bi bi-exclamation-triangle-fill text-danger" style="font-size: 2rem;"></i>
                         <h5 class="card-title mt-3">Students Without Tutor</h5>
-                        <p class="card-text display-6 fw-bold"><?= number_format($systemStats['students_without_tutor']) ?></p>
+                        <p class="card-text display-6 fw-bold"><?= number_format($systemStats['students_without_tutor'] ?? 0) ?></p>
                         <a href="?url=dashboard/studentsWithoutTutor" class="btn btn-sm btn-outline-danger">View List</a>
                     </div>
                 </div>
@@ -67,11 +67,11 @@ ob_start();
 
             <!-- Students without interaction -->
             <div class="col-md-3 mb-4">
-                <div class="card shadow-sm text-center h-100 <?= $systemStats['no_interaction_7days'] > 0 ? 'border-warning' : '' ?>">
+                <div class="card shadow-sm text-center h-100 <?= ($systemStats['no_interaction_7days'] ?? 0) > 0 ? 'border-warning' : '' ?>">
                     <div class="card-body">
                         <i class="bi bi-clock-history text-warning" style="font-size: 2rem;"></i>
                         <h5 class="card-title mt-3">No Recent Interaction</h5>
-                        <p class="card-text display-6 fw-bold"><?= number_format($systemStats['no_interaction_7days']) ?></p>
+                        <p class="card-text display-6 fw-bold"><?= number_format($systemStats['no_interaction_7days'] ?? 0) ?></p>
                         <div class="btn-group">
                             <a href="?url=dashboard/studentsWithoutInteraction&days=7" class="btn btn-sm btn-outline-warning">7 Days</a>
                             <a href="?url=dashboard/studentsWithoutInteraction&days=28" class="btn btn-sm btn-outline-danger">28 Days</a>
@@ -161,15 +161,15 @@ ob_start();
                             </div>
                         </div>
 
-                        <div class="col-md-4 mb-3">
-                            <div class="card h-100">
-                                <div class="card-body">
-                                    <h5 class="card-title"><i class="bi bi-arrow-left-right"></i> Compare Periods</h5>
-                                    <p class="card-text">Compare system activity between two custom time periods.</p>
-                                    <a href="?url=dashboard/compareTimePeriods" class="btn btn-primary">Compare Periods</a>
-                                </div>
-                            </div>
-                        </div>
+<!--                        <div class="col-md-4 mb-3">-->
+<!--                            <div class="card h-100">-->
+<!--                                <div class="card-body">-->
+<!--                                    <h5 class="card-title"><i class="bi bi-arrow-left-right"></i> Compare Periods</h5>-->
+<!--                                    <p class="card-text">Compare system activity between two custom time periods.</p>-->
+<!--                                    <a href="?url=dashboard/compareTimePeriods" class="btn btn-primary">Compare Periods</a>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
                     </div>
                 </div>
             </div>
