@@ -1,5 +1,6 @@
 <?php
 $title = "Page Views Report";
+
 ob_start();
 ?>
 

@@ -52,7 +52,7 @@ ob_start();
             </div>
         </div>
 
-        <!-- Hourly Activity Chart -->
+        <!-- Hourly Activity Results -->
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-success text-white">
                 <h4 class="mb-0"><i class="bi bi-clock"></i> Hourly Activity</h4>
@@ -63,7 +63,6 @@ ob_start();
                         <i class="bi bi-info-circle"></i> No activity data available for the selected period.
                     </div>
                 <?php else: ?>
-                    <canvas id="hourlyActivityChart" height="300"></canvas>
                     <div class="mt-4">
                         <h5>Key Insights</h5>
                         <?php
@@ -89,42 +88,36 @@ ob_start();
                             <li><strong>Total Activity:</strong> <?= number_format($totalActivity) ?> page views in the selected period</li>
                         </ul>
                     </div>
-                <?php endif; ?>
-            </div>
-        </div>
 
-        <!-- Hourly Activity Table -->
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h4 class="mb-0"><i class="bi bi-table"></i> Hourly Activity Data</h4>
-            </div>
-            <div class="card-body">
-                <?php if (empty($hourlyActivity)): ?>
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle"></i> No activity data available for the selected period.
-                    </div>
-                <?php else: ?>
-                    <div class="table-responsive">
-                        <table class="table table-hover" id="hourlyActivityTable">
-                            <thead class="table-light">
+                    <div class="table-responsive mt-4">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-primary">
                             <tr>
                                 <th>Hour</th>
-                                <th class="text-center">Count</th>
+                                <th class="text-center">Page Views</th>
                                 <th class="text-center">Percentage</th>
                             </tr>
                             </thead>
                             <tbody>
                             <?php
-                            foreach ($hourlyActivity as $hour):
-                                $hourFormatted = date('g:i A', strtotime($hour['hour'] . ':00'));
-                                $percentage = ($totalActivity > 0) ? round(($hour['count'] / $totalActivity) * 100, 1) : 0;
+                            // Generate array for all 24 hours with zero counts for missing hours
+                            $hourData = array_fill(0, 24, 0);
+                            foreach ($hourlyActivity as $hour) {
+                                $hourData[(int)$hour['hour']] = (int)$hour['count'];
+                            }
+
+                            for ($i = 0; $i < 24; $i++) {
+                                $hourFormatted = date('g:i A', strtotime($i . ':00'));
+                                $count = $hourData[$i];
+                                $percentage = ($totalActivity > 0) ? round(($count / $totalActivity) * 100, 1) : 0;
+                                $isHighlighted = ($i == $peakHour) ? 'class="table-success"' : '';
                                 ?>
-                                <tr class="<?= ($hour['hour'] == $peakHour) ? 'table-success' : '' ?>">
+                                <tr <?= $isHighlighted ?>>
                                     <td><?= $hourFormatted ?></td>
-                                    <td class="text-center"><?= number_format($hour['count']) ?></td>
+                                    <td class="text-center"><?= number_format($count) ?></td>
                                     <td class="text-center"><?= $percentage ?>%</td>
                                 </tr>
-                            <?php endforeach; ?>
+                            <?php } ?>
                             </tbody>
                         </table>
                     </div>
@@ -132,75 +125,6 @@ ob_start();
             </div>
         </div>
     </div>
-
-    <!-- Include Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            <?php if (!empty($hourlyActivity)): ?>
-            // Prepare data for hourly activity chart
-            const hourLabels = [
-                <?php
-                for ($i = 0; $i < 24; $i++) {
-                    echo "'" . date('g A', strtotime($i . ':00')) . "',";
-                }
-                ?>
-            ];
-
-            const hourData = Array(24).fill(0);
-
-            <?php foreach ($hourlyActivity as $hour): ?>
-            hourData[<?= $hour['hour'] ?>] = <?= $hour['count'] ?>;
-            <?php endforeach; ?>
-
-            // Create hourly activity chart
-            const hourlyCtx = document.getElementById('hourlyActivityChart').getContext('2d');
-            new Chart(hourlyCtx, {
-                type: 'bar',
-                data: {
-                    labels: hourLabels,
-                    datasets: [{
-                        label: 'Page Views',
-                        data: hourData,
-                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Number of Page Views'
-                            }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Hour of Day'
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top'
-                        },
-                        title: {
-                            display: true,
-                            text: 'Page Views by Hour of Day'
-                        }
-                    }
-                }
-            });
-            <?php endif; ?>
-        });
-    </script>
 
 <?php
 $content = ob_get_clean();

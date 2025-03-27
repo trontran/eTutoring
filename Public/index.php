@@ -34,10 +34,8 @@ require_once '../app/controllers/EmailQueueController.php';
 require_once '../app/controllers/SystemMonitoringController.php';
 require_once '../app/models/ActivityTracker.php';
 require_once '../app/middleware/ActivityTrackerMiddleware.php';
-require_once '../app/core/ErrorHandler.php';
 require_once '../app/models/SystemStats.php';
-// Initialize error handler
-//\App\Core\ErrorHandler::init();
+
 // Track page view
 \App\Middleware\ActivityTrackerMiddleware::track();
 

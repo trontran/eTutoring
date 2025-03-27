@@ -1,5 +1,7 @@
 <?php
 $title = "User Activity Report";
+$startDate = isset($_GET['start_date']) ? $_GET['start_date'] : '';
+$endDate = isset($_GET['end_date']) ? $_GET['end_date'] : '';
 ob_start();
 ?>
 
