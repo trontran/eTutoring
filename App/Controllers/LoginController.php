@@ -126,7 +126,11 @@ class LoginController extends Controller
 
         // Xóa tất cả dữ liệu trong session
         $_SESSION = [];
-
+        // Track logout activity
+        if (isset($_SESSION['user']) && isset($_SESSION['user']['user_id'])) {
+            $activityTracker = new \App\Models\ActivityTracker();
+            $activityTracker->trackUserActivity($_SESSION['user']['user_id'], 'logout');
+        }
         // Hủy session
         session_destroy();
 
@@ -171,7 +175,9 @@ class LoginController extends Controller
                     'email' => $user['email'],
                     'role' => $user['role']
                 ];
-
+                // Track login activity
+                $activityTracker = new \App\Models\ActivityTracker();
+                $activityTracker->trackUserActivity($user['user_id'], 'login');
                 header("Location: ?url=home/index");
                 exit;
             }

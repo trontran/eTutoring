@@ -92,6 +92,7 @@ $title = $title ?? 'eTutoring System';
                                         Manage Users</a></li>
                                 <li><a class="dropdown-item" href="?url=tutor/assign"><i
                                                 class="bi bi-person-plus-fill"></i> Assign Tutor</a></li>
+
                             </ul>
                         </li>
                     <?php endif; ?>

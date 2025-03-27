@@ -170,6 +170,15 @@ ob_start();
 <!--                                </div>-->
 <!--                            </div>-->
 <!--                        </div>-->
+                        <div class="col-md-4 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="bi bi-speedometer2"></i> System Monitoring</h5>
+                                    <p class="card-text">View detailed system usage statistics, browser data, and user activity.</p>
+                                    <a href="?url=monitoring/index" class="btn btn-primary">View Monitoring</a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

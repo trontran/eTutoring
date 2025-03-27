@@ -31,7 +31,15 @@ require_once '../app/models/BlogDocument.php';
 require_once '../vendor/autoload.php';
 require_once '../app/models/EmailQueue.php';
 require_once '../app/controllers/EmailQueueController.php';
-
+require_once '../app/controllers/SystemMonitoringController.php';
+require_once '../app/models/ActivityTracker.php';
+require_once '../app/middleware/ActivityTrackerMiddleware.php';
+require_once '../app/core/ErrorHandler.php';
+require_once '../app/models/SystemStats.php';
+// Initialize error handler
+//\App\Core\ErrorHandler::init();
+// Track page view
+\App\Middleware\ActivityTrackerMiddleware::track();
 
 
 // Lấy URL từ query string, ví dụ: ?url=user/index
@@ -302,6 +310,32 @@ $controller->viewDetails();
     require_once '../app/controllers/EmailQueueController.php';
     $controller = new EmailQueueController();
     $controller->status();
+    // System Monitoring Routes
+} elseif ($url === 'monitoring/index') {
+    require_once '../app/controllers/SystemMonitoringController.php';
+    $controller = new SystemMonitoringController();
+    $controller->index();
+} elseif ($url === 'monitoring/pageViews') {
+    require_once '../app/controllers/SystemMonitoringController.php';
+    $controller = new SystemMonitoringController();
+    $controller->pageViews();
+} elseif ($url === 'monitoring/userActivity') {
+    require_once '../app/controllers/SystemMonitoringController.php';
+    $controller = new SystemMonitoringController();
+    $controller->userActivity();
+} elseif ($url === 'monitoring/techUsage') {
+    require_once '../app/controllers/SystemMonitoringController.php';
+    $controller = new SystemMonitoringController();
+    $controller->techUsage();
+} elseif ($url === 'monitoring/usagePatterns') {
+    require_once '../app/controllers/SystemMonitoringController.php';
+    $controller = new SystemMonitoringController();
+    $controller->usagePatterns();
+} elseif ($url === 'monitoring/errors') {
+    require_once '../app/controllers/SystemMonitoringController.php';
+    $controller = new SystemMonitoringController();
+    $controller->errors();
+
 } else {
     echo "404 Not Found or Route not handled yet.";
 }

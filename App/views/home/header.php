@@ -163,6 +163,8 @@ $currentPage = $_GET['url'] ?? 'home/index';
                                 <?php if ($isAdmin): ?>
                                     <li><a class="dropdown-item" href="?url=user/index"><i class="bi bi-people-fill me-2"></i> Manage Users</a></li>
                                     <li><a class="dropdown-item" href="?url=tutor/assign"><i class="bi bi-person-plus-fill me-2"></i> Assign Tutor</a></li>
+<!--                                    <li><a class="dropdown-item" href="?url=analytics/index"><i-->
+<!--                                                    class="bi bi-bar-chart-fill"></i> Phân tích hệ thống</a></li>-->
                                 <?php endif; ?>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="?url=logout"><i class="bi bi-box-arrow-right me-2"></i> Logout</a></li>
