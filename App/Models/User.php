@@ -203,7 +203,7 @@ class User {
      * @param int $userId User ID
      * @return bool Success status
      */
-    public function updateLoginTimestamps($userId)
+    public function updateLoginTimestamps(int $userId): bool
     {
         $currentTime = date('Y-m-d H:i:s');
 
@@ -233,7 +233,7 @@ class User {
      * @param int $userId User ID
      * @return string|null Previous login timestamp or null if first login
      */
-    public function getPreviousLoginTime($userId)
+    public function getPreviousLoginTime(int $userId): ?string
     {
         $query = "SELECT previous_login FROM Users WHERE user_id = :user_id";
         $stmt = $this->db->prepare($query);

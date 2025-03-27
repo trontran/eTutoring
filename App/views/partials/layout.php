@@ -108,23 +108,7 @@ $title = $title ?? 'eTutoring System';
 
     <!--  Main Content -->
     <main class="container mt-4">
-        <!-- Login Notification Alert -->
-        <?php if (isset($_SESSION['first_login']) && $_SESSION['first_login'] === true): ?>
-            <div class="alert alert-success alert-dismissible fade show">
-                <i class="bi bi-hand-thumbs-up"></i>
-                Welcome to eTutoring! This is your first login.
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-            <?php unset($_SESSION['first_login']); // Clear after displaying ?>
-        <?php elseif (isset($_SESSION['previous_login'])): ?>
-            <div class="alert alert-info alert-dismissible fade show">
-                <i class="bi bi-info-circle"></i>
-                Welcome back! Your last login was on
-                <?= date('F j, Y \a\t g:i A', strtotime($_SESSION['previous_login'])); ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-            <?php unset($_SESSION['previous_login']); // Clear after displaying ?>
-        <?php endif; ?>
+
 
         <?= $content ?? '' ?>
     </main>

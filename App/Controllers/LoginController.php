@@ -145,7 +145,7 @@ class LoginController extends Controller
     }
 
     //test new function for sprint 6
-    public function process()
+    public function process(): void
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email = $_POST['email'];
@@ -174,9 +174,9 @@ class LoginController extends Controller
 
                 header("Location: ?url=home/index");
                 exit;
-            } else {
-                $this->view('auth/login', ['error' => 'Invalid email or password']);
             }
+
+            $this->view('auth/login', ['error' => 'Invalid email or password']);
         } else {
             header("Location: ?url=login");
             exit;

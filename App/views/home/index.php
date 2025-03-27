@@ -32,13 +32,21 @@ if ($isTutor && isset($_SESSION['user']['user_id'])) {
     <!-- Hero Section -->
     <section class="hero-section py-5 text-center" style="background: linear-gradient(to right, #0056b3, #007bff);">
         <div class="container">
-            <h1 class="fw-bold text-white">
-                <?php if ($isLoggedIn): ?>
-                    Welcome back, <?= htmlspecialchars($username) ?>!
-                <?php else: ?>
-                    Welcome to eTutoring!
+                <h1 class="fw-bold text-white">
+                    <?php if ($isLoggedIn): ?>
+                        Welcome back, <?= htmlspecialchars($username) ?>!
+                    <?php else: ?>
+                        Welcome to eTutoring!
+                    <?php endif; ?>
+                </h1>
+
+                <?php if ($isLoggedIn && isset($_SESSION['previous_login'])): ?>
+                    <p class="text-white opacity-75">
+                        <i class="bi bi-clock-history"></i> Last login: <?= date('F j, Y \a\t g:i A', strtotime($_SESSION['previous_login'])); ?>
+                    </p>
                 <?php endif; ?>
-            </h1>
+
+
 
             <?php if ($isStudent): ?>
                 <p class="lead text-white">Ready to learn? Explore your courses and connect with your tutor.</p>
