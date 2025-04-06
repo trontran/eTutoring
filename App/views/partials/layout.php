@@ -1,17 +1,17 @@
 <?php
-// Kiểm tra và khởi động session nếu chưa có
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Xác định vai trò của user
+
 $isLoggedIn = isset($_SESSION['user']);
 $isAdmin = isset($_SESSION['user']) && $_SESSION['user']['role'] === 'staff';
 $isStudent = isset($_SESSION['user']) && $_SESSION['user']['role'] === 'student';
 $isTutor = isset($_SESSION['user']) && $_SESSION['user']['role'] === 'tutor';
 $username = $isLoggedIn ? $_SESSION['user']['first_name'] : 'Guest';
 
-// Xác định tiêu đề trang (nếu có)
+
 $title = $title ?? 'eTutoring System';
 ?>
 

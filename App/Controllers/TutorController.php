@@ -46,17 +46,17 @@ class TutorController extends Controller
 //
 //            $personalTutorModel = new PersonalTutor();
 //
-//            // Duyệt qua từng student_id để gán tutor
+//
 //            foreach ($student_ids as $student_id) {
 //                $personalTutorModel->assignTutor($student_id, $tutor_id, $assigned_by);
 //            }
 //
-//            // Redirect về trang assign với thông báo thành công
+//
 //            header("Location: ?url=tutor/assign&success=1");
 //            exit();
 //        }
 //
-//        // Nếu không có dữ liệu hợp lệ, báo lỗi
+//
 //        header("Location: ?url=tutor/assign&error=1");
 //        exit();
 //    }
@@ -74,8 +74,8 @@ class TutorController extends Controller
         }
     
         $tutorId = $_SESSION['user']['user_id'];
-        $filter = $_GET['filter'] ?? "";  // Lấy giá trị tìm kiếm
-        $sortBy = $_GET['sort_by'] ?? "assigned_at";  // Giá trị sắp xếp mặc định
+        $filter = $_GET['filter'] ?? "";
+        $sortBy = $_GET['sort_by'] ?? "assigned_at";
     
         $tutees = $this->personalTutorModel->getTuteesByTutor($tutorId, $filter, $sortBy);
     
@@ -87,9 +87,9 @@ class TutorController extends Controller
     }
 
     public function getTuteesByTutor($tutorId, $filter = "", $sortBy = "assigned_at") {
-    $validSortColumns = ['first_name', 'email', 'assigned_at']; // Chỉ cho phép các giá trị hợp lệ
+    $validSortColumns = ['first_name', 'email', 'assigned_at'];
     if (!in_array($sortBy, $validSortColumns)) {
-        $sortBy = "assigned_at"; // Mặc định nếu giá trị không hợp lệ
+        $sortBy = "assigned_at";
     }
 
     $sql = "SELECT u.user_id, u.first_name, u.last_name, u.email, pt.assigned_at 
@@ -101,7 +101,7 @@ class TutorController extends Controller
         $sql .= " AND (u.first_name LIKE :filter OR u.last_name LIKE :filter OR u.email LIKE :filter)";
     }
 
-    $sql .= " ORDER BY $sortBy ASC";  // Sắp xếp theo tiêu chí được chọn
+    $sql .= " ORDER BY $sortBy ASC";
 
     $stmt = $this->db->prepare($sql);
     $stmt->bindParam(':tutorId', $tutorId, PDO::PARAM_INT);

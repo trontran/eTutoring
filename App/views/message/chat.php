@@ -40,9 +40,9 @@
             const messageForm = document.getElementById("messageForm");
             const messageInput = document.getElementById("messageInput");
             const receiverId = document.getElementById("receiverId").value;
-            let lastMessageId = 0;  // Biến lưu ID của tin nhắn cuối cùng
+            let lastMessageId = 0;
 
-            // Hàm lấy tin nhắn mới
+
             function fetchMessages() {
                 fetch(`?url=message/getMessages&receiver_id=${receiverId}&last_message_id=${lastMessageId}`)
                     .then(response => response.json())
@@ -50,15 +50,15 @@
                         if (data.status === "success" && data.messages.length > 0) {
                             data.messages.forEach(msg => {
                                 appendMessage(msg);
-                                lastMessageId = msg.message_id; // Cập nhật ID tin nhắn mới nhất
+                                lastMessageId = msg.message_id;
                             });
-                            chatBox.scrollTop = chatBox.scrollHeight; // Tự động cuộn xuống
+                            chatBox.scrollTop = chatBox.scrollHeight;
                         }
                     })
                     .catch(error => console.error("Error fetching messages:", error));
             }
 
-            // Hàm thêm tin nhắn vào khung chat
+
             function appendMessage(msg) {
                 const messageElement = document.createElement("div");
                 messageElement.classList.add("message", msg.sender_id === parseInt(receiverId) ? "received" : "sent");
@@ -69,7 +69,7 @@
                 chatBox.appendChild(messageElement);
             }
 
-            // Gửi tin nhắn
+
             messageForm.addEventListener("submit", function (e) {
                 e.preventDefault();
 
@@ -85,15 +85,15 @@
                     .then(data => {
                         if (data.status === "success") {
                             messageInput.value = "";
-                            fetchMessages(); // Lấy tin nhắn ngay lập tức
+                            fetchMessages();
                         }
                     })
                     .catch(error => console.error("Error sending message:", error));
             });
 
-            // Tự động tải tin nhắn mới mỗi 2 giây
+
             setInterval(fetchMessages, 2000);
-            fetchMessages(); // Lấy tin nhắn ngay khi trang tải
+            fetchMessages();
         });
     </script>
 

@@ -10,7 +10,6 @@ class Notification
 
     public function __construct()
     {
-        // Kiểm tra xem Database có tồn tại không
         if (!class_exists(Database::class)) {
             die("Lỗi: Lớp Database chưa được import đúng cách.");
         }
@@ -18,7 +17,7 @@ class Notification
         $this->db = Database::getInstance()->getConnection();
     }
 
-    // Tạo thông báo mới, trạng thái mặc định của cột status là 'unread' theo định nghĩa bảng
+
     public function createNotification($userId, $text): bool
     {
         $stmt = $this->db->prepare("INSERT INTO Notifications (user_id, notification_text) 
@@ -28,7 +27,7 @@ class Notification
         return $stmt->execute();
     }
 
-    // Lấy danh sách thông báo chưa đọc của người dùng
+
     public function getUnreadNotifications($userId): array
     {
         $stmt = $this->db->prepare("SELECT * FROM Notifications 
@@ -39,7 +38,7 @@ class Notification
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Đánh dấu tất cả thông báo chưa đọc của người dùng thành 'read'
+
     public function markAsRead($userId): bool
     {
         $stmt = $this->db->prepare("UPDATE Notifications 

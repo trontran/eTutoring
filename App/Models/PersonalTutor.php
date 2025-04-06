@@ -38,11 +38,11 @@ class PersonalTutor
         $stmt->bindParam(":assigned_by", $assigned_by, PDO::PARAM_INT);
 
         if ($stmt->execute()) {
-            // Lấy thông tin Student và Tutor để gửi email
+
             $student = $this->db->query("SELECT * FROM Users WHERE user_id = $student_id")->fetch(PDO::FETCH_ASSOC);
             $tutor = $this->db->query("SELECT * FROM Users WHERE user_id = $tutor_id")->fetch(PDO::FETCH_ASSOC);
 
-            // Gửi email cho Student
+
             $studentSubject = "Your New Tutor Assignment - eTutoring System";
             $studentBody = "
             <p>Dear {$student['first_name']},</p>
@@ -64,7 +64,7 @@ class PersonalTutor
 
             MailHelper::sendMail($student['email'], $studentSubject, $studentBody);
 
-            // Gửi email cho Tutor
+
             $tutorSubject = "New Student Assigned - eTutoring System";
             $tutorBody = "
             <p>Dear {$tutor['first_name']},</p>
@@ -98,7 +98,7 @@ class PersonalTutor
         return $stmt->execute([$tutor_id, $assigned_by, $student_id]);
     }
 
-    // Lấy thông tin gia sư của sinh viên
+
     public function getTutorDetails($student_id)
     {
         $query = "SELECT u.user_id, u.first_name, u.last_name, u.email,
@@ -162,7 +162,7 @@ class PersonalTutor
             $sql .= " AND (u.first_name LIKE :filter OR u.last_name LIKE :filter OR u.email LIKE :filter)";
         }
 
-        $sql .= " ORDER BY $sortBy ASC";  // Sắp xếp theo tiêu chí được chọn
+        $sql .= " ORDER BY $sortBy ASC";
 
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':tutorId', $tutorId, PDO::PARAM_INT);
@@ -247,7 +247,7 @@ class PersonalTutor
                        FROM TutorHistory 
                        WHERE student_id = :student_id 
                        ORDER BY assigned_at DESC 
-                       LIMIT 1 OFFSET 1"; // OFFSET 1 để bỏ qua bản ghi mới nhất
+                       LIMIT 1 OFFSET 1";
             $stmtH = $this->db->prepare($sqlHistory);
             $stmtH->bindParam(':student_id', $studentId, PDO::PARAM_INT);
             $stmtH->execute();

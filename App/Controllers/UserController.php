@@ -26,7 +26,7 @@ class UserController extends Controller
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
             if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'staff') {
-                header("Location: ?url=home/index"); // Chặn truy cập nếu không phải staff
+                header("Location: ?url=home/index");
                 exit;
             }
         }
@@ -38,25 +38,25 @@ class UserController extends Controller
             session_start();
         }
 
-        // Kiểm tra quyền truy cập
+
         if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'staff') {
             header("Location: ?url=home/index");
             exit;
         }
 
-        // Lấy danh sách người dùng có phân trang
+
         $usersPerPage = 10;
         $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
         $offset = ($page - 1) * $usersPerPage;
 
-        // Lấy danh sách người dùng từ Model
+
         $users = $this->userModel->getPaginatedUsers($usersPerPage, $offset);
         $totalUsers = $this->userModel->getTotalUserCount();
         $totalPages = ceil($totalUsers / $usersPerPage);
 
         $isAdmin = $_SESSION['user']['role'] === 'staff';
 
-        // Truyền dữ liệu vào view
+
         $data = [
             'title' => 'User Management',
             'users' => $users,
@@ -82,7 +82,7 @@ class UserController extends Controller
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $password = $_POST['password'];
 
-            // Kiểm tra độ mạnh của mật khẩu
+
             if (strlen($password) < 8 || !preg_match('/[A-Z]/', $password)) {
                 $_SESSION['error'] = "Password must be at least 8 characters long and contain at least one uppercase letter.";
                 header("Location: ?url=user/create");
@@ -141,7 +141,7 @@ class UserController extends Controller
 
     public function detail()
     {
-        $this->requireStaffRole(); // Chỉ staff mới xem được
+        $this->requireStaffRole();
 
         if (!isset($_GET['id'])) {
             header("Location: ?url=user/index");
@@ -167,7 +167,7 @@ class UserController extends Controller
             session_start();
         }
 
-        // Kiểm tra nếu session không tồn tại hoặc không có user ID
+
         if (!isset($_SESSION['user']) || !isset($_SESSION['user']['user_id'])) {
             die("<h3 style='color: red;'> Error: User ID is not set in session.</h3>");
         }
@@ -184,7 +184,7 @@ class UserController extends Controller
                 exit;
             }
 
-            // Cập nhật tutor trong database
+
             $this->personalTutor->updateTutorAssignment($studentId, $newTutorId, $assignedBy);
 
 
@@ -229,7 +229,7 @@ class UserController extends Controller
             exit;
         }
 
-        // Hiển thị danh sách student & tutor
+
         $studentId = $_GET['id'] ?? null;
         if (!$studentId) {
             header("Location: ?url=user/index&error=missing_student_id");
@@ -266,12 +266,12 @@ class UserController extends Controller
         require_once '../app/models/User.php';
         $userModel = new User();
 
-        // Kiểm tra nếu có `id` trên URL thì lấy profile của `student`
+
         if (isset($_GET['id'])) {
             $userId = (int)$_GET['id'];
             $user = $userModel->getUserById($userId);
         } else {
-            // Nếu không có `id`, mặc định hiển thị profile của chính mình
+
             $user = $_SESSION['user'];
         }
 

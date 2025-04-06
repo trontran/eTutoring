@@ -37,7 +37,7 @@ class MessageController extends Controller
 
         $messages = $this->messageModel->getMessages($senderId, $receiverId);
 
-        // Khi người dùng mở cửa sổ chat, đánh dấu các thông báo của chính họ đã đọc
+
 
         $this->notificationModel->markAsRead($senderId);
 
@@ -53,7 +53,7 @@ class MessageController extends Controller
         $this->view('message/chat', ['messages' => $messages, 'receiverId' => $receiverId]);
     }
 
-    // Phương thức send() cho chat realtime, tích hợp tạo thông báo mới sau khi gửi tin nhắn
+
     public function send()
     {
         if (session_status() === PHP_SESSION_NONE) {
@@ -74,12 +74,11 @@ class MessageController extends Controller
                 exit;
             }
 
-            // Gọi Model để lưu tin nhắn
+
             $messageId = $this->messageModel->sendMessage($senderId, $receiverId, $messageText);
 
             if ($messageId) {
-                // Tạo thông báo cho người nhận
-                // Sử dụng tên người gửi để tạo thông báo thân thiện
+
                 $notificationText = "You have a new message from  " . $_SESSION['user']['first_name'];
                 $this->notificationModel->createNotification($receiverId, $notificationText);
 
@@ -109,7 +108,7 @@ class MessageController extends Controller
         $this->view('message/chat_list', ['chatUsers' => $chatUsers]);
     }
 
-    // Phương thức getMessages() cho chat realtime
+
     public function getMessages()
     {
         if (session_status() === PHP_SESSION_NONE) {
@@ -135,7 +134,7 @@ class MessageController extends Controller
         exit;
     }
 
-    // Thêm endpoint để lấy số thông báo chưa đọc của người dùng
+
     public function getUnreadCount()
     {
         if (session_status() === PHP_SESSION_NONE) {

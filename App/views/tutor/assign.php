@@ -37,7 +37,6 @@ ob_start();
             </p>
 
             <form action="?url=tutor/store" method="POST" class="mb-4">
-                <!-- Select Tutor: Đưa lên trên -->
                 <div class="mb-3">
                     <label for="tutor" class="form-label fw-bold">Select Tutor</label>
                     <select class="form-select" name="tutor_id" id="tutor" required>
@@ -50,7 +49,6 @@ ob_start();
                     </select>
                 </div>
 
-                <!-- Select Students: Đưa xuống dưới -->
                 <div class="mb-3">
                     <label class="form-label fw-bold">Select Students</label>
                     <div class="table-responsive">

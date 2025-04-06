@@ -30,7 +30,7 @@ class Database {
         return $this->pdo;
     }
 
-    // Thực thi lệnh SQL (INSERT, UPDATE, DELETE)
+
     public function execute($query, $params = []) {
         try {
             $stmt = $this->pdo->prepare($query);
@@ -40,7 +40,7 @@ class Database {
         }
     }
 
-    // Lấy một dòng dữ liệu
+
     public function fetch($query, $params = []) {
         try {
             $stmt = $this->pdo->prepare($query);
@@ -51,7 +51,7 @@ class Database {
         }
     }
 
-    // Lấy nhiều dòng dữ liệu
+
     public function fetchAll($query, $params = []) {
         try {
             $stmt = $this->pdo->prepare($query);

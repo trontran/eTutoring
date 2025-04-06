@@ -88,7 +88,7 @@ class LoginController extends Controller
         $this->view('auth/login');
     }
 
-    // Xử lý đăng nhập
+
 //    public function process()
 //    {
 //        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -124,17 +124,17 @@ class LoginController extends Controller
             session_start();
         }
 
-        // Xóa tất cả dữ liệu trong session
+
         $_SESSION = [];
-        // Track logout activity
+
         if (isset($_SESSION['user']) && isset($_SESSION['user']['user_id'])) {
             $activityTracker = new \App\Models\ActivityTracker();
             $activityTracker->trackUserActivity($_SESSION['user']['user_id'], 'logout');
         }
-        // Hủy session
+
         session_destroy();
 
-        // Xóa cookie session (nếu có)
+
         if (ini_get("session.use_cookies")) {
             $params = session_get_cookie_params();
             setcookie(session_name(), '', time() - 42000,
@@ -143,7 +143,7 @@ class LoginController extends Controller
             );
         }
 
-        // Chuyển hướng về trang chủ
+
         header("Location: ?url=home/index");
         exit;
     }
