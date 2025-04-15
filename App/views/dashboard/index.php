@@ -140,36 +140,36 @@ ob_start();
                     <h4 class="mb-0"><i class="bi bi-clock-history"></i> Time-Based Analytics</h4>
                 </div>
                 <div class="card-body">
-<!--                    <div class="row">-->
-<!--                        <div class="col-md-4 mb-3">-->
-<!--                            <div class="card h-100">-->
-<!--                                <div class="card-body">-->
-<!--                                    <h5 class="card-title"><i class="bi bi-graph-up"></i> Activity Trends</h5>-->
-<!--                                    <p class="card-text">View message and meeting activity trends over time (weekly, monthly, term).</p>-->
-<!--                                    <a href="?url=dashboard/timeBasedActivity" class="btn btn-primary">View Trends</a>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!---->
-<!--                        <div class="col-md-4 mb-3">-->
-<!--                            <div class="card h-100">-->
-<!--                                <div class="card-body">-->
-<!--                                    <h5 class="card-title"><i class="bi bi-clock"></i> Peak Usage Times</h5>-->
-<!--                                    <p class="card-text">Analyze when students and tutors are most active by hour and day of week.</p>-->
-<!--                                    <a href="?url=dashboard/peakUsageTimes" class="btn btn-primary">View Peak Times</a>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="bi bi-graph-up"></i> Activity Trends</h5>
+                                    <p class="card-text">View message and meeting activity trends over time (weekly, monthly, term).</p>
+                                    <a href="?url=dashboard/timeBasedActivity" class="btn btn-primary">View Trends</a>
+                                </div>
+                            </div>
+                        </div>
 
-<!--                        <div class="col-md-4 mb-3">-->
-<!--                            <div class="card h-100">-->
-<!--                                <div class="card-body">-->
-<!--                                    <h5 class="card-title"><i class="bi bi-arrow-left-right"></i> Compare Periods</h5>-->
-<!--                                    <p class="card-text">Compare system activity between two custom time periods.</p>-->
-<!--                                    <a href="?url=dashboard/compareTimePeriods" class="btn btn-primary">Compare Periods</a>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="bi bi-clock"></i> Peak Usage Times</h5>
+                                    <p class="card-text">Analyze when students and tutors are most active by hour and day of week.</p>
+                                    <a href="?url=dashboard/peakUsageTimes" class="btn btn-primary">View Peak Times</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="bi bi-arrow-left-right"></i> Compare Periods</h5>
+                                    <p class="card-text">Compare system activity between two custom time periods.</p>
+                                    <a href="?url=dashboard/compareTimePeriods" class="btn btn-primary">Compare Periods</a>
+                                </div>
+                            </div>
+                        </div>
                         <div class="col-md-4 mb-3">
                             <div class="card">
                                 <div class="card-body">

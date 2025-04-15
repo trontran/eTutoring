@@ -111,7 +111,7 @@ class SystemStats
     public function getBrowserUsage($startDate = null, $endDate = null)
     {
         $query = "SELECT browser, COUNT(*) as count,
-                 ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM PageViews), 2) as percentage
+                 ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM PageViews), 2) as percentage 
                  FROM PageViews
                  WHERE 1=1";
 

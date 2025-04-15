@@ -150,24 +150,6 @@ class Meeting
     }
 
     /**
-     * Update Google Calendar event ID for a meeting
-     *
-     * @param int $meetingId Meeting ID
-     * @param string $googleEventId Google Calendar event ID
-     * @return bool True if successful, false otherwise
-     */
-    public function updateGoogleEventId($meetingId, $googleEventId)
-    {
-        $query = "UPDATE Meetings SET google_event_id = :google_event_id WHERE meeting_id = :meeting_id";
-
-        $stmt = $this->db->prepare($query);
-        $stmt->bindParam(':meeting_id', $meetingId, PDO::PARAM_INT);
-        $stmt->bindParam(':google_event_id', $googleEventId, PDO::PARAM_STR);
-
-        return $stmt->execute();
-    }
-
-    /**
      * Check if a meeting time slot is available
      *
      * @param int $tutorId Tutor ID
@@ -317,13 +299,57 @@ class Meeting
      * @param int $meetingId Meeting ID
      * @return string Meeting link URL
      */
-    public function generateMeetingLink($meetingId)
+    public function generateMeetingLink(int $meetingId): string
     {
         // This is a placeholder - in a real application, you might integrate with
         // Zoom, Google Meet, or another video conferencing platform
         $baseUrl = "https://meet.example.com/";
         $uniqueCode = md5('etutoring-' . $meetingId . '-' . time());
         return $baseUrl . substr($uniqueCode, 0, 10);
+    }
+
+    //this is for testing recording purposes only
+
+    /**
+     * Save recording information for a meeting
+     *
+     * @param int $meetingId Meeting ID
+     * @param string $audioPath Path to the audio recording file
+     * @return bool True if successful, false otherwise
+     */
+    public function saveRecordingInfo($meetingId, $audioPath)
+    {
+        $now = date('Y-m-d H:i:s');
+        $query = "UPDATE Meetings 
+              SET audio_recording_path = :audio_path,
+                  recording_date = :recording_date
+              WHERE meeting_id = :meeting_id";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':meeting_id', $meetingId, PDO::PARAM_INT);
+        $stmt->bindParam(':audio_path', $audioPath, PDO::PARAM_STR);
+        $stmt->bindParam(':recording_date', $now, PDO::PARAM_STR);
+
+        return $stmt->execute();
+    }
+
+    /**
+     * Get recording information for a meeting
+     *
+     * @param int $meetingId Meeting ID
+     * @return array|false Recording information or false if not found
+     */
+    public function getRecordingInfo($meetingId)
+    {
+        $query = "SELECT audio_recording_path, recording_date
+              FROM Meetings 
+              WHERE meeting_id = :meeting_id";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':meeting_id', $meetingId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
 }

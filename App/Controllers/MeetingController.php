@@ -5,6 +5,8 @@ use App\Models\Meeting;
 use App\Models\User;
 use App\Models\PersonalTutor;
 use App\Models\Notification;
+use JetBrains\PhpStorm\NoReturn;
+
 require_once __DIR__ . '/../Helpers/MailHelper.php';
 
 class MeetingController extends Controller
@@ -808,4 +810,122 @@ class MeetingController extends Controller
         // Send the email
         return MailHelper::sendMail($recipient['email'], $subject, $body);
     }
+
+    //this is for testing recording purposes
+
+    /**
+     * Handle audio recording upload
+     */
+    public function uploadRecording()
+    {
+        // Check if user is logged in
+        if (!isset($_SESSION['user'])) {
+            echo json_encode(['status' => 'error', 'message' => 'User not logged in']);
+            exit;
+        }
+
+        // Check if request has file
+        if (!isset($_FILES['audio_data']) || $_FILES['audio_data']['error'] !== UPLOAD_ERR_OK) {
+            echo json_encode(['status' => 'error', 'message' => 'No audio file uploaded']);
+            exit;
+        }
+
+        $meetingId = $_POST['meeting_id'] ?? null;
+
+        if (!$meetingId) {
+            echo json_encode(['status' => 'error', 'message' => 'Meeting ID is required']);
+            exit;
+        }
+
+        $meeting = $this->meetingModel->getMeetingById($meetingId);
+
+        if (!$meeting) {
+            echo json_encode(['status' => 'error', 'message' => 'Meeting not found']);
+            exit;
+        }
+
+        // Check if user is part of this meeting
+        $userId = $_SESSION['user']['user_id'];
+        if ($meeting['student_id'] != $userId && $meeting['tutor_id'] != $userId) {
+            echo json_encode(['status' => 'error', 'message' => 'You do not have permission']);
+            exit;
+        }
+
+        // Create unique filename
+        $fileName = 'meeting_' . $meetingId . '_' . date('Ymd_His') . '.mp3';
+        $uploadDir = __DIR__ . '/../../public/recordings/';
+        $uploadPath = $uploadDir . $fileName;
+
+        // Move uploaded file
+        if (move_uploaded_file($_FILES['audio_data']['tmp_name'], $uploadPath)) {
+            // Save recording info in database
+            $recordingPath = 'recordings/' . $fileName;
+            if ($this->meetingModel->saveRecordingInfo($meetingId, $recordingPath)) {
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => 'Recording saved successfully',
+                    'file_path' => $recordingPath
+                ]);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Failed to save recording info']);
+            }
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Failed to save recording file']);
+        }
+        exit;
+    }
+
+    /**
+     * View recording of a meeting
+     */
+    public function viewRecording()
+    {
+        // Check if user is logged in
+        if (!isset($_SESSION['user'])) {
+            header("Location: ?url=login");
+            exit;
+        }
+
+        $meetingId = $_GET['id'] ?? null;
+
+        if (!$meetingId) {
+            $_SESSION['error'] = "Meeting ID is required.";
+            header("Location: ?url=meeting/list");
+            exit;
+        }
+
+        $meeting = $this->meetingModel->getMeetingById($meetingId);
+
+        if (!$meeting) {
+            $_SESSION['error'] = "Meeting not found.";
+            header("Location: ?url=meeting/list");
+            exit;
+        }
+
+        // Check if user is part of this meeting
+        $userId = $_SESSION['user']['user_id'];
+        if ($meeting['student_id'] != $userId && $meeting['tutor_id'] != $userId) {
+            $_SESSION['error'] = "You don't have permission to view this recording.";
+            header("Location: ?url=meeting/list");
+            exit;
+        }
+
+        // Get recording info
+        $recordingInfo = $this->meetingModel->getRecordingInfo($meetingId);
+
+        if (!$recordingInfo || !$recordingInfo['audio_recording_path']) {
+            $_SESSION['error'] = "No recording available for this meeting.";
+            header("Location: ?url=meeting/view&id=" . $meetingId);
+            exit;
+        }
+
+        // Pass data to the view
+        $data = [
+            'meeting' => $meeting,
+            'recordingInfo' => $recordingInfo
+        ];
+
+        $this->view('meeting/recording', $data);
+    }
+
 }

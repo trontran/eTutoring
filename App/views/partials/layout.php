@@ -64,7 +64,7 @@ $title = $title ?? 'eTutoring System';
                                         Profile</a></li>
                                 <?php if ($isStudent): ?>
                                     <li><a class="dropdown-item" href="?url=student/courses"><i class="bi bi-book"></i>
-                                            My Courses</a></li>
+
                                 <?php endif; ?>
                                 <li>
                                     <hr class="dropdown-divider">

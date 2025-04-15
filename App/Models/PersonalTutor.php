@@ -27,7 +27,7 @@ class PersonalTutor
 
     public function assignTutor($student_id, $tutor_id, $assigned_by): bool
     {
-//        ini_set('max_execution_time', 300);
+
         $query = "INSERT INTO PersonalTutors (student_id, tutor_id, assigned_by) 
                   VALUES (:student_id, :tutor_id, :assigned_by) 
                   ON DUPLICATE KEY UPDATE tutor_id = VALUES(tutor_id), assigned_by = VALUES(assigned_by)";
@@ -196,10 +196,10 @@ class PersonalTutor
     public function reallocateTutor(int $studentId, int $newTutorId, int $assignedBy): bool
     {
         try {
-            // 1. Begin a transaction
+
             $this->db->beginTransaction();
 
-            // 2. Retrieve the current (old) tutor_id from the PersonalTutors table (if exists)
+            //  Retrieve the current (old) tutor_id from the PersonalTutors table (if exists)
             $sqlOld = "SELECT tutor_id FROM PersonalTutors 
                    WHERE student_id = :student_id 
                    ORDER BY assigned_at DESC 
@@ -267,10 +267,6 @@ class PersonalTutor
         if ($oldTutor) {
             error_log("Final Old Tutor Email: " . $oldTutor['email']);
         }
-
-        // ------------------------------------------------------
-        // 8. Send notification emails
-        // ------------------------------------------------------
 
         // Send email to the student
         $studentSubject = "Notification: Your Tutor Has Been Reassigned";

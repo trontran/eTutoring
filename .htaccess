@@ -1,0 +1,11 @@
+# Deny direct access to .mp3 files
+<FilesMatch "\.mp3$">
+    Order deny,allow
+    Deny from all
+</FilesMatch>
+
+# Allow access through PHP script
+<FilesMatch "download\.php$">
+    Order allow,deny
+    Allow from all
+</FilesMatch>

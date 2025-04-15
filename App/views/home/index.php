@@ -119,6 +119,7 @@ if ($isTutor && isset($_SESSION['user']['user_id'])) {
             <div class="card-header bg-primary text-white text-center">
                 <h5 class="mb-0">
                     <i class="bi bi-person-badge-fill"></i> Your Personal Tutor
+
                 </h5>
             </div>
             <div class="card-body text-center">
@@ -143,6 +144,9 @@ if ($isTutor && isset($_SESSION['user']['user_id'])) {
                 </p>
                 <a href="mailto:<?= htmlspecialchars($tutor['email']) ?>" class="btn btn-primary">
                     <i class="bi bi-envelope-fill"></i> Contact Tutor
+                </a>
+                <a href="?url=message/chat&receiver_id=<?= $dashboardData['tutor']['tutor_id'] ?>" class="btn btn-sm btn-primary">
+                    <i class="bi bi-chat-dots"></i> Message Tutor
                 </a>
             </div>
         </div>

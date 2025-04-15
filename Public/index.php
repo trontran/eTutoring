@@ -333,6 +333,18 @@ $controller->viewDetails();
     require_once '../app/controllers/SystemMonitoringController.php';
     $controller = new SystemMonitoringController();
     $controller->errors();
+    //recording
+// Route for uploading audio recording
+} elseif ($url === 'meeting/uploadRecording') {
+    require_once '../app/controllers/MeetingController.php';
+    $controller = new MeetingController();
+    $controller->uploadRecording();
+
+// Route for viewing recording
+} elseif ($url === 'meeting/viewRecording') {
+    require_once '../app/controllers/MeetingController.php';
+    $controller = new MeetingController();
+    $controller->viewRecording();
 
 } else {
     echo "404 Not Found or Route not handled yet.";

@@ -25,7 +25,7 @@ class Message
 
         $messages = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
-        // Debug để kiểm tra xem có lấy được tin nhắn không
+
         if (empty($messages)) {
             error_log("No messages found for Sender: $senderId and Receiver: $receiverId");
         }
