@@ -164,7 +164,7 @@ $currentPage = $_GET['url'] ?? 'home/index';
                                     <li><a class="dropdown-item" href="?url=user/index"><i class="bi bi-people-fill me-2"></i> Manage Users</a></li>
                                     <li><a class="dropdown-item" href="?url=tutor/assign"><i class="bi bi-person-plus-fill me-2"></i> Assign Tutor</a></li>
 <!--                                    <li><a class="dropdown-item" href="?url=analytics/index"><i-->
-<!--                                                    class="bi bi-bar-chart-fill"></i> Phân tích hệ thống</a></li>-->
+<!--                                                    class="bi bi-bar-chart-fill"></i> System analysing</a></li>-->
                                 <?php endif; ?>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="?url=logout"><i class="bi bi-box-arrow-right me-2"></i> Logout</a></li>
@@ -178,7 +178,7 @@ $currentPage = $_GET['url'] ?? 'home/index';
                         </li>
                     <?php endif; ?>
                 </ul>
-                <!-- Thêm đoạn này vào header.php để hiển thị thông báo -->
+                <!-- Add this part into header.php to display notification -->
 
                 <!-- Thông báo / Notifications -->
                 <li class="nav-item dropdown">
