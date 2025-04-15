@@ -179,113 +179,245 @@ if (isset($_GET['debug'])): ?>
                                 </div>
 
                                 <script>
+                                    // Place inside the <script> tag at the end of view.php
                                     document.addEventListener('DOMContentLoaded', function() {
+                                        // --- Variable Declarations ---
                                         let mediaRecorder;
                                         let audioChunks = [];
                                         let recordingStartTime;
                                         let timerInterval;
+                                        let chosenMimeType = ''; // Variable to store the selected MIME type
 
+                                        // --- Get DOM Elements ---
                                         const startButton = document.getElementById('startRecording');
                                         const stopButton = document.getElementById('stopRecording');
                                         const recordingStatus = document.getElementById('recordingStatus');
                                         const recordingTimer = document.getElementById('recordingTimer');
-                                        const audioPlayer = document.getElementById('audioPlayer');
-                                        const recordedAudio = document.getElementById('recordedAudio');
+                                        const audioPlayer = document.getElementById('audioPlayer'); // Container for player AND save button
+                                        const recordedAudio = document.getElementById('recordedAudio'); // The <audio> tag
                                         const saveButton = document.getElementById('saveRecording');
                                         const uploadStatus = document.getElementById('uploadStatus');
 
-                                        // Start recording
+                                        // --- Event Listener: Start Recording ---
                                         startButton.addEventListener('click', async function() {
                                             try {
                                                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-                                                mediaRecorder = new MediaRecorder(stream);
-                                                audioChunks = [];
+                                                // Check for supported MIME types (prefer webm)
+                                                const typesToCheck = [
+                                                    'audio/webm;codecs=opus',
+                                                    'audio/webm',
+                                                    'audio/ogg;codecs=opus',
+                                                    'audio/ogg;codecs=vorbis',
+                                                    'audio/ogg'
+                                                    // You can add others like 'audio/mp4' if needed
+                                                ];
+                                                chosenMimeType = ''; // Reset
+                                                for (const type of typesToCheck) {
+                                                    if (MediaRecorder.isTypeSupported(type)) {
+                                                        chosenMimeType = type;
+                                                        console.log('Using MIME type:', chosenMimeType);
+                                                        break;
+                                                    }
+                                                }
+                                                if (!chosenMimeType) {
+                                                    console.warn('Preferred MIME types not supported, using browser default.');
+                                                }
 
+                                                // Initialize MediaRecorder with options (if a preferred type was found)
+                                                const options = chosenMimeType ? { mimeType: chosenMimeType } : {};
+                                                mediaRecorder = new MediaRecorder(stream, options);
+                                                audioChunks = []; // Reset chunks for new recording
+
+                                                // Event Listener: Collect audio data
                                                 mediaRecorder.addEventListener('dataavailable', event => {
-                                                    audioChunks.push(event.data);
+                                                    if (event.data.size > 0) { // Ensure chunk is not empty
+                                                        audioChunks.push(event.data);
+                                                    }
                                                 });
 
+                                                // Event Listener: Handle stop recording
                                                 mediaRecorder.addEventListener('stop', () => {
-                                                    const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
-                                                    const audioUrl = URL.createObjectURL(audioBlob);
-                                                    recordedAudio.src = audioUrl;
-                                                    audioPlayer.classList.remove('d-none');
+                                                    // Get the actual MIME type used, fallback to the chosen one or webm
+                                                    const actualMimeType = mediaRecorder.mimeType || chosenMimeType || 'audio/webm';
+                                                    console.log('Actual MIME type on stop:', actualMimeType);
+
+                                                    // Check if any audio data was actually recorded
+                                                    if (audioChunks.length === 0) {
+                                                        console.error("No audio data was recorded.");
+                                                        alert("Recording failed, no audio data captured.");
+                                                        // Reset button states
+                                                        startButton.disabled = false;
+                                                        stopButton.disabled = true;
+                                                        if(recordingStatus) recordingStatus.classList.add('d-none');
+                                                        return; // Stop processing if no data
+                                                    }
+
+                                                    // Create the Blob object
+                                                    const audioBlob = new Blob(audioChunks, { type: actualMimeType });
+                                                    const audioUrl = URL.createObjectURL(audioBlob); // Create temporary URL
+
+                                                    console.log('Audio Blob created:', audioBlob);
+                                                    console.log('Object URL created:', audioUrl);
+
+                                                    // Update the audio player for preview
+                                                    if(recordedAudio) { // Check if the audio element exists
+                                                        recordedAudio.src = audioUrl; // Assign the new source
+
+                                                        // *** IMPORTANT STEP: Call load() to refresh the source ***
+                                                        recordedAudio.load();
+
+                                                        // Ensure the audio tag itself is visible (if previously hidden)
+                                                        recordedAudio.style.display = ''; // Or 'block', 'inline-block' depending on layout
+
+                                                        // (Optional) Try to play automatically after loading, but controls are generally better
+                                                        // recordedAudio.play().catch(e => console.error("Autoplay error:", e));
+
+                                                    } else {
+                                                        console.error("Could not find the audio element with id='recordedAudio'");
+                                                    }
+
+                                                    // Show the container div (which includes the save button)
+                                                    if(audioPlayer) { // Check if the container element exists
+                                                        audioPlayer.classList.remove('d-none');
+                                                    } else {
+                                                        console.error("Could not find the div with id='audioPlayer'");
+                                                    }
+
+                                                    // Stop the timer
                                                     clearInterval(timerInterval);
                                                 });
 
+                                                // Event Listener: Handle errors during recording
+                                                mediaRecorder.onerror = (event) => {
+                                                    console.error('MediaRecorder error:', event.error);
+                                                    alert('An error occurred during recording: ' + event.error.name);
+                                                    // Reset button states
+                                                    startButton.disabled = false;
+                                                    stopButton.disabled = true;
+                                                    if(recordingStatus) recordingStatus.classList.add('d-none');
+                                                    clearInterval(timerInterval); // Stop timer on error
+                                                };
+
+                                                // Start recording
                                                 mediaRecorder.start();
                                                 recordingStartTime = Date.now();
-                                                startRecordingTimer();
+                                                startRecordingTimer(); // Start the visual timer
 
+                                                // Update UI state
                                                 startButton.disabled = true;
                                                 stopButton.disabled = false;
-                                                recordingStatus.classList.remove('d-none');
-                                                audioPlayer.classList.add('d-none');
-                                                uploadStatus.classList.add('d-none');
+                                                if(recordingStatus) recordingStatus.classList.remove('d-none');
+                                                if(audioPlayer) audioPlayer.classList.add('d-none'); // Hide player container initially
+                                                if(uploadStatus) uploadStatus.classList.add('d-none');
+
 
                                             } catch (err) {
-                                                alert('Error accessing microphone: ' + err.message);
-                                                console.error('Error accessing microphone:', err);
-                                            }
-                                        });
-
-                                        // Stop recording
-                                        stopButton.addEventListener('click', function() {
-                                            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                                                mediaRecorder.stop();
-
-                                                // Stop all tracks on the stream
-                                                mediaRecorder.stream.getTracks().forEach(track => track.stop());
-
+                                                // Handle errors getting user media or starting recorder
+                                                alert('Error accessing microphone or starting recording: ' + err.message);
+                                                console.error('getUserMedia or new MediaRecorder error:', err);
+                                                // Reset button states
                                                 startButton.disabled = false;
                                                 stopButton.disabled = true;
                                             }
                                         });
 
-                                        // Save recording
+                                        // --- Event Listener: Stop Recording Button ---
+                                        stopButton.addEventListener('click', function() {
+                                            if (mediaRecorder && mediaRecorder.state === 'recording') { // Only stop if currently recording
+                                                mediaRecorder.stop();
+                                                // Stop media tracks after the 'stop' event has processed the Blob
+                                                // mediaRecorder.stream.getTracks().forEach(track => track.stop()); // Can be moved to 'stop' listener if needed
+                                            } else {
+                                                console.warn("MediaRecorder is not in recording state.");
+                                            }
+                                            // Update button states immediately
+                                            startButton.disabled = false;
+                                            stopButton.disabled = true;
+                                            if(recordingStatus) recordingStatus.classList.add('d-none'); // Hide "Recording in progress"
+                                        });
+
+                                        // --- Event Listener: Save Recording Button ---
                                         saveButton.addEventListener('click', function() {
-                                            const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+                                            // Check if there's a valid Blob source to save
+                                            if (!recordedAudio || !recordedAudio.src || !recordedAudio.src.startsWith('blob:')) {
+                                                alert('There is no recording to save.');
+                                                console.error('No valid Blob source found on recordedAudio.');
+                                                return;
+                                            }
+                                            // Also check if audioChunks has data, as src might exist but data is empty
+                                            if (audioChunks.length === 0) {
+                                                alert('Recorded data is empty, cannot save.');
+                                                return;
+                                            }
+
+                                            // Determine MIME type and extension for saving
+                                            const actualMimeType = mediaRecorder.mimeType || chosenMimeType || 'audio/webm';
+                                            const fileExtension = actualMimeType.includes('ogg') ? 'ogg' : 'webm'; // Determine file extension
+
+                                            // Recreate Blob from original chunks to ensure latest data
+                                            const audioBlobToSave = new Blob(audioChunks, { type: actualMimeType });
+
+                                            // Prepare FormData for upload
                                             const formData = new FormData();
-
-                                            formData.append('audio_data', audioBlob, 'recording.mp3');
+                                            formData.append('audio_data', audioBlobToSave, `recording.${fileExtension}`); // Use correct extension
                                             formData.append('meeting_id', '<?= $meeting['meeting_id'] ?>');
+                                            formData.append('mime_type', actualMimeType); // Send the actual MIME type
 
-                                            uploadStatus.innerHTML = '<div class="alert alert-info">Uploading recording...</div>';
-                                            uploadStatus.classList.remove('d-none');
+                                            // Update UI for upload status
+                                            if(uploadStatus) {
+                                                uploadStatus.innerHTML = '<div class="alert alert-info">Uploading recording...</div>';
+                                                uploadStatus.classList.remove('d-none');
+                                            }
 
+                                            // Send data to server
                                             fetch('?url=meeting/uploadRecording', {
                                                 method: 'POST',
                                                 body: formData
                                             })
-                                                .then(response => response.json())
+                                                .then(response => {
+                                                    if (!response.ok) {
+                                                        // Throw an error for bad HTTP status codes (e.g., 500)
+                                                        throw new Error(`HTTP error: ${response.status}`);
+                                                    }
+                                                    return response.json(); // Parse JSON response
+                                                })
                                                 .then(data => {
+                                                    // Handle server response
                                                     if (data.status === 'success') {
-                                                        uploadStatus.innerHTML = '<div class="alert alert-success">Recording saved successfully!</div>';
-                                                        // Reload page after 2 seconds
+                                                        if(uploadStatus) uploadStatus.innerHTML = '<div class="alert alert-success">Recording saved successfully! Reloading page...</div>';
+                                                        // Revoke the old Object URL before reloading
+                                                        if (recordedAudio && recordedAudio.src.startsWith('blob:')) {
+                                                            URL.revokeObjectURL(recordedAudio.src);
+                                                        }
+                                                        // Reload the page after a short delay
                                                         setTimeout(() => {
                                                             window.location.reload();
                                                         }, 2000);
                                                     } else {
-                                                        uploadStatus.innerHTML = `<div class="alert alert-danger">Error: ${data.message}</div>`;
+                                                        // Show specific error from server
+                                                        if(uploadStatus) uploadStatus.innerHTML = `<div class="alert alert-danger">Error saving: ${data.message}</div>`;
                                                     }
                                                 })
                                                 .catch(error => {
-                                                    console.error('Error:', error);
-                                                    uploadStatus.innerHTML = '<div class="alert alert-danger">Upload failed. Please try again.</div>';
+                                                    // Handle fetch errors (network issues, server errors)
+                                                    console.error('Error fetching during save:', error);
+                                                    if(uploadStatus) uploadStatus.innerHTML = `<div class="alert alert-danger">Upload failed. Error: ${error.message}. Please try again.</div>`;
                                                 });
                                         });
 
-                                        // Timer function
+                                        // --- Function: Start Recording Timer ---
                                         function startRecordingTimer() {
+                                            // (Keep the timer function as is)
                                             timerInterval = setInterval(() => {
                                                 const elapsedTime = Date.now() - recordingStartTime;
                                                 const minutes = Math.floor(elapsedTime / 60000);
                                                 const seconds = Math.floor((elapsedTime % 60000) / 1000);
-                                                recordingTimer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                                                if(recordingTimer) recordingTimer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
                                             }, 1000);
                                         }
                                     });
+
                                 </script>
                             <?php endif; ?>
                         </div>

@@ -820,57 +820,102 @@ class MeetingController extends Controller
     {
         // Check if user is logged in
         if (!isset($_SESSION['user'])) {
-            echo json_encode(['status' => 'error', 'message' => 'User not logged in']);
+            echo json_encode(['status' => 'error', 'message' => 'Người dùng chưa đăng nhập']);
             exit;
         }
 
-        // Check if request has file
+        // Check if request has file and no upload error
         if (!isset($_FILES['audio_data']) || $_FILES['audio_data']['error'] !== UPLOAD_ERR_OK) {
-            echo json_encode(['status' => 'error', 'message' => 'No audio file uploaded']);
+            $errorMessage = 'Không có file âm thanh nào được tải lên';
+            if (isset($_FILES['audio_data']['error']) && $_FILES['audio_data']['error'] !== UPLOAD_ERR_NO_FILE) {
+                // Cung cấp thông báo lỗi cụ thể hơn nếu có thể
+                $uploadErrors = [
+                    UPLOAD_ERR_INI_SIZE   => 'File vượt quá dung lượng cho phép bởi upload_max_filesize.',
+                    UPLOAD_ERR_FORM_SIZE  => 'File vượt quá dung lượng cho phép bởi MAX_FILE_SIZE.',
+                    UPLOAD_ERR_PARTIAL    => 'File chỉ được tải lên một phần.',
+                    UPLOAD_ERR_NO_TMP_DIR => 'Thiếu thư mục tạm.',
+                    UPLOAD_ERR_CANT_WRITE => 'Không thể ghi file vào đĩa.',
+                    UPLOAD_ERR_EXTENSION  => 'Một tiện ích PHP đã dừng việc tải file lên.',
+                ];
+                $errorCode = $_FILES['audio_data']['error'];
+                $errorMessage = $uploadErrors[$errorCode] ?? 'Lỗi tải lên không xác định.';
+            }
+            echo json_encode(['status' => 'error', 'message' => $errorMessage]);
             exit;
         }
 
         $meetingId = $_POST['meeting_id'] ?? null;
 
         if (!$meetingId) {
-            echo json_encode(['status' => 'error', 'message' => 'Meeting ID is required']);
+            echo json_encode(['status' => 'error', 'message' => 'Thiếu ID cuộc họp']);
             exit;
         }
 
         $meeting = $this->meetingModel->getMeetingById($meetingId);
 
         if (!$meeting) {
-            echo json_encode(['status' => 'error', 'message' => 'Meeting not found']);
+            echo json_encode(['status' => 'error', 'message' => 'Không tìm thấy cuộc họp']);
             exit;
         }
 
         // Check if user is part of this meeting
         $userId = $_SESSION['user']['user_id'];
         if ($meeting['student_id'] != $userId && $meeting['tutor_id'] != $userId) {
-            echo json_encode(['status' => 'error', 'message' => 'You do not have permission']);
+            echo json_encode(['status' => 'error', 'message' => 'Bạn không có quyền thực hiện hành động này']);
             exit;
         }
 
-        // Create unique filename
-        $fileName = 'meeting_' . $meetingId . '_' . date('Ymd_His') . '.mp3';
-        $uploadDir = __DIR__ . '/../../public/recordings/';
+        // *** THAY ĐỔI: Xác định phần mở rộng file ***
+        $originalName = $_FILES['audio_data']['name']; // Lấy tên file gốc từ trình duyệt
+        $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION)); // Lấy phần mở rộng
+
+        // Nếu tên file gốc không có đuôi hoặc không phải webm/ogg, thử dựa vào MIME type gửi lên
+        if (empty($extension) || !in_array($extension, ['webm', 'ogg'])) {
+            $mimeType = $_POST['mime_type'] ?? $_FILES['audio_data']['type'] ?? 'audio/webm'; // Lấy MIME type gửi lên hoặc từ thông tin file
+            $extension = strpos($mimeType, 'ogg') !== false ? 'ogg' : 'webm'; // Ưu tiên webm
+        }
+        // Tạo tên file duy nhất với phần mở rộng đúng
+        $fileName = 'meeting_' . $meetingId . '_' . date('Ymd_His') . '.' . $extension;
+        //------------------------------------------
+
+        $uploadDir = __DIR__ . '/../../public/recordings/'; // Đường dẫn tuyệt đối đến thư mục lưu trữ
         $uploadPath = $uploadDir . $fileName;
+
+        // Đảm bảo thư mục tồn tại
+        if (!is_dir($uploadDir)) {
+            if (!mkdir($uploadDir, 0777, true)) {
+                echo json_encode(['status' => 'error', 'message' => 'Không thể tạo thư mục lưu trữ bản ghi.']);
+                exit;
+            }
+        }
 
         // Move uploaded file
         if (move_uploaded_file($_FILES['audio_data']['tmp_name'], $uploadPath)) {
             // Save recording info in database
-            $recordingPath = 'recordings/' . $fileName;
-            if ($this->meetingModel->saveRecordingInfo($meetingId, $recordingPath)) {
+            $recordingPath = 'recordings/' . $fileName; // Đường dẫn tương đối để lưu vào DB và sử dụng trong URL
+
+            // (Tùy chọn) Lấy và lưu MIME type nếu bạn đã gửi nó từ client
+            $actualMimeType = $_POST['mime_type'] ?? $_FILES['audio_data']['type'] ?? 'audio/' . $extension;
+
+            // Bạn cần thêm một cột vào bảng Meetings (ví dụ: `audio_mime_type` VARCHAR(50) NULL)
+            // và cập nhật phương thức saveRecordingInfo trong Model để lưu nó.
+            // Ví dụ: if ($this->meetingModel->saveRecordingInfo($meetingId, $recordingPath, $actualMimeType)) { ... }
+
+            if ($this->meetingModel->saveRecordingInfo($meetingId, $recordingPath)) { // Bỏ qua mime type nếu chưa thêm cột
                 echo json_encode([
                     'status' => 'success',
-                    'message' => 'Recording saved successfully',
-                    'file_path' => $recordingPath
+                    'message' => 'Đã lưu bản ghi âm thành công',
+                    'file_path' => $recordingPath // Trả về đường dẫn tương đối
                 ]);
             } else {
-                echo json_encode(['status' => 'error', 'message' => 'Failed to save recording info']);
+                // Xóa file đã tải lên nếu lưu DB thất bại
+                if (file_exists($uploadPath)) {
+                    unlink($uploadPath);
+                }
+                echo json_encode(['status' => 'error', 'message' => 'Không thể lưu thông tin bản ghi vào cơ sở dữ liệu']);
             }
         } else {
-            echo json_encode(['status' => 'error', 'message' => 'Failed to save recording file']);
+            echo json_encode(['status' => 'error', 'message' => 'Không thể di chuyển file ghi âm đã tải lên']);
         }
         exit;
     }
