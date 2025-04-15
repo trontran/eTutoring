@@ -16,13 +16,13 @@ ob_start();
                 $lastName = $user['last_name'] ?? '';
                 $initials = strtoupper(substr($firstName, 0, 1) . substr($lastName, 0, 1));
                 ?>
-                <!-- Avatar (chữ cái đầu) -->
+                <!-- Avatar (first letter) -->
                 <div class="avatar d-inline-flex mb-3"
                      style="width: 100px; height: 100px; border-radius: 50%; background-color: #007bff; color: #fff; font-size: 2.5rem; justify-content: center; align-items: center;">
                     <?= htmlspecialchars($initials) ?>
                 </div>
 
-                <!-- Tên người dùng -->
+                <!-- Username -->
                 <h4 class="card-title fw-bold">
                     <?= htmlspecialchars($user['first_name'] . " " . $user['last_name']) ?>
                 </h4>
@@ -37,7 +37,7 @@ ob_start();
                 </span>
                 </p>
 
-                <!-- Thông báo tin nhắn mới -->
+                <!-- New message notification -->
                 <?php if (!empty($unreadNotifications)): ?>
                     <div class="alert alert-warning text-start mt-4">
                         <h6 class="mb-2"><i class="bi bi-bell-fill"></i> Notifications</h6>
@@ -55,7 +55,7 @@ ob_start();
                     </div>
                 <?php endif; ?>
 
-                <!-- Nút nhắn tin nếu không phải profile của chính mình -->
+                <!-- Message button if not user's profile -->
                 <?php if ($_SESSION['user']['user_id'] != $user['user_id']): ?>
                     <a href="?url=message/chat&receiver_id=<?= $user['user_id'] ?>" class="btn btn-primary mt-3">
                         <i class="bi bi-chat-text"></i> Message

@@ -19,7 +19,7 @@ ob_start();
 
             <div class="card-body">
                 <?php if (empty($student)): ?>
-                    <!-- Hiển thị lỗi nếu student không tồn tại -->
+                    <!-- Display error if student is not exist -->
                     <div class="alert alert-danger text-center">
                         Student not found.
                         <a href="?url=user/index" class="ms-2">
@@ -53,7 +53,7 @@ ob_start();
                     </form>
                 <?php endif; ?>
 
-                <!-- Nút quay lại User Management -->
+                <!-- "Back to User Management" button -->
                 <a href="?url=user/index" class="btn btn-secondary w-100 mt-3">
                     <i class="bi bi-arrow-left"></i> Back to User Management
                 </a>

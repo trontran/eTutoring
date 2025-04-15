@@ -12,16 +12,16 @@ ob_start();
         <i class="bi bi-people-fill"></i> User Management
     </h1>
 
-    <!-- Wrapper cho nội dung bằng thẻ card -->
+    <!-- Wrapper for content by card -->
     <div class="card shadow-sm border-0">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
             <h5 class="mb-0"><i class="bi bi-list-ul"></i> User List</h5>
             <div>
-                <!-- Nút 'Add New User' -->
+                <!-- 'Add New User' button -->
                 <a href="?url=user/create" class="btn btn-success me-2">
                     <i class="bi bi-person-plus-fill"></i> Add New User
                 </a>
-                <!-- Nút 'Back to Home' -->
+                <!-- 'Back to Home' button -->
                 <a href="?url=home/index" class="btn btn-secondary">
                     <i class="bi bi-arrow-left"></i> Back to Home
                 </a>
@@ -31,7 +31,7 @@ ob_start();
         <div class="card-body">
 
             <?php if (!empty($users)): ?>
-                <!-- Table responsive để tự co giãn trên màn hình nhỏ -->
+                <!-- Table responsive to stretch freely on small screen -->
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover align-middle">
                         <thead class="table-primary text-center">
@@ -58,7 +58,7 @@ ob_start();
                                 </span>
                                 </td>
                                 <td>
-                                    <!-- Group các nút hành động -->
+                                    <!-- Group of action buttons -->
                                     <div class="btn-group" role="group">
                                         <!-- View button -->
                                         <a href="?url=user/detail&id=<?= $user['user_id'] ?>"
@@ -83,7 +83,7 @@ ob_start();
                                                 <i class="bi bi-speedometer2"></i> Dashboard
                                             </a>
                                         <?php endif; ?>
-                                        <!-- Reallocate button (chỉ hiển thị nếu user là student) -->
+                                        <!-- Reallocate button (only display if user is student) -->
                                         <?php if ($isAdmin && $user['role'] === 'student'): ?>
                                             <a href="?url=user/reallocate&id=<?= $user['user_id'] ?>"
                                                class="btn btn-warning btn-sm">

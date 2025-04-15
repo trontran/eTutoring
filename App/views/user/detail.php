@@ -15,7 +15,7 @@ ob_start();
             <div class="card-body">
                 <div class="d-flex align-items-center mb-3">
                     <?php
-                    // Tạo avatar (dựa trên chữ cái đầu, nếu cần)
+                    // Create avatar (base on first letter, if needed)
                     $firstName = $user['first_name'] ?? '';
                     $lastName = $user['last_name'] ?? '';
                     $initials = strtoupper(substr($firstName, 0, 1) . substr($lastName, 0, 1));
@@ -42,7 +42,7 @@ ob_start();
                 </span>
                 </p>
 
-                <!-- Nút trở về danh sách user -->
+                <!-- "Back to user" button -->
                 <div class="mt-4 text-end">
                     <a href="?url=user/index" class="btn btn-secondary">
                         <i class="bi bi-arrow-left"></i> Back to Users

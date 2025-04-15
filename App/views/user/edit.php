@@ -13,7 +13,7 @@ ob_start();
             </div>
             <!-- Body Card -->
             <div class="card-body">
-                <!-- Thông báo lỗi -->
+                <!-- Error banner -->
                 <?php if (!empty($error)): ?>
                     <div class="alert alert-danger text-center">
                         <i class="bi bi-exclamation-triangle-fill"></i>

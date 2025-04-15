@@ -14,7 +14,7 @@
 
             <!-- Body Card -->
             <div class="card-body">
-                <!-- Hiển thị lỗi nếu có -->
+                <!-- Display error if encounter -->
                 <?php if (!empty($_SESSION['error'])): ?>
                     <div class="alert alert-danger text-center">
                         <i class="bi bi-exclamation-triangle-fill"></i>
