@@ -42,7 +42,7 @@ use App\Models\User;
 //                    'role' => $user['role']
 //                ];
 //
-//                // Chuyển hướng đến dashboard hoặc home
+//                // Navigate to dashboard or home
 //                header("Location: /eTutoring/public/?url=user/index");
 //                exit;
 //            } else {
@@ -58,13 +58,13 @@ use App\Models\User;
 //    {
 //        session_start();
 //
-//        // Xóa tất cả dữ liệu trong session
+//        // Delete all data in the session
 //        session_unset();
 //
-//        // Hủy bỏ session
+//        // Cancel the session
 //        session_destroy();
 //
-//        // Chuyển hướng về trang chủ
+//        // Navigate back to hompage
 //        header("Location: ?url=home/index");
 //        exit;
 //    }
@@ -98,15 +98,15 @@ class LoginController extends Controller
 //            $user = $this->userModel->getUserByEmail($email);
 //
 //            if ($user && password_verify($password, $user['password_hash'])) {
-//                // Lưu session với key đúng
+//                // Save the session with right key
 //                $_SESSION['user'] = [
-//                    'user_id' => $user['user_id'], // Đổi 'id' thành 'user_id'
+//                    'user_id' => $user['user_id'], // Change 'id' into 'user_id'
 //                    'first_name' => $user['first_name'],
 //                    'last_name' => $user['last_name'],
 //                    'email' => $user['email'],
 //                    'role' => $user['role']
 //                ];
-//                // Chuyển hướng đến dashboard
+//                // Navigate to dashboard
 //                header("Location: /eTutoring/public/?url=user/index");
 //                exit;
 //            } else {
