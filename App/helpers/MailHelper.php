@@ -14,7 +14,7 @@ class MailHelper {
             $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
             $mail->Username = 'trontran126@Gmail.com';
-            $mail->Password = 'ybyl edns agkt hrki';
+            $mail->Password = '';
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
 
